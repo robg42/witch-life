@@ -18,7 +18,9 @@ import { CosmicBar } from "@/components/reading/cosmic-bar";
 import { NatalStrip } from "@/components/reading/natal-strip";
 import { OracleSection } from "@/components/reading/oracle-section";
 import { WeeklyArc } from "@/components/reading/weekly-arc";
-import { DailyCard } from "@/components/reading/daily-card";
+import { TarotCard } from "@/components/cards/tarot-card";
+import { CardInterpretation } from "@/components/cards/card-interpretation";
+import { dailyCard, type Card } from "@/lib/deck";
 import { VOICE_LABEL } from "@/lib/voices";
 
 /*
@@ -77,8 +79,8 @@ function ReadingPage({
   onQuestionChange,
   onAskQuestion,
 }: InnerProps) {
-  // Compute sky + natal once per mount per birth.
-  const { sky, natal, todayISO } = useMemo(() => {
+  // Compute sky + natal + today's card once per mount per birth.
+  const { sky, natal, todayISO, card } = useMemo(() => {
     const now = new Date();
     const sky = getSkyState(now, { lat: birth.lat });
     const birthDate = birthToUtcDate(birth);
@@ -87,8 +89,16 @@ function ReadingPage({
       lat: birth.lat,
       lng: birth.lng,
     });
-    return { sky, natal, todayISO: now.toISOString().slice(0, 10) };
+    return {
+      sky,
+      natal,
+      todayISO: now.toISOString().slice(0, 10),
+      card: dailyCard(now),
+    };
   }, [birth]);
+
+  // Card revealed by the reader on flip → triggers AI interpretation.
+  const [revealedCard, setRevealedCard] = useState<Card | null>(null);
 
   const [reading, setReading] = useState<
     { status: "loading" } | { status: "ok"; data: ReadingResponse } | { status: "error"; error: string }
@@ -148,10 +158,16 @@ function ReadingPage({
         </section>
 
         <section className="mt-12 flex flex-col items-center">
-          <DailyCard />
+          <TarotCard card={card} onFlip={(c) => setRevealedCard(c)} />
           <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-ash">
-            Today&rsquo;s symbol — the real deck arrives in Phase IV
+            Today&rsquo;s symbol — drawn for everyone
           </p>
+          <CardInterpretation
+            card={revealedCard}
+            sky={sky}
+            natal={natal}
+            voice={birth.voice}
+          />
         </section>
 
         <BotanicalDivider className="my-12 mx-auto" />
