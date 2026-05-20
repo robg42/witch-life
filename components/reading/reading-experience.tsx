@@ -13,6 +13,7 @@ import {
 import { birthToUtcDate, loadBirth, type BirthDetails } from "@/lib/birth-details";
 import type { ReadingResponse } from "@/app/api/reading/route";
 import type { WeeklyResponse } from "@/app/api/weekly/route";
+import { summariseEntries, type JournalEntry } from "@/lib/journal";
 import { BotanicalDivider } from "@/components/site/botanical-divider";
 import { CosmicBar } from "@/components/reading/cosmic-bar";
 import { NatalStrip } from "@/components/reading/natal-strip";
@@ -108,18 +109,31 @@ function ReadingPage({
     { status: "loading" } | { status: "ok"; data: WeeklyResponse } | { status: "error"; error: string }
   >({ status: "loading" });
 
+  const [hasJournal, setHasJournal] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
     setReading({ status: "loading" });
     setWeekly({ status: "loading" });
 
-    fetchReading(sky, natal, birth.voice, question).then((r) => {
-      if (cancelled) return;
-      setReading(r);
-    });
+    // Weekly arc doesn't depend on journal context — fire immediately.
     fetchWeekly(todayISO, natal, birth.voice).then((r) => {
       if (cancelled) return;
       setWeekly(r);
+    });
+
+    // Try to load recent journal entries. If the reader isn't signed in,
+    // we get a 401 and silently skip — the reading still runs, just
+    // without journal awareness. If we do get entries, we compress them
+    // into a short summary that goes to the oracle for theme-sensing.
+    fetchRecentJournal().then((entries) => {
+      if (cancelled) return;
+      const summary = entries.length > 0 ? summariseEntries(entries) : undefined;
+      setHasJournal(entries.length > 0);
+      fetchReading(sky, natal, birth.voice, question, summary).then((r) => {
+        if (cancelled) return;
+        setReading(r);
+      });
     });
 
     return () => {
@@ -183,7 +197,7 @@ function ReadingPage({
         {reading.status === "ok" && (
           <ReadingBody
             reading={reading.data}
-            hasJournal={false}
+            hasJournal={hasJournal}
             hasQuestion={!!question}
           />
         )}
@@ -339,6 +353,7 @@ async function fetchReading(
   natal: NatalChart,
   voice: BirthDetails["voice"],
   question: string | undefined,
+  recentJournal: string | undefined,
 ): Promise<
   | { status: "ok"; data: ReadingResponse }
   | { status: "error"; error: string }
@@ -347,7 +362,7 @@ async function fetchReading(
     const res = await fetch("/api/reading", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sky, natal, voice, question }),
+      body: JSON.stringify({ sky, natal, voice, question, recentJournal }),
     });
     if (!res.ok) {
       const body = await safeJson(res);
@@ -402,5 +417,16 @@ async function safeJson(res: Response): Promise<{ error?: string } | null> {
     return (await res.json()) as { error?: string };
   } catch {
     return null;
+  }
+}
+
+async function fetchRecentJournal(): Promise<JournalEntry[]> {
+  try {
+    const res = await fetch("/api/journal", { method: "GET" });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { entries?: JournalEntry[] };
+    return body.entries ?? [];
+  } catch {
+    return [];
   }
 }
