@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  The Verdant Oracle — design tokens
+  Modern witch, not Halloween witch. Botanical, editorial, archaic.
+  Tokens are the source of truth. Never hardcode colour or font values
+  outside of these variables.
+*/
+
+:root {
+  /* Colour palette */
+  --color-earth: #1C1A14;        /* near-black with warmth — primary background */
+  --color-parchment: #F2EDE3;    /* aged paper — primary text on dark */
+  --color-moss: #2D4A2D;         /* deep forest green — accent, borders */
+  --color-sage: #7A9E7E;         /* lighter green — secondary accent */
+  --color-ochre: #C4872A;        /* warm gold — highlights, card accents */
+  --color-ash: #8A8478;          /* warm mid-grey — muted text */
+  --color-bark: #3D3529;         /* dark warm brown — elevated surfaces */
+  --color-linen: #E8E0D0;        /* slightly warmer than parchment — cards */
+
+  /* Energy quality accents (used for weekly arc + state cues) */
+  --color-energy-expand: var(--color-sage);
+  --color-energy-flow: var(--color-ochre);
+  --color-energy-inward: var(--color-ash);
+  --color-energy-contract: var(--color-moss);
+  --color-energy-friction: var(--color-bark);
+
+  /* Typography — font family variables come from next/font in layout.tsx */
+  --font-display: var(--font-cinzel), serif;
+  --font-serif: var(--font-cormorant), serif;
+  --font-accent: var(--font-fell), serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Type scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  /* Spacing scale — 4px base */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Radius */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+
+  /* Borders — fine lines, nothing chunky */
+  --border-hair: 0.5px solid var(--color-moss);
+  --border-default: 1px solid var(--color-moss);
+  --border-parchment: 1px solid var(--color-ash);
+
+  /* Transitions — slow and deliberate */
+  --transition-base: all 0.4s ease;
+}
+
+html,
+body {
+  background-color: var(--color-earth);
+  color: var(--color-parchment);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* Oracle voice body copy — generous size and line-height */
+.oracle-body {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+/* Display headings — use Cinzel sparingly */
+.display {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Archaic accents — card names, pull quotes */
+.accent {
+  font-family: var(--font-accent);
+  font-style: italic;
+}
+
+/* UI chrome — Inter for everything functional */
+.ui {
+  font-family: var(--font-sans);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .hairline {
+    border: var(--border-hair);
+  }
+}

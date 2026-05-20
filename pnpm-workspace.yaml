@@ -1,0 +1,6 @@
+onlyBuiltDependencies:
+  - "@clerk/shared"
+  - unrs-resolver
+  - "@next/swc-darwin-arm64"
+  - sharp
+verifyDepsBeforeRun: false
