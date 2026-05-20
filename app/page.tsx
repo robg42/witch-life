@@ -3,21 +3,24 @@ import { getSkyState } from "@/lib/astro";
 import { SIGN_GLYPH } from "@/lib/zodiac";
 import { LandingAuthActions } from "@/components/site/landing-auth-actions";
 import { SkyWheel } from "@/components/site/sky-wheel";
-import { VoiceSampler } from "@/components/site/voice-sampler";
-import { DeckRibbon } from "@/components/site/deck-ribbon";
-import { InstantNatalPreview } from "@/components/site/instant-natal-preview";
-import { BotanicalBackdrop } from "@/components/site/botanical-backdrop";
 
 export const dynamic = "force-dynamic";
 
+/*
+  The landing is the foyer — a single visible screen with the sky
+  wheel at its centre and four doors below. No marketing scroll, no
+  feature list. Everything else lives behind a door.
+*/
 export default function Home() {
   const now = new Date();
   const sky = getSkyState(now);
+
   const dateLong = now.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
+
   const mercuryStatus = sky.planets.mercury.retrograde
     ? "retrograde"
     : sky.planets.mercury.shadowPeriod
@@ -25,202 +28,147 @@ export default function Home() {
       : "direct";
 
   return (
-    <main className="min-h-screen bg-earth text-parchment overflow-hidden">
-      {/* Masthead */}
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 font-sans text-[10px] uppercase tracking-[0.3em] text-ash md:px-12">
-        <span className="text-parchment/80">The Verdant Oracle</span>
-        <div className="flex items-center gap-6">
-          <span className="hidden sm:inline">MMXXVI</span>
+    <main className="relative min-h-screen overflow-hidden">
+      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-6 md:px-10 md:py-8">
+        {/* Masthead */}
+        <header className="flex items-baseline justify-between gap-6 font-sans text-[10px] uppercase tracking-[0.3em] text-ash">
+          <span className="text-parchment/80">The Verdant Oracle</span>
+          <span className="hidden md:inline">{dateLong}</span>
           <LandingAuthActions />
-        </div>
-      </header>
+        </header>
 
-      {/* Cosmic readout strip */}
-      <section className="mx-auto mt-4 max-w-6xl border-t border-b border-moss/40 px-6 py-5 md:px-12">
-        <div className="flex flex-wrap items-baseline gap-x-10 gap-y-2 font-sans text-sm">
-          <span className="text-xs uppercase tracking-[0.25em] text-ash">
-            {dateLong}
-          </span>
-          <span className="flex items-baseline gap-2 text-parchment">
-            <span className="text-2xl leading-none">{sky.moon.phaseSymbol}</span>
-            <span>
+        {/* One-line cosmic readout */}
+        <div className="mt-5 flex flex-wrap items-baseline justify-center gap-x-6 gap-y-1 font-sans text-[11px] uppercase tracking-[0.25em] text-ash">
+          <span className="flex items-baseline gap-2">
+            <span className="text-lg text-parchment leading-none">
+              {sky.moon.phaseSymbol}
+            </span>
+            <span className="text-parchment/90">
               {sky.moon.phaseName} in {sky.moon.sign}
             </span>
           </span>
-          <span className="text-parchment">
+          <span className="text-ash/60">·</span>
+          <span className="text-parchment/90">
             Sun in {sky.sun.sign}{" "}
             <span className="text-ash">{SIGN_GLYPH[sky.sun.sign]}</span>
           </span>
+          <span className="text-ash/60">·</span>
           <span
             className={
               sky.planets.mercury.retrograde
                 ? "text-ochre"
                 : sky.planets.mercury.shadowPeriod
                   ? "text-sage"
-                  : "text-parchment"
+                  : "text-parchment/90"
             }
           >
             Mercury {mercuryStatus}
           </span>
-          <span className="ml-auto text-xs uppercase tracking-[0.25em] text-ash">
-            New moon in {Math.round(sky.moon.daysToNewMoon)} days
-          </span>
+          <span className="text-ash/60">·</span>
+          <span>New moon in {Math.round(sky.moon.daysToNewMoon)} days</span>
         </div>
-      </section>
 
-      {/* Hero: sky wheel + tagline */}
-      <section className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-12 md:px-12 md:pb-32 md:pt-24">
-        {/* Faint botanical watermark behind the hero */}
-        <div
-          className="pointer-events-none absolute -right-32 top-0 hidden text-moss opacity-[0.05] md:block"
-          aria-hidden
-        >
-          <BotanicalBackdrop variant="right" />
-        </div>
-        <div className="relative md:col-span-5 md:order-2">
-          <div className="glow-warm">
+        {/* Centerpiece */}
+        <section className="flex flex-1 flex-col items-center justify-center py-10">
+          <div className="glow-warm w-full max-w-[460px]">
             <SkyWheel sky={sky} />
           </div>
-        </div>
-        <div className="md:col-span-7 md:order-1">
+
           <p
-            className="accent fade-up text-lg text-ochre"
-            style={{ animationDelay: "120ms" }}
+            className="fade-up mt-12 max-w-2xl text-center font-accent text-2xl italic leading-snug text-parchment/90 md:text-3xl"
+            style={{ animationDelay: "300ms" }}
           >
-            A reading of the sky as it is, daily.
+            What is moving,{" "}
+            <span className="text-ochre">what is still,</span> what is building.
           </p>
-          <h1
-            className="display fade-up mt-8 text-[2.5rem] leading-[1.05] tracking-[0.04em] md:text-6xl lg:text-7xl"
-            style={{ animationDelay: "320ms" }}
-          >
-            What is moving,
-            <br />
-            <span className="text-ochre">what is still,</span>
-            <br />
-            what is building.
-          </h1>
-          <p
-            className="oracle-body fade-up mt-10 max-w-xl text-parchment/90"
-            style={{ animationDelay: "600ms" }}
-          >
-            Not a horoscope. Not a prediction. The Verdant Oracle reads the
-            live state of the sky — sun, moon, planets — against the chart
-            you arrived in, and tells you where to pour your energy, and
-            where to consciously release it.
-          </p>
-          <div
-            className="fade-up mt-12 flex flex-col items-start gap-6 sm:flex-row sm:items-baseline"
-            style={{ animationDelay: "820ms" }}
-          >
-            <Link
-              href="/onboarding"
-              className="group inline-flex items-baseline gap-3 border border-moss bg-moss/30 px-10 py-4 font-sans text-sm uppercase tracking-[0.25em] text-parchment transition-base hover:bg-moss/50"
-            >
-              <span>Begin the reading</span>
-              <span aria-hidden className="transition-base group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
-            <Link
-              href="/sign-in"
-              className="font-sans text-xs uppercase tracking-[0.25em] text-sage transition-base hover:text-parchment"
-            >
-              Return to your chart
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Section: voice sampler */}
-      <section className="relative mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-28">
-        <div
-          className="pointer-events-none absolute -left-40 top-10 hidden text-moss opacity-[0.04] md:block"
-          aria-hidden
+        {/* Four doors */}
+        <nav
+          aria-label="The chapters of the oracle"
+          className="fade-up grid grid-cols-2 gap-px bg-moss/40 md:grid-cols-4"
+          style={{ animationDelay: "600ms" }}
         >
-          <BotanicalBackdrop variant="left" />
-        </div>
-        <header className="mb-12 flex flex-wrap items-baseline justify-between gap-4">
-          <h2 className="display text-sm tracking-[0.35em] text-parchment">
-            Hear the oracle
-          </h2>
-          <p className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
-            Three voices · choose by ear
-          </p>
-        </header>
-        <VoiceSampler />
-      </section>
+          <Door
+            n="01"
+            glyph="☉"
+            label="The reading"
+            sub="Today, in your voice"
+            href="/reading"
+          />
+          <Door
+            n="02"
+            glyph="✦"
+            label="The card"
+            sub="A single pull"
+            href="/draw"
+          />
+          <Door
+            n="03"
+            glyph="✎"
+            label="The journal"
+            sub="Set down what's moving"
+            href="/journal"
+          />
+          <Door
+            n="04"
+            glyph="⊕"
+            label="Your chart"
+            sub="The sky you arrived in"
+            href="/onboarding"
+          />
+        </nav>
 
-      {/* Section: deck ribbon */}
-      <section className="relative mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-28">
-        <header className="mb-12 flex flex-wrap items-baseline justify-between gap-4">
-          <h2 className="display text-sm tracking-[0.35em] text-parchment">
-            The deck
-          </h2>
-          <p className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
-            Twenty-eight cards · tap to read
-          </p>
-        </header>
-        <DeckRibbon />
-      </section>
-
-      {/* Section: instant chart caster */}
-      <section className="relative mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-28">
-        <div
-          className="pointer-events-none absolute -right-32 top-0 hidden text-moss opacity-[0.04] md:block"
-          aria-hidden
-        >
-          <BotanicalBackdrop variant="right" />
-        </div>
-        <header className="mb-10 flex flex-wrap items-baseline justify-between gap-4">
-          <h2 className="display text-sm tracking-[0.35em] text-parchment">
-            See your sky
-          </h2>
-          <p className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
-            A preview · no sign-up
-          </p>
-        </header>
-        <p className="oracle-body mb-10 max-w-2xl text-parchment/85">
-          Put in the day you arrived. The oracle will show you where the
-          visible planets sat that day. The full chart — rising sign,
-          houses, the conversation between placements — waits behind the
-          door.
-        </p>
-        <InstantNatalPreview />
-      </section>
-
-      {/* Closing CTA */}
-      <section className="mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-24">
-        <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
-          <div>
-            <h2 className="display text-3xl leading-tight text-parchment md:text-5xl">
-              Today is waiting<br />
-              to be read.
-            </h2>
-          </div>
-          <div>
-            <p className="oracle-body text-parchment/90">
-              The free reading begins the moment you save your birth details.
-              No card needed. No conditions. Just the sky and your chart and
-              the oracle&rsquo;s voice, every morning.
-            </p>
-            <Link
-              href="/onboarding"
-              className="mt-8 inline-flex items-baseline gap-3 border border-moss bg-moss/30 px-10 py-4 font-sans text-sm uppercase tracking-[0.25em] text-parchment transition-base hover:bg-moss/50"
-            >
-              Begin the reading <span aria-hidden>→</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="mx-auto max-w-6xl section-rule px-6 py-8 md:px-12">
-        <div className="flex flex-wrap items-baseline justify-between gap-4 font-sans text-[10px] uppercase tracking-[0.3em] text-ash">
-          <span>The Verdant Oracle</span>
-          <span>No prediction · only attention</span>
-          <span>Built by hand · MMXXVI</span>
-        </div>
-      </footer>
+        {/* Quiet footer */}
+        <footer className="mt-6 flex flex-wrap items-baseline justify-between gap-2 font-sans text-[10px] uppercase tracking-[0.3em] text-ash/80">
+          <span>MMXXVI</span>
+          <span className="hidden sm:inline">No prediction · only attention</span>
+          <span>Built by hand</span>
+        </footer>
+      </div>
     </main>
+  );
+}
+
+function Door({
+  n,
+  glyph,
+  label,
+  sub,
+  href,
+}: {
+  n: string;
+  glyph: string;
+  label: string;
+  sub: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group relative flex flex-col gap-3 bg-earth/95 px-6 py-7 transition-base hover:bg-bark/60"
+    >
+      <div className="flex items-baseline justify-between">
+        <span className="font-sans text-[10px] uppercase tracking-[0.35em] text-ochre">
+          {n}
+        </span>
+        <span
+          aria-hidden
+          className="font-sans text-base text-ash transition-base group-hover:translate-x-1 group-hover:text-ochre"
+        >
+          →
+        </span>
+      </div>
+      <span
+        aria-hidden
+        className="font-serif text-3xl leading-none text-sage transition-base group-hover:text-ochre"
+      >
+        {glyph}
+      </span>
+      <h3 className="accent text-2xl text-parchment">{label}</h3>
+      <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-ash">
+        {sub}
+      </p>
+    </Link>
   );
 }
