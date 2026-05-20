@@ -49,23 +49,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        variables: {
-          colorPrimary: "#7A9E7E",
-          colorBackground: "#1C1A14",
-          colorText: "#F2EDE3",
-          fontFamily: "var(--font-inter)",
-        },
-      }}
-    >
-      <html lang="en">
-        <body
-          className={`${cinzel.variable} ${cormorant.variable} ${fell.variable} ${inter.variable}`}
+    <html lang="en">
+      <body
+        className={`${cinzel.variable} ${cormorant.variable} ${fell.variable} ${inter.variable}`}
+      >
+        <ClerkProvider
+          appearance={{
+            variables: {
+              colorPrimary: "#7A9E7E",
+              colorBackground: "#1C1A14",
+              colorText: "#F2EDE3",
+              fontFamily: "var(--font-inter)",
+            },
+          }}
         >
           {children}
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
