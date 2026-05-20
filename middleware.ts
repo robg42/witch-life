@@ -6,17 +6,18 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
   Paywall gates on subscription_status live inside the route handlers
   themselves — middleware only enforces "logged in or not".
 */
+/*
+  Free-tier philosophy: /reading and /draw work without an account so the
+  daily habit can form before any paywall. Journal, spread, reports and
+  the matching paid APIs require auth. The /api/reading API is public so
+  unauthenticated viewers can still pull a reading from localStorage —
+  abuse mitigation (rate limiting by IP) will come in Phase 7.
+*/
 const isProtectedRoute = createRouteMatcher([
-  "/reading(.*)",
-  "/natal(.*)",
   "/journal(.*)",
-  "/draw(.*)",
   "/spread(.*)",
   "/reports(.*)",
   "/account(.*)",
-  "/api/reading(.*)",
-  "/api/card(.*)",
-  "/api/weekly(.*)",
   "/api/spread(.*)",
   "/api/report(.*)",
 ]);
