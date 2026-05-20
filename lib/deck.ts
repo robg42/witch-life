@@ -207,3 +207,25 @@ export function randomCard(): Card {
 export function cardByName(name: string): Card | undefined {
   return DECK.find((c) => c.name === name);
 }
+
+/**
+ * Three distinct cards for a spread. No repeats — three different cards
+ * in three different positions. Uses crypto random in browsers + Node,
+ * Math.random as a test-environment fallback.
+ */
+export function drawThree(): [Card, Card, Card] {
+  const indices = new Set<number>();
+  const buf = new Uint32Array(1);
+  const cryptoObj: Crypto | undefined =
+    typeof globalThis !== "undefined" ? globalThis.crypto : undefined;
+  const next = (): number => {
+    if (cryptoObj?.getRandomValues) {
+      cryptoObj.getRandomValues(buf);
+      return buf[0] % DECK.length;
+    }
+    return Math.floor(Math.random() * DECK.length);
+  };
+  while (indices.size < 3) indices.add(next());
+  const arr = Array.from(indices);
+  return [DECK[arr[0]], DECK[arr[1]], DECK[arr[2]]];
+}

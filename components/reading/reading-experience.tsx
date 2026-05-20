@@ -246,6 +246,15 @@ function ReadingPage({
           )}
         </section>
 
+        <BotanicalDivider className="my-16 mx-auto" />
+
+        <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <FooterLink href="/draw" label="Pull a card" />
+          <FooterLink href="/spread" label="Three-card spread" />
+          <FooterLink href="/journal" label="The journal" />
+          <FooterLink href="/reports" label="Deeper reports" />
+        </section>
+
         <footer className="mt-24 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-ash">
           {DEV_TRANSIT_SUMMARY(sky, natal)}
         </footer>
@@ -330,6 +339,17 @@ function ErrorBlock({ label, detail }: { label: string; detail: string }) {
       </p>
       <p className="mt-2 font-serif text-base text-parchment/80">{detail}</p>
     </div>
+  );
+}
+
+function FooterLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="hairline rounded-md bg-bark/30 px-4 py-3 text-center font-sans text-xs uppercase tracking-[0.25em] text-parchment transition-base hover:bg-bark/60 hover:text-ochre"
+    >
+      {label}
+    </Link>
   );
 }
 

@@ -794,3 +794,122 @@ export function computeTransits(
 function capitalise(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+// ─── Saturn return ────────────────────────────────────────────────────────
+
+export interface SaturnReturnWindow {
+  /** True if transiting Saturn is currently within ~8° of natal Saturn. */
+  active: boolean;
+  /** Signed degrees from natal — negative = approaching, positive = separating. */
+  offsetDegrees: number;
+  /** Approximate months until exact return (negative if already past). */
+  monthsToExact: number;
+}
+
+/**
+ * Saturn return window detection.
+ *
+ * Saturn orbits in ~29.5 years; a "return" is when transiting Saturn
+ * comes back to its natal longitude. Astrologers count the surrounding
+ * year or two as the return window. We define `active` as transiting
+ * Saturn within ~8° of natal Saturn — a conservative envelope that
+ * catches the build-up, the exact moment, and the integration tail.
+ *
+ * If you want the exact-return date, walk forward in monthly steps until
+ * the longitudinal offset crosses zero.
+ */
+export function saturnReturn(
+  date: Date,
+  natalSaturnSign: Sign,
+  natalSaturnDegreeInSign = 15,
+): SaturnReturnWindow {
+  const jd = julianDay(date);
+  const transitLng = planetGeocentricLongitude("saturn", jd);
+  const natalLng =
+    SIGNS.indexOf(natalSaturnSign) * 30 + natalSaturnDegreeInSign;
+  const offset = angleDiff(transitLng, natalLng);
+  const active = Math.abs(offset) < 8;
+
+  // Saturn moves ~12°/year on average → ~1°/month. Negative offset means
+  // transiting Saturn hasn't reached natal yet.
+  const monthsToExact = -offset; // rough but useful for "in ~9 months" copy
+  return { active, offsetDegrees: offset, monthsToExact };
+}
+
+// ─── Eclipse season ───────────────────────────────────────────────────────
+
+export interface Eclipse {
+  date: string; // ISO YYYY-MM-DD (UTC of greatest eclipse)
+  type: "solar" | "lunar";
+  /** Approximate sign the eclipse occurs in (Sun's sign for solar, Moon's for lunar). */
+  sign: Sign;
+}
+
+/*
+  Eclipse table 2024–2030. Astronomy-grade prediction of eclipses without
+  a proper ephemeris is non-trivial, so we ship a static table and
+  refresh it on a multi-year cadence. Dates are UTC dates of greatest
+  eclipse; signs are calculated from the engine at runtime in the helper
+  below.
+*/
+const ECLIPSE_DATES: { date: string; type: "solar" | "lunar" }[] = [
+  { date: "2024-03-25", type: "lunar" },
+  { date: "2024-04-08", type: "solar" },
+  { date: "2024-09-18", type: "lunar" },
+  { date: "2024-10-02", type: "solar" },
+  { date: "2025-03-14", type: "lunar" },
+  { date: "2025-03-29", type: "solar" },
+  { date: "2025-09-07", type: "lunar" },
+  { date: "2025-09-21", type: "solar" },
+  { date: "2026-03-03", type: "lunar" },
+  { date: "2026-03-17", type: "solar" },
+  { date: "2026-08-12", type: "solar" },
+  { date: "2026-08-28", type: "lunar" },
+  { date: "2027-02-06", type: "solar" },
+  { date: "2027-02-20", type: "lunar" },
+  { date: "2027-07-18", type: "lunar" },
+  { date: "2027-08-02", type: "solar" },
+  { date: "2027-08-17", type: "lunar" },
+  { date: "2028-01-12", type: "lunar" },
+  { date: "2028-01-26", type: "solar" },
+  { date: "2028-07-06", type: "lunar" },
+  { date: "2028-07-22", type: "solar" },
+  { date: "2028-12-31", type: "lunar" },
+  { date: "2029-01-14", type: "solar" },
+  { date: "2029-06-12", type: "solar" },
+  { date: "2029-06-26", type: "lunar" },
+  { date: "2029-07-11", type: "solar" },
+  { date: "2029-12-05", type: "solar" },
+  { date: "2029-12-20", type: "lunar" },
+  { date: "2030-06-01", type: "solar" },
+  { date: "2030-06-15", type: "lunar" },
+  { date: "2030-11-25", type: "solar" },
+  { date: "2030-12-09", type: "lunar" },
+];
+
+/**
+ * Eclipse(s) within the given window around `date`. Default ±14 days,
+ * which approximates the astrological "eclipse season" — the field is
+ * disturbed before and after, not just on the day.
+ */
+export function eclipsesNear(
+  date: Date,
+  windowDays = 14,
+): Eclipse[] {
+  const result: Eclipse[] = [];
+  const t = date.getTime();
+  for (const ecl of ECLIPSE_DATES) {
+    const ed = new Date(`${ecl.date}T00:00:00Z`);
+    const diff = Math.abs(ed.getTime() - t) / 86_400_000;
+    if (diff <= windowDays) {
+      const sky = getSkyState(ed);
+      const sign = ecl.type === "solar" ? sky.sun.sign : sky.moon.sign;
+      result.push({ date: ecl.date, type: ecl.type, sign });
+    }
+  }
+  return result;
+}
+
+export function isInEclipseSeason(date: Date = new Date()): boolean {
+  return eclipsesNear(date).length > 0;
+}
