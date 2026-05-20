@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { getSkyState } from "@/lib/astro";
 import { SIGN_GLYPH } from "@/lib/zodiac";
 import { LandingAuthActions } from "@/components/site/landing-auth-actions";
@@ -7,11 +9,20 @@ import { SkyWheel } from "@/components/site/sky-wheel";
 export const dynamic = "force-dynamic";
 
 /*
-  The landing is the foyer — a single visible screen with the sky
-  wheel at its centre and four doors below. No marketing scroll, no
-  feature list. Everything else lives behind a door.
+  Root path behaviour:
+    - Unauthenticated visitors → redirected to /sign-in (the cream
+      herbarium portal). The first thing anyone sees is the arrival
+      page, not the hub.
+    - Signed-in users → see the hub: sky wheel + four doors.
+    - If Clerk isn't configured at all, the hub renders for everyone
+      so dev/preview builds without keys still work.
 */
-export default function Home() {
+export default async function Home() {
+  if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    const { userId } = await auth();
+    if (!userId) redirect("/sign-in");
+  }
+
   const now = new Date();
   const sky = getSkyState(now);
 

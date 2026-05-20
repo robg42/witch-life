@@ -17,12 +17,16 @@ const config: Config = {
       colors: {
         earth: "var(--color-earth)",
         parchment: "var(--color-parchment)",
+        bone: "var(--color-bone)",
         moss: "var(--color-moss)",
         sage: "var(--color-sage)",
         ochre: "var(--color-ochre)",
+        clay: "var(--color-clay)",
+        saffron: "var(--color-saffron)",
         ash: "var(--color-ash)",
         bark: "var(--color-bark)",
         linen: "var(--color-linen)",
+        ink: "var(--color-ink)",
         energy: {
           expand: "var(--color-energy-expand)",
           flow: "var(--color-energy-flow)",

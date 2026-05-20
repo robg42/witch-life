@@ -11,14 +11,18 @@
 
 :root {
   /* Colour palette */
-  --color-earth: #1C1A14;        /* near-black with warmth — primary background */
+  --color-earth: #2A1F14;        /* warm deep cocoa — primary dark surface (interior pages) */
   --color-parchment: #F2EDE3;    /* aged paper — primary text on dark */
+  --color-bone: #EAD9BD;         /* warm cream — primary LIGHT surface (entry pages) */
   --color-moss: #2D4A2D;         /* deep forest green — accent, borders */
   --color-sage: #7A9E7E;         /* lighter green — secondary accent */
   --color-ochre: #C4872A;        /* warm gold — highlights, card accents */
+  --color-clay: #B8654A;         /* terracotta — warm earth-red accent */
+  --color-saffron: #D4A12B;      /* bright spice yellow — illustration accent */
   --color-ash: #8A8478;          /* warm mid-grey — muted text */
   --color-bark: #3D3529;         /* dark warm brown — elevated surfaces */
   --color-linen: #E8E0D0;        /* slightly warmer than parchment — cards */
+  --color-ink: #1F1A12;          /* deep ink-brown — primary text on light surfaces */
 
   /* Energy quality accents (used for weekly arc + state cues) */
   --color-energy-expand: var(--color-sage);
