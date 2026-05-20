@@ -256,7 +256,7 @@ function ReadingPage({
         </section>
 
         <footer className="mt-24 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-ash">
-          {DEV_TRANSIT_SUMMARY(sky, natal)}
+          {transitFooter(sky, natal)}
         </footer>
       </div>
     </main>
@@ -363,7 +363,12 @@ function BootingState() {
   );
 }
 
-function DEV_TRANSIT_SUMMARY(sky: SkyState, natal: NatalChart): string {
+/*
+  A small editorial footer summarising any notable transits the engine
+  detected today. Not a leak — these are the same insights the oracle
+  is already using to shape the reading.
+*/
+function transitFooter(sky: SkyState, natal: NatalChart): string {
   const t = computeTransits(sky, natal);
   return [...t.activeTransits, ...t.significantWindows].join(" · ") || "—";
 }
