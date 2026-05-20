@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import {
   Cinzel,
   Cormorant_Garamond,
@@ -55,11 +56,17 @@ export default function RootLayout({
       >
         <ClerkProvider
           appearance={{
+            baseTheme: dark,
             variables: {
               colorPrimary: "#7A9E7E",
               colorBackground: "#1C1A14",
+              colorInputBackground: "#3D3529",
+              colorInputText: "#F2EDE3",
               colorText: "#F2EDE3",
+              colorTextSecondary: "#8A8478",
+              colorNeutral: "#F2EDE3",
               fontFamily: "var(--font-inter)",
+              borderRadius: "2px",
             },
           }}
         >
