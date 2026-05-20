@@ -71,15 +71,78 @@
 
 html,
 body {
-  background-color: var(--color-earth);
   color: var(--color-parchment);
   font-family: var(--font-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+  A layered, slow-breathing atmospheric background. Far from a flat slab
+  of paint — warm ochre bloom top-left, distant sage haze right, deeper
+  bark settling at the bottom, all over a base earth tone. The breath
+  animation drifts the warmth from upper-left to upper-right over
+  20 seconds, like candlelight or aurora at the edge of vision.
+*/
 body {
   min-height: 100vh;
+  background-color: var(--color-earth);
+  background-image:
+    radial-gradient(
+      ellipse 70% 50% at 20% 8%,
+      rgba(196, 135, 42, 0.1) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 60% at 85% 40%,
+      rgba(122, 158, 126, 0.08) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 80% 50% at 50% 100%,
+      rgba(45, 74, 45, 0.3) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(28, 26, 20, 0) 0%,
+      rgba(21, 19, 15, 0.6) 100%
+    );
+  background-attachment: fixed;
+  background-size: cover;
+  position: relative;
+}
+
+@keyframes vo-breath {
+  0%,
+  100% {
+    transform: translate(0%, 0%);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(15%, 4%);
+    opacity: 0.85;
+  }
+}
+
+/*
+  Drifting warm glow — a second radial layer that very slowly moves
+  across the viewport. Catches the eye only at the edge of perception
+  but makes the surface feel like it's actually breathing.
+*/
+body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: -10% -10%;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 40% 30% at 30% 30%,
+    rgba(196, 135, 42, 0.07) 0%,
+    transparent 70%
+  );
+  animation: vo-breath 22s ease-in-out infinite;
+  mix-blend-mode: screen;
 }
 
 /* Oracle voice body copy — generous size and line-height */
@@ -140,7 +203,8 @@ body {
 
 /*
   A thin parchment-grain noise on the body, very subtle. Stops the dark
-  background from feeling like a flat slab of paint.
+  background from feeling like a flat slab of paint. SVG noise gives a
+  more organic, paper-like grain than a regular dot pattern.
 */
 body::before {
   content: "";
@@ -148,17 +212,36 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.04;
-  mix-blend-mode: screen;
-  background-image: radial-gradient(
-      circle at 0.5px 0.5px,
-      rgba(242, 237, 227, 0.6) 0.5px,
-      transparent 0.5px
-    );
-  background-size: 3px 3px;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.93 0 0 0 0 0.89 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
 }
 
 body > * {
   position: relative;
   z-index: 1;
+}
+
+/* Halo for elements that should feel softly lit, like the sky wheel. */
+.glow-warm {
+  position: relative;
+}
+.glow-warm::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  z-index: -1;
+  background: radial-gradient(
+    circle at center,
+    rgba(196, 135, 42, 0.12) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* Section divider used between major landing sections — a single botanical sprig sitting on a hairline. */
+.section-rule {
+  position: relative;
+  border-top: 1px solid rgba(45, 74, 45, 0.4);
 }

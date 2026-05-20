@@ -6,6 +6,7 @@ import { SkyWheel } from "@/components/site/sky-wheel";
 import { VoiceSampler } from "@/components/site/voice-sampler";
 import { DeckRibbon } from "@/components/site/deck-ribbon";
 import { InstantNatalPreview } from "@/components/site/instant-natal-preview";
+import { BotanicalBackdrop } from "@/components/site/botanical-backdrop";
 
 export const dynamic = "force-dynamic";
 
@@ -68,9 +69,18 @@ export default function Home() {
       </section>
 
       {/* Hero: sky wheel + tagline */}
-      <section className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-12 md:px-12 md:pb-32 md:pt-24">
-        <div className="md:col-span-5 md:order-2">
-          <SkyWheel sky={sky} />
+      <section className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-12 md:px-12 md:pb-32 md:pt-24">
+        {/* Faint botanical watermark behind the hero */}
+        <div
+          className="pointer-events-none absolute -right-32 top-0 hidden text-moss opacity-[0.05] md:block"
+          aria-hidden
+        >
+          <BotanicalBackdrop variant="right" />
+        </div>
+        <div className="relative md:col-span-5 md:order-2">
+          <div className="glow-warm">
+            <SkyWheel sky={sky} />
+          </div>
         </div>
         <div className="md:col-span-7 md:order-1">
           <p
@@ -122,7 +132,13 @@ export default function Home() {
       </section>
 
       {/* Section: voice sampler */}
-      <section className="mx-auto max-w-6xl border-t border-moss/40 px-6 py-20 md:px-12 md:py-28">
+      <section className="relative mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-28">
+        <div
+          className="pointer-events-none absolute -left-40 top-10 hidden text-moss opacity-[0.04] md:block"
+          aria-hidden
+        >
+          <BotanicalBackdrop variant="left" />
+        </div>
         <header className="mb-12 flex flex-wrap items-baseline justify-between gap-4">
           <h2 className="display text-sm tracking-[0.35em] text-parchment">
             Hear the oracle
@@ -135,7 +151,7 @@ export default function Home() {
       </section>
 
       {/* Section: deck ribbon */}
-      <section className="mx-auto max-w-6xl border-t border-moss/40 px-6 py-20 md:px-12 md:py-28">
+      <section className="relative mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-28">
         <header className="mb-12 flex flex-wrap items-baseline justify-between gap-4">
           <h2 className="display text-sm tracking-[0.35em] text-parchment">
             The deck
@@ -148,7 +164,13 @@ export default function Home() {
       </section>
 
       {/* Section: instant chart caster */}
-      <section className="mx-auto max-w-6xl border-t border-moss/40 px-6 py-20 md:px-12 md:py-28">
+      <section className="relative mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-28">
+        <div
+          className="pointer-events-none absolute -right-32 top-0 hidden text-moss opacity-[0.04] md:block"
+          aria-hidden
+        >
+          <BotanicalBackdrop variant="right" />
+        </div>
         <header className="mb-10 flex flex-wrap items-baseline justify-between gap-4">
           <h2 className="display text-sm tracking-[0.35em] text-parchment">
             See your sky
@@ -167,7 +189,7 @@ export default function Home() {
       </section>
 
       {/* Closing CTA */}
-      <section className="mx-auto max-w-6xl border-t border-moss/40 px-6 py-20 md:px-12 md:py-24">
+      <section className="mx-auto max-w-6xl section-rule px-6 py-20 md:px-12 md:py-24">
         <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
           <div>
             <h2 className="display text-3xl leading-tight text-parchment md:text-5xl">
@@ -192,7 +214,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="mx-auto max-w-6xl border-t border-moss/40 px-6 py-8 md:px-12">
+      <footer className="mx-auto max-w-6xl section-rule px-6 py-8 md:px-12">
         <div className="flex flex-wrap items-baseline justify-between gap-4 font-sans text-[10px] uppercase tracking-[0.3em] text-ash">
           <span>The Verdant Oracle</span>
           <span>No prediction · only attention</span>

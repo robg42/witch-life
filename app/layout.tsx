@@ -60,13 +60,69 @@ export default function RootLayout({
             variables: {
               colorPrimary: "#7A9E7E",
               colorBackground: "#1C1A14",
-              colorInputBackground: "#3D3529",
+              colorInputBackground: "#2A251C",
               colorInputText: "#F2EDE3",
               colorText: "#F2EDE3",
-              colorTextSecondary: "#8A8478",
+              colorTextSecondary: "#C4B89E",
               colorNeutral: "#F2EDE3",
               fontFamily: "var(--font-inter)",
               borderRadius: "2px",
+            },
+            elements: {
+              rootBox: { backgroundColor: "transparent" },
+              card: {
+                backgroundColor: "rgba(28, 26, 20, 0.85)",
+                border: "1px solid rgba(45, 74, 45, 0.5)",
+                boxShadow:
+                  "0 0 80px rgba(196, 135, 42, 0.15), 0 1px 3px rgba(0,0,0,0.4)",
+                backdropFilter: "blur(4px)",
+              },
+              headerTitle: {
+                color: "#F2EDE3",
+                fontFamily: "var(--font-cinzel), serif",
+                letterSpacing: "0.08em",
+                fontSize: "1.5rem",
+                textTransform: "uppercase",
+              },
+              headerSubtitle: {
+                color: "rgba(242, 237, 227, 0.75)",
+                fontFamily: "var(--font-cormorant), serif",
+                fontStyle: "italic",
+                fontSize: "1.1rem",
+              },
+              formFieldLabel: {
+                color: "#F2EDE3",
+                fontSize: "0.7rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+              },
+              formButtonPrimary: {
+                backgroundColor: "#7A9E7E",
+                color: "#1C1A14",
+                fontFamily: "var(--font-inter)",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                fontSize: "0.75rem",
+              },
+              dividerLine: { backgroundColor: "rgba(122, 158, 126, 0.3)" },
+              dividerText: {
+                color: "rgba(242, 237, 227, 0.55)",
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                fontSize: "0.65rem",
+              },
+              footerActionText: {
+                color: "rgba(242, 237, 227, 0.7)",
+              },
+              footerActionLink: { color: "#C4872A" },
+              socialButtonsBlockButton: {
+                border: "1px solid rgba(122, 158, 126, 0.4)",
+                backgroundColor: "rgba(61, 53, 41, 0.4)",
+              },
+              identityPreview: {
+                backgroundColor: "rgba(61, 53, 41, 0.4)",
+                border: "1px solid rgba(122, 158, 126, 0.3)",
+              },
             },
           }}
         >
