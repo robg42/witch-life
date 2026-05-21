@@ -19,7 +19,8 @@ export function HerbariumPlate({ className = "" }: { className?: string }) {
       className={className}
     >
       {/* ─── Left specimen: moss stem with sage leaves ─────────────────── */}
-      <g stroke="var(--color-moss)" strokeWidth="1.2">
+      <g className="sway" style={{ transformBox: "fill-box" }}>
+        <g stroke="var(--color-moss)" strokeWidth="1.2">
         <path d="M80 580 C 78 480, 84 380, 80 280 C 76 200, 86 120, 80 40" />
         <path d="M80 480 C 50 470, 30 478, 14 496 C 36 484, 60 478, 80 480" />
         <path d="M80 420 C 110 410, 130 418, 146 436 C 124 424, 100 418, 80 420" />
@@ -39,8 +40,10 @@ export function HerbariumPlate({ className = "" }: { className?: string }) {
           fillOpacity="0.3"
         />
       </g>
+      </g>
 
       {/* ─── Centre specimen: tall stem with clay flowers ──────────────── */}
+      <g className="sway-slow" style={{ transformBox: "fill-box" }}>
       <g stroke="var(--color-bark)" strokeWidth="1.4">
         <path d="M200 580 C 200 480, 204 380, 200 280 C 196 200, 204 120, 200 30" />
       </g>
@@ -94,8 +97,10 @@ export function HerbariumPlate({ className = "" }: { className?: string }) {
         <path d="M158 82 L 166 88" />
         <path d="M242 82 L 234 88" />
       </g>
+      </g>
 
       {/* ─── Right specimen: berry stem in saffron ─────────────────────── */}
+      <g className="sway-counter" style={{ transformBox: "fill-box" }}>
       <g stroke="var(--color-moss)" strokeWidth="1.2">
         <path d="M320 580 C 322 480, 318 380, 322 280 C 326 200, 318 120, 322 60" />
       </g>
@@ -122,6 +127,7 @@ export function HerbariumPlate({ className = "" }: { className?: string }) {
         <circle cx="330" cy="126" r="4" />
 
         <circle cx="322" cy="84" r="3.5" />
+      </g>
       </g>
 
       {/* Ground line — herbarium mount */}

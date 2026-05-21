@@ -126,18 +126,45 @@ body {
 }
 
 /*
-  Drifting warm spot — like sun moving across a page through a window.
-  Animates slowly so it reads at the edge of perception.
+  Layered celestial motion behind the page. Three drifting washes
+  travelling at different speeds and along different axes — gives the
+  surface a parallax feel without using any literal stars or sparkles.
+  The page itself feels like it's moving with the sky.
+
+    ::after  — warm ochre glow drifting NE → SW over 32 seconds
+    .wl-wash — mossy cool wash drifting E → W over 54 seconds
+    .wl-trail — clay tint slowly orbiting the centre over 120 seconds
 */
-@keyframes wl-drift {
+@keyframes wl-drift-warm {
   0%,
   100% {
     transform: translate(0%, 0%);
-    opacity: 0.5;
+    opacity: 0.55;
   }
   50% {
-    transform: translate(20%, 8%);
-    opacity: 0.85;
+    transform: translate(22%, 9%);
+    opacity: 0.9;
+  }
+}
+
+@keyframes wl-drift-cool {
+  0%,
+  100% {
+    transform: translate(0%, 0%);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-18%, -6%);
+    opacity: 0.75;
+  }
+}
+
+@keyframes wl-orbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
@@ -148,11 +175,44 @@ body::after {
   inset: -10%;
   z-index: 0;
   background: radial-gradient(
-    ellipse 35% 28% at 30% 25%,
-    rgba(198, 138, 42, 0.18) 0%,
+    ellipse 35% 28% at 28% 25%,
+    rgba(198, 138, 42, 0.2) 0%,
     transparent 65%
   );
-  animation: wl-drift 32s ease-in-out infinite;
+  animation: wl-drift-warm 32s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+
+/*
+  Second body wash. Mounted on a span we inject below — keeps body::*
+  pseudo-elements available. (See app/layout.tsx for the injection.)
+*/
+.wl-wash {
+  pointer-events: none;
+  position: fixed;
+  inset: -10%;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 40% 32% at 80% 65%,
+    rgba(46, 67, 38, 0.16) 0%,
+    transparent 65%
+  );
+  animation: wl-drift-cool 54s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+
+.wl-trail {
+  pointer-events: none;
+  position: fixed;
+  inset: -25%;
+  z-index: 0;
+  transform-origin: center center;
+  background: radial-gradient(
+    ellipse 12% 8% at 65% 35%,
+    rgba(184, 92, 58, 0.13) 0%,
+    transparent 70%
+  );
+  animation: wl-orbit 180s linear infinite;
   mix-blend-mode: multiply;
 }
 
@@ -254,3 +314,62 @@ body > * {
   position: relative;
   border-top: 1px solid rgba(74, 63, 48, 0.35);
 }
+
+/*
+  Celestial motion vocabulary — used by botanical and astrological art.
+*/
+
+/* Slow rotation — the wheel of the year. One revolution every 5 min. */
+@keyframes wl-rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spin-celestial { animation: wl-rotate-slow 300s linear infinite; }
+.spin-celestial-reverse { animation: wl-rotate-slow 420s linear infinite reverse; }
+
+/* Orbital marker travelling around an unseen ring. */
+@keyframes wl-orbit-90 {
+  from { transform: rotate(0deg) translateX(var(--orbit-r, 110px)) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(var(--orbit-r, 110px)) rotate(-360deg); }
+}
+.orbit-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  margin-top: -4px;
+  animation: wl-orbit-90 90s linear infinite;
+  transform-origin: 4px 4px;
+}
+
+/* Glow pulse — for the moon halo. Long breath. */
+@keyframes wl-breath {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 0.9;  transform: scale(1.06); }
+}
+.breath-slow {
+  animation: wl-breath 11s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+/* Botanical sway — for plant illustrations. Small angle, slow period. */
+@keyframes wl-sway {
+  0%, 100% { transform: rotate(-0.6deg); }
+  50%      { transform: rotate(0.6deg); }
+}
+@keyframes wl-sway-counter {
+  0%, 100% { transform: rotate(0.5deg); }
+  50%      { transform: rotate(-0.5deg); }
+}
+.sway       { animation: wl-sway 9s ease-in-out infinite;        transform-origin: bottom center; }
+.sway-slow  { animation: wl-sway 14s ease-in-out infinite;       transform-origin: bottom center; }
+.sway-counter { animation: wl-sway-counter 11s ease-in-out infinite; transform-origin: bottom center; }
+
+/* Stagger helper — used inline with animation-delay on fade-up children. */
+.fade-up-1 { animation-delay: 80ms; }
+.fade-up-2 { animation-delay: 220ms; }
+.fade-up-3 { animation-delay: 380ms; }
+.fade-up-4 { animation-delay: 560ms; }
+.fade-up-5 { animation-delay: 760ms; }

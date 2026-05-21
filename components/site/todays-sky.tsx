@@ -112,32 +112,63 @@ const R = 72;
  */
 function Moon({ phase }: { phase: number }) {
   return (
-    <div className="relative">
-      {/* Soft saffron glow behind the moon */}
+    <div
+      className="relative"
+      style={{ width: SIZE * 1.6, height: SIZE * 1.6 }}
+    >
+      {/* Breathing saffron glow behind the moon */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-saffron/25 blur-3xl"
+        className="breath-slow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-saffron/30 blur-3xl"
         style={{ width: SIZE * 1.4, height: SIZE * 1.4 }}
       />
+
+      {/* Outer dashed orbital ring — rotates very slowly */}
+      <div
+        aria-hidden
+        className="spin-celestial absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-bark/20"
+        style={{
+          width: SIZE * 1.45,
+          height: SIZE * 1.45,
+          borderStyle: "dashed",
+        }}
+      />
+
+      {/* Inner dotted ring — rotates the other way, faster */}
+      <div
+        aria-hidden
+        className="spin-celestial-reverse absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-clay/35"
+        style={{
+          width: SIZE * 1.22,
+          height: SIZE * 1.22,
+          borderStyle: "dotted",
+          borderWidth: "1.5px",
+        }}
+      />
+
+      {/* Orbital marker — small clay dot that travels around the moon */}
+      <div
+        aria-hidden
+        className="orbit-marker"
+        style={
+          {
+            "--orbit-r": `${(SIZE * 1.45) / 2}px`,
+          } as React.CSSProperties
+        }
+      >
+        <div className="h-2 w-2 rounded-full bg-clay shadow-[0_0_8px_rgba(184,92,58,0.6)]" />
+      </div>
 
       <svg
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         width={SIZE}
         height={SIZE}
-        className="relative"
+        className="relative left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        style={{
+          position: "absolute",
+        }}
         aria-hidden
       >
-        {/* Faint outer ring */}
-        <circle
-          cx={CX}
-          cy={CY}
-          r={R + 12}
-          fill="none"
-          stroke="rgba(61, 53, 41, 0.15)"
-          strokeWidth="0.5"
-          strokeDasharray="1 6"
-        />
-
         {/* Moon body — warm bone with subtle inner gradient */}
         <defs>
           <radialGradient id="moon-body" cx="40%" cy="38%" r="65%">

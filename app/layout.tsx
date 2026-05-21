@@ -63,6 +63,13 @@ export default function RootLayout({
       <body
         className={`${cinzel.variable} ${cormorant.variable} ${fell.variable} ${inter.variable}`}
       >
+        {/*
+          Two additional drifting washes that ride above body::after.
+          Together with body's own background gradients, this gives the
+          surface four layers of motion at four different speeds.
+        */}
+        <span aria-hidden className="wl-wash" />
+        <span aria-hidden className="wl-trail" />
         <ClerkProvider
           appearance={{
             variables: {
