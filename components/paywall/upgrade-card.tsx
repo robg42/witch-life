@@ -49,12 +49,12 @@ export function UpgradeCard({
   };
 
   return (
-    <div className="rounded-sm border border-clay/40 bg-linen/60 px-6 py-6">
+    <div className="rounded-sm border border-clay/40 bg-smoke/60 px-6 py-6">
       <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
         For subscribers
       </p>
-      <h3 className="accent mt-2 text-2xl text-ink">{title}</h3>
-      <p className="oracle-body mt-2 text-ink/85">{body}</p>
+      <h3 className="accent mt-2 text-2xl text-wax">{title}</h3>
+      <p className="oracle-body mt-2 text-wax/85">{body}</p>
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <button
           type="button"

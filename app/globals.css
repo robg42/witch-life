@@ -3,35 +3,35 @@
 @tailwind utilities;
 
 /*
-  The Verdant Oracle — design tokens
-  Modern witch, not Halloween witch. Botanical, editorial, archaic.
-  Tokens are the source of truth. Never hardcode colour or font values
-  outside of these variables.
+  Witch Life — design tokens.
+
+  Direction: aged ink, forest floor, smoke, old wax, tarnished gold. Not
+  bright, not cosy, not generic mystical. Deep considered tones — the
+  inside of a fine letterpress book about plant medicine and the dead.
+  Tokens are the source of truth. Do not hardcode hex outside this file.
 */
 
 :root {
   /* Colour palette */
-  --color-earth: #2A1F14;        /* warm deep cocoa — primary dark surface (interior pages) */
-  --color-parchment: #F2EDE3;    /* aged paper — primary text on dark */
-  --color-bone: #EAD9BD;         /* warm cream — primary LIGHT surface (entry pages) */
-  --color-moss: #2D4A2D;         /* deep forest green — accent, borders */
-  --color-sage: #7A9E7E;         /* lighter green — secondary accent */
-  --color-ochre: #C4872A;        /* warm gold — highlights, card accents */
-  --color-clay: #B8654A;         /* terracotta — warm earth-red accent */
-  --color-saffron: #D4A12B;      /* bright spice yellow — illustration accent */
-  --color-ash: #8A8478;          /* warm mid-grey — muted text */
-  --color-bark: #3D3529;         /* dark warm brown — elevated surfaces */
-  --color-linen: #E8E0D0;        /* slightly warmer than parchment — cards */
-  --color-ink: #1F1A12;          /* deep ink-brown — primary text on light surfaces */
+  --color-ink: #14110D;          /* aged ink — primary background, near-black with warm brown undertone */
+  --color-forest: #1E211B;       /* forest floor — elevated surface, dark mossy green-brown */
+  --color-smoke: #2A2722;        /* smoke — secondary elevated surface, warm dark grey */
+  --color-wax: #E8DAB5;          /* old wax — primary text on dark, warm aged cream */
+  --color-bone: #D8CCAB;         /* bone — secondary cream, slightly dustier than wax */
+  --color-gold: #A88543;         /* tarnished gold — primary accent, oxidized brass */
+  --color-ember: #B5572E;        /* ember — warm fire accent, deep rust, used sparingly */
+  --color-moss: #4A5A3A;         /* deep moss — botanical accent for illustrations */
+  --color-sage: #7E9277;         /* dusted sage — secondary green, used rarely */
+  --color-ash: #7C746A;          /* warm smoke — muted text on dark */
+  --color-bark: #3A3328;         /* dark warm bark — hairline borders, dividers */
+  --color-parchment: #F0E4C8;    /* legacy alias = wax-with-more-light, used as text-parchment */
+  --color-earth: #14110D;        /* legacy alias for ink, kept so existing utilities map cleanly */
+  --color-linen: #2A2722;        /* legacy alias for smoke (used for elevated cards) */
+  --color-clay: #B5572E;         /* legacy alias for ember */
+  --color-ochre: #A88543;        /* legacy alias for tarnished gold */
+  --color-saffron: #C99C39;      /* spice yellow — only on illustrations */
 
-  /* Energy quality accents (used for weekly arc + state cues) */
-  --color-energy-expand: var(--color-sage);
-  --color-energy-flow: var(--color-ochre);
-  --color-energy-inward: var(--color-ash);
-  --color-energy-contract: var(--color-moss);
-  --color-energy-friction: var(--color-bark);
-
-  /* Typography — font family variables come from next/font in layout.tsx */
+  /* Typography */
   --font-display: var(--font-cinzel), serif;
   --font-serif: var(--font-cormorant), serif;
   --font-accent: var(--font-fell), serif;
@@ -65,108 +65,88 @@
   --radius-lg: 8px;
 
   /* Borders — fine lines, nothing chunky */
-  --border-hair: 0.5px solid var(--color-moss);
-  --border-default: 1px solid var(--color-moss);
-  --border-parchment: 1px solid var(--color-ash);
+  --border-hair: 0.5px solid var(--color-bark);
+  --border-default: 1px solid var(--color-bark);
 
-  /* Transitions — slow and deliberate */
+  /* Transitions */
   --transition-base: all 0.4s ease;
 }
 
 html,
 body {
-  color: var(--color-ink);
+  color: var(--color-wax);
   font-family: var(--font-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /*
-  Warm cream herbarium base. Layered radial tints — clay terracotta in
-  one corner, saffron in another, a deeper bone shadow at the foot —
-  over the bone surface. The breath animation drifts warm light
-  diagonally over 26 seconds, like late-afternoon sun moving across a
-  laid-out page of pressed flowers.
+  Body surface: deep aged ink with the faintest forest-floor wash near the
+  bottom. No drifting glow, no candle bloom, no breath animation — the
+  brief said "let the content carry the mysticism". The surface is quiet.
 */
 body {
   min-height: 100vh;
-  background-color: var(--color-bone);
+  background-color: var(--color-ink);
   background-image:
     radial-gradient(
-      ellipse 70% 50% at 15% 5%,
-      rgba(184, 101, 74, 0.08) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 60% at 90% 30%,
-      rgba(212, 161, 43, 0.07) 0%,
-      transparent 65%
-    ),
-    radial-gradient(
-      ellipse 80% 50% at 50% 100%,
-      rgba(61, 53, 41, 0.08) 0%,
+      ellipse 80% 60% at 50% 110%,
+      rgba(30, 33, 27, 0.5) 0%,
       transparent 70%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 50% -10%,
+      rgba(58, 51, 40, 0.35) 0%,
+      transparent 75%
     );
   background-attachment: fixed;
   background-size: cover;
   position: relative;
-  color: var(--color-ink);
-}
-
-@keyframes vo-breath {
-  0%,
-  100% {
-    transform: translate(0%, 0%);
-    opacity: 0.4;
-  }
-  50% {
-    transform: translate(12%, 5%);
-    opacity: 0.7;
-  }
 }
 
 /*
-  Drifting warm light — second radial layer that very slowly moves
-  across the viewport. On the cream surface it reads like sun-spot
-  through a window, not aurora.
+  A barely-there paper-fibre noise. Just enough to stop the dark from
+  reading as flat paint.
 */
-body::after {
+body::before {
   content: "";
   pointer-events: none;
   position: fixed;
-  inset: -10% -10%;
+  inset: 0;
   z-index: 0;
-  background: radial-gradient(
-    ellipse 45% 35% at 28% 28%,
-    rgba(212, 161, 43, 0.09) 0%,
-    transparent 70%
-  );
-  animation: vo-breath 26s ease-in-out infinite;
-  mix-blend-mode: multiply;
+  opacity: 0.07;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.91 0 0 0 0 0.85 0 0 0 0 0.71 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
 }
 
-/* Oracle voice body copy — generous size and line-height */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Oracle voice body copy — generous size and line-height. */
 .oracle-body {
   font-family: var(--font-serif);
   font-size: 1.25rem;
-  line-height: 1.8;
-  letter-spacing: 0.01em;
+  line-height: 1.85;
+  letter-spacing: 0.005em;
 }
 
-/* Display headings — use Cinzel sparingly */
+/* Display headings — Cinzel uppercase, used sparingly. */
 .display {
   font-family: var(--font-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-/* Archaic accents — card names, pull quotes */
+/* Archaic accents — pull quotes, card names. */
 .accent {
   font-family: var(--font-accent);
   font-style: italic;
 }
 
-/* UI chrome — Inter for everything functional */
+/* UI chrome — Inter. */
 .ui {
   font-family: var(--font-sans);
 }
@@ -182,13 +162,13 @@ body::after {
 }
 
 /*
-  Slow editorial fade-up. Used for staggered hero copy on the landing —
-  the page comes into focus the way ink dries onto paper.
+  Slow editorial fade-up. Used for staggered hero copy on key pages —
+  text emerges the way wax cools.
 */
-@keyframes vo-fade-up {
+@keyframes wl-fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -198,52 +178,13 @@ body::after {
 
 .fade-up {
   opacity: 0;
-  animation: vo-fade-up 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: wl-fade-up 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
 
 /*
-  Organic paper grain — SVG fractal noise. On cream it reads like the
-  fibre of laid paper. Mix-blend-mode multiply lets the noise darken
-  the surface in tiny irregular spots, giving texture without flattening
-  the colour.
+  Section divider hairline on dark surfaces.
 */
-body::before {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.13;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.31 0 0 0 0 0.21 0 0 0 0 0.14 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 220px 220px;
-}
-
-body > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Halo for elements that should feel softly lit, like the sky wheel. */
-.glow-warm {
-  position: relative;
-}
-.glow-warm::before {
-  content: "";
-  position: absolute;
-  inset: -10%;
-  z-index: -1;
-  background: radial-gradient(
-    circle at center,
-    rgba(212, 161, 43, 0.18) 0%,
-    rgba(184, 101, 74, 0.05) 40%,
-    transparent 70%
-  );
-  pointer-events: none;
-}
-
-/* Section divider — hairline on cream surfaces uses warm bark. */
 .section-rule {
   position: relative;
-  border-top: 1px solid rgba(61, 53, 41, 0.25);
+  border-top: 1px solid var(--color-bark);
 }

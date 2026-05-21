@@ -22,7 +22,7 @@ export interface BirthDetails {
   voice: VoiceKey;
 }
 
-const STORAGE_KEY = "verdant.birth";
+const STORAGE_KEY = "witchlife.birth";
 
 export function loadBirth(): BirthDetails | null {
   if (typeof window === "undefined") return null;

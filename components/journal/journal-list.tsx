@@ -18,7 +18,7 @@ const PHASE_SYMBOL: Record<string, string> = {
 export function JournalList({ entries }: { entries: JournalEntry[] }) {
   if (entries.length === 0) {
     return (
-      <p className="font-serif text-base italic text-bark/70">
+      <p className="font-serif text-base italic text-ash">
         Nothing yet. The first entry is the hardest. Everything after is easier.
       </p>
     );
@@ -49,12 +49,12 @@ function EntryRow({ entry }: { entry: JournalEntry }) {
 
   return (
     <li>
-      <header className="mb-3 flex items-baseline justify-between border-b border-bark/20 pb-2">
-        <div className="flex items-baseline gap-4 font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
+      <header className="mb-3 flex items-baseline justify-between border-b border-bark/60 pb-2">
+        <div className="flex items-baseline gap-4 font-sans text-xs uppercase tracking-[0.25em] text-ash">
           <span>{formatDate(entry.entryDate)}</span>
           {entry.moonPhase && (
             <span>
-              <span className="mr-1 text-base text-ink">
+              <span className="mr-1 text-base text-wax">
                 {PHASE_SYMBOL[entry.moonPhase] ?? ""}
               </span>
               {entry.moonPhase}
@@ -66,13 +66,13 @@ function EntryRow({ entry }: { entry: JournalEntry }) {
           type="button"
           onClick={onDelete}
           disabled={deleting}
-          className="font-sans text-[10px] uppercase tracking-[0.2em] text-bark/60 transition-base hover:text-clay disabled:opacity-50"
+          className="font-sans text-[10px] uppercase tracking-[0.2em] text-ash/80 transition-base hover:text-clay disabled:opacity-50"
         >
           {deleting ? "…" : "remove"}
         </button>
       </header>
 
-      <div className="flex flex-col gap-3 font-serif text-base leading-relaxed text-ink/90">
+      <div className="flex flex-col gap-3 font-serif text-base leading-relaxed text-wax/90">
         {entry.whatLanded && (
           <Block label="What landed">{entry.whatLanded}</Block>
         )}

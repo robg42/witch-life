@@ -21,7 +21,7 @@ export function LandingAuthActions() {
           await signOut();
           router.refresh();
         }}
-        className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70 transition-base hover:text-clay"
+        className="font-sans text-[10px] uppercase tracking-[0.3em] text-ash transition-base hover:text-clay"
       >
         Sign out
       </button>
@@ -30,7 +30,7 @@ export function LandingAuthActions() {
   return (
     <Link
       href="/sign-in"
-      className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70 transition-base hover:text-clay"
+      className="font-sans text-[10px] uppercase tracking-[0.3em] text-ash transition-base hover:text-clay"
     >
       Sign in
     </Link>

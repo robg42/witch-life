@@ -1,5 +1,5 @@
 /*
-  lib/astro.ts — The Verdant Oracle astronomical engine.
+  lib/astro.ts — Witch Life astronomical engine.
 
   Pure TypeScript, no external dependencies. All functions are pure: given
   the same inputs they return the same outputs. Can run server-side or

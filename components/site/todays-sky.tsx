@@ -29,7 +29,7 @@ export function TodaysSky({ sky }: { sky: SkyState }) {
       <figure className="flex flex-col items-center">
         <Moon phase={sky.moon.phase} />
         <figcaption className="mt-6 text-center">
-          <p className="font-accent text-3xl italic leading-tight text-ink md:text-4xl">
+          <p className="font-accent text-3xl italic leading-tight text-wax md:text-4xl">
             {sky.moon.phaseName}
           </p>
           <p className="mt-2 font-sans text-[11px] uppercase tracking-[0.35em] text-clay">
@@ -38,7 +38,7 @@ export function TodaysSky({ sky }: { sky: SkyState }) {
             </span>
             <span className="ml-2 align-middle">in {sky.moon.sign}</span>
           </p>
-          <p className="mt-3 font-sans text-[10px] uppercase tracking-[0.3em] text-bark/60">
+          <p className="mt-3 font-sans text-[10px] uppercase tracking-[0.3em] text-ash/80">
             Day {sky.moon.cycleDay} of the lunar cycle
           </p>
         </figcaption>
@@ -46,12 +46,12 @@ export function TodaysSky({ sky }: { sky: SkyState }) {
 
       {/* Sun + Mercury — secondary, two columns */}
       <div className="mt-12 grid grid-cols-2">
-        <div className="border-r border-bark/20 py-4 text-center">
+        <div className="border-r border-bark/60 py-4 text-center">
           <span className="font-serif text-3xl text-saffron leading-none">☉</span>
-          <p className="mt-3 font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
+          <p className="mt-3 font-sans text-[10px] uppercase tracking-[0.3em] text-ash">
             The sun
           </p>
-          <p className="mt-2 font-serif text-lg text-ink">
+          <p className="mt-2 font-serif text-lg text-wax">
             {sky.sun.sign}, {Math.round(sky.sun.degree)}°
           </p>
         </div>
@@ -63,10 +63,10 @@ export function TodaysSky({ sky }: { sky: SkyState }) {
           >
             ☿
           </span>
-          <p className="mt-3 font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
+          <p className="mt-3 font-sans text-[10px] uppercase tracking-[0.3em] text-ash">
             Mercury
           </p>
-          <p className="mt-2 font-serif text-lg text-ink">
+          <p className="mt-2 font-serif text-lg text-wax">
             {mercuryStatus},{" "}
             <span className="text-bark/80">{sky.planets.mercury.sign}</span>
           </p>
@@ -74,8 +74,8 @@ export function TodaysSky({ sky }: { sky: SkyState }) {
       </div>
 
       {/* The visible planets — tertiary, single row */}
-      <div className="mt-10 border-t border-bark/20 pt-6">
-        <p className="text-center font-sans text-[10px] uppercase tracking-[0.3em] text-bark/60">
+      <div className="mt-10 border-t border-bark/60 pt-6">
+        <p className="text-center font-sans text-[10px] uppercase tracking-[0.3em] text-ash/80">
           The other visible planets
         </p>
         <div className="mt-4 flex flex-wrap items-baseline justify-center gap-x-10 gap-y-3">
@@ -84,7 +84,7 @@ export function TodaysSky({ sky }: { sky: SkyState }) {
               <span className="font-serif text-xl text-moss" title={PLANET_NAME[p]}>
                 {PLANET_GLYPH[p]}
               </span>
-              <span className="font-serif text-base text-ink">
+              <span className="font-serif text-base text-wax">
                 {sky.planets[p].sign}
               </span>
             </div>

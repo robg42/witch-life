@@ -4,6 +4,14 @@ import type { Config } from "tailwindcss";
   Tailwind config maps directly to the CSS custom properties in globals.css.
   All theme values are derived from the tokens — changing a token reskins
   the entire app.
+
+  Witch Life palette: aged ink (ink), forest floor (forest), smoke
+  (smoke), warm cream (wax/bone), tarnished gold (gold), ember rust
+  (ember), deep moss (moss), warm smoke-grey (ash).
+
+  Legacy alias colours (earth, parchment, ochre, clay, linen) are kept
+  so existing utility classes resolve to the right new token without
+  rewriting every page.
 */
 const config: Config = {
   content: [
@@ -15,25 +23,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        earth: "var(--color-earth)",
-        parchment: "var(--color-parchment)",
+        // Witch Life surface tokens
+        ink: "var(--color-ink)",
+        forest: "var(--color-forest)",
+        smoke: "var(--color-smoke)",
+        wax: "var(--color-wax)",
         bone: "var(--color-bone)",
+        gold: "var(--color-gold)",
+        ember: "var(--color-ember)",
         moss: "var(--color-moss)",
         sage: "var(--color-sage)",
-        ochre: "var(--color-ochre)",
-        clay: "var(--color-clay)",
-        saffron: "var(--color-saffron)",
         ash: "var(--color-ash)",
         bark: "var(--color-bark)",
+        // Legacy aliases — resolve to the new palette so older utility
+        // classes keep working.
+        earth: "var(--color-earth)",
+        parchment: "var(--color-parchment)",
+        ochre: "var(--color-ochre)",
+        clay: "var(--color-clay)",
         linen: "var(--color-linen)",
-        ink: "var(--color-ink)",
-        energy: {
-          expand: "var(--color-energy-expand)",
-          flow: "var(--color-energy-flow)",
-          inward: "var(--color-energy-inward)",
-          contract: "var(--color-energy-contract)",
-          friction: "var(--color-energy-friction)",
-        },
+        saffron: "var(--color-saffron)",
       },
       fontFamily: {
         display: ["var(--font-display)"],

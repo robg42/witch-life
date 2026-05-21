@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import {
   Cinzel,
   Cormorant_Garamond,
@@ -38,11 +39,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "The Verdant Oracle",
+  title: "Witch Life",
   description:
-    "A reading of the sky as it is, not what it might be. Personal cosmic energy, daily.",
+    "A reading of the sky as it is, not what it might be. A daily oracle, against your chart.",
+  openGraph: {
+    title: "Witch Life",
+    description:
+      "A reading of the sky as it is, not what it might be. A daily oracle, against your chart.",
+    type: "website",
+  },
 };
 
+/*
+  Clerk appearance — dark theme with the Witch Life palette. Targets
+  every visible element so labels, headers, dividers, and buttons all
+  read clearly against the aged-ink surface.
+*/
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,68 +67,80 @@ export default function RootLayout({
       >
         <ClerkProvider
           appearance={{
+            baseTheme: dark,
             variables: {
-              colorPrimary: "#2D4A2D",
-              colorBackground: "#EAD9BD",
-              colorInputBackground: "#FFFFFF",
-              colorInputText: "#1F1A12",
-              colorText: "#1F1A12",
-              colorTextSecondary: "#3D3529",
-              colorNeutral: "#1F1A12",
+              colorPrimary: "#A88543",
+              colorBackground: "#14110D",
+              colorInputBackground: "#1E211B",
+              colorInputText: "#E8DAB5",
+              colorText: "#E8DAB5",
+              colorTextSecondary: "#D8CCAB",
+              colorNeutral: "#E8DAB5",
               fontFamily: "var(--font-inter)",
               borderRadius: "2px",
             },
             elements: {
               rootBox: { backgroundColor: "transparent" },
               card: {
-                backgroundColor: "rgba(244, 233, 210, 0.6)",
-                border: "1px solid rgba(61, 53, 41, 0.3)",
+                backgroundColor: "rgba(30, 33, 27, 0.7)",
+                border: "1px solid rgba(58, 51, 40, 0.7)",
                 boxShadow:
-                  "0 0 60px rgba(184, 101, 74, 0.1), 0 1px 4px rgba(31, 26, 18, 0.08)",
+                  "0 0 80px rgba(168, 133, 67, 0.08), 0 1px 4px rgba(0, 0, 0, 0.5)",
+                backdropFilter: "blur(4px)",
               },
               headerTitle: {
-                color: "#1F1A12",
+                color: "#E8DAB5",
                 fontFamily: "var(--font-cinzel), serif",
-                letterSpacing: "0.08em",
+                letterSpacing: "0.1em",
                 fontSize: "1.25rem",
                 textTransform: "uppercase",
+                fontWeight: 500,
               },
               headerSubtitle: {
-                color: "rgba(31, 26, 18, 0.7)",
+                color: "rgba(216, 204, 171, 0.65)",
                 fontFamily: "var(--font-cormorant), serif",
                 fontStyle: "italic",
                 fontSize: "1rem",
               },
               formFieldLabel: {
-                color: "#1F1A12",
+                color: "rgba(232, 218, 181, 0.8)",
                 fontSize: "0.7rem",
-                letterSpacing: "0.2em",
+                letterSpacing: "0.22em",
                 textTransform: "uppercase",
+                fontFamily: "var(--font-inter)",
+              },
+              formFieldInput: {
+                backgroundColor: "rgba(30, 33, 27, 0.8)",
+                borderColor: "rgba(58, 51, 40, 0.8)",
+                color: "#E8DAB5",
               },
               formButtonPrimary: {
-                backgroundColor: "#B8654A",
-                color: "#F2EDE3",
+                backgroundColor: "#A88543",
+                color: "#14110D",
                 fontFamily: "var(--font-inter)",
-                letterSpacing: "0.2em",
+                letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 fontSize: "0.75rem",
+                fontWeight: 500,
+                border: "none",
               },
-              dividerLine: { backgroundColor: "rgba(61, 53, 41, 0.3)" },
+              dividerLine: { backgroundColor: "rgba(58, 51, 40, 0.7)" },
               dividerText: {
-                color: "rgba(31, 26, 18, 0.5)",
-                letterSpacing: "0.25em",
+                color: "rgba(216, 204, 171, 0.5)",
+                letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 fontSize: "0.65rem",
               },
-              footerActionText: { color: "rgba(31, 26, 18, 0.65)" },
-              footerActionLink: { color: "#B8654A", fontWeight: 500 },
+              footerActionText: { color: "rgba(216, 204, 171, 0.6)" },
+              footerActionLink: { color: "#A88543", fontWeight: 500 },
               socialButtonsBlockButton: {
-                border: "1px solid rgba(61, 53, 41, 0.35)",
-                backgroundColor: "rgba(255, 255, 255, 0.4)",
+                border: "1px solid rgba(58, 51, 40, 0.8)",
+                backgroundColor: "rgba(30, 33, 27, 0.4)",
+                color: "#E8DAB5",
               },
               identityPreview: {
-                backgroundColor: "rgba(255, 255, 255, 0.4)",
-                border: "1px solid rgba(61, 53, 41, 0.3)",
+                backgroundColor: "rgba(30, 33, 27, 0.6)",
+                border: "1px solid rgba(58, 51, 40, 0.7)",
               },
             },
           }}

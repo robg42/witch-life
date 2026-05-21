@@ -1,4 +1,4 @@
-# The Verdant Oracle
+# Witch Life
 
 A personalised cosmic energy service. Reads the live state of the sky —
 sun, moon, planets — and tells the reader how to move through that

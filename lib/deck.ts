@@ -1,5 +1,5 @@
 /*
-  The Verdant Oracle's 28-card botanical / elemental / animist deck.
+  Witch Life's 28-card botanical / elemental / animist deck.
   Four suits of seven. The names are intentionally archaic and concrete —
   no traditional tarot vocabulary, no Major / Minor split.
 

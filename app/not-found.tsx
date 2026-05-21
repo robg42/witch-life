@@ -7,7 +7,7 @@ export default function NotFound() {
         <p className="font-sans text-xs uppercase tracking-[0.3em] text-clay">
           Not here
         </p>
-        <p className="oracle-body mt-4 text-ink/90">
+        <p className="oracle-body mt-4 text-wax/90">
           That page does not exist. The oracle has not written it yet, or you
           followed a link that has fallen out of fashion.
         </p>

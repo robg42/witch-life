@@ -1,4 +1,4 @@
--- The Verdant Oracle — initial schema
+-- Witch Life — initial schema
 -- Apply via Supabase SQL editor or `supabase db push`.
 -- Supabase Auth is NOT used; Clerk is the source of truth for identity.
 -- RLS policies authenticate via the `request.jwt.claims->>sub` claim,

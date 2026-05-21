@@ -9,9 +9,9 @@ import { TodaysSky } from "@/components/site/todays-sky";
 export const dynamic = "force-dynamic";
 
 /*
-  Hub for signed-in visitors. Unauthenticated → /sign-in. The hub uses
-  the cream herbarium surface — same as the entry portal — with four
-  numbered doors and the live sky wheel at centre.
+  Hub for signed-in visitors. Unauthenticated → /sign-in. The hub lives
+  on the aged-ink surface with a live almanac at centre and four
+  numbered doors below. No scroll, no marketing — bearings.
 */
 export default async function Home() {
   if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
@@ -35,43 +35,43 @@ export default async function Home() {
       : "direct";
 
   return (
-    <main className="relative min-h-screen overflow-hidden text-ink">
+    <main className="relative min-h-screen overflow-hidden text-wax">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-6 md:px-10 md:py-8">
         {/* Masthead */}
-        <header className="flex items-baseline justify-between gap-6 font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-          <span className="text-ink">The Verdant Oracle</span>
+        <header className="flex items-baseline justify-between gap-6 font-sans text-[10px] uppercase tracking-[0.3em] text-ash">
+          <span className="text-wax">Witch Life</span>
           <span className="hidden md:inline">{dateLong}</span>
           <LandingAuthActions />
         </header>
 
         {/* One-line cosmic readout */}
-        <div className="mt-5 flex flex-wrap items-baseline justify-center gap-x-6 gap-y-1 font-sans text-[11px] uppercase tracking-[0.25em] text-bark/70">
+        <div className="mt-5 flex flex-wrap items-baseline justify-center gap-x-6 gap-y-1 font-sans text-[11px] uppercase tracking-[0.25em] text-ash">
           <span className="flex items-baseline gap-2">
-            <span className="text-lg text-ink leading-none">
+            <span className="text-lg text-wax leading-none">
               {sky.moon.phaseSymbol}
             </span>
-            <span className="text-ink/90">
+            <span className="text-wax/90">
               {sky.moon.phaseName} in {sky.moon.sign}
             </span>
           </span>
-          <span className="text-bark/40">·</span>
-          <span className="text-ink/90">
+          <span className="text-ash/60">·</span>
+          <span className="text-wax/90">
             Sun in {sky.sun.sign}{" "}
-            <span className="text-bark/70">{SIGN_GLYPH[sky.sun.sign]}</span>
+            <span className="text-ash">{SIGN_GLYPH[sky.sun.sign]}</span>
           </span>
-          <span className="text-bark/40">·</span>
+          <span className="text-ash/60">·</span>
           <span
             className={
               sky.planets.mercury.retrograde
                 ? "text-clay"
                 : sky.planets.mercury.shadowPeriod
                   ? "text-moss"
-                  : "text-ink/90"
+                  : "text-wax/90"
             }
           >
             Mercury {mercuryStatus}
           </span>
-          <span className="text-bark/40">·</span>
+          <span className="text-ash/60">·</span>
           <span>New moon in {Math.round(sky.moon.daysToNewMoon)} days</span>
         </div>
 
@@ -80,7 +80,7 @@ export default async function Home() {
           <TodaysSky sky={sky} />
 
           <p
-            className="fade-up mt-14 max-w-2xl text-center font-accent text-2xl italic leading-snug text-ink/85 md:text-3xl"
+            className="fade-up mt-14 max-w-2xl text-center font-accent text-2xl italic leading-snug text-wax/85 md:text-3xl"
             style={{ animationDelay: "500ms" }}
           >
             What is moving,{" "}
@@ -125,7 +125,7 @@ export default async function Home() {
         </nav>
 
         {/* Quiet footer */}
-        <footer className="mt-6 flex flex-wrap items-baseline justify-between gap-2 font-sans text-[10px] uppercase tracking-[0.3em] text-bark/60">
+        <footer className="mt-6 flex flex-wrap items-baseline justify-between gap-2 font-sans text-[10px] uppercase tracking-[0.3em] text-ash/80">
           <span>MMXXVI</span>
           <span className="hidden sm:inline">No prediction · only attention</span>
           <span>Built by hand</span>
@@ -151,7 +151,7 @@ function Door({
   return (
     <Link
       href={href}
-      className="group relative flex flex-col gap-3 bg-bone/95 px-6 py-7 transition-base hover:bg-linen/80"
+      className="group relative flex flex-col gap-3 bg-ink/95 px-6 py-7 transition-base hover:bg-linen/80"
     >
       <div className="flex items-baseline justify-between">
         <span className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay">
@@ -159,19 +159,19 @@ function Door({
         </span>
         <span
           aria-hidden
-          className="font-sans text-base text-bark/60 transition-base group-hover:translate-x-1 group-hover:text-clay"
+          className="font-sans text-base text-ash/80 transition-base group-hover:translate-x-1 group-hover:text-clay"
         >
           →
         </span>
       </div>
       <span
         aria-hidden
-        className="font-serif text-3xl leading-none text-moss transition-base group-hover:text-clay"
+        className="font-serif text-3xl leading-none text-gold transition-base group-hover:text-ember"
       >
         {glyph}
       </span>
-      <h3 className="accent text-2xl text-ink">{label}</h3>
-      <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/70">
+      <h3 className="accent text-2xl text-wax">{label}</h3>
+      <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-ash">
         {sub}
       </p>
     </Link>

@@ -70,7 +70,7 @@ export function CardInterpretation({ card, sky, natal, voice }: Props) {
   return (
     <div className="mt-6 w-full max-w-xl">
       {state.kind === "loading" && (
-        <div className="animate-pulse space-y-2 text-bark/40">
+        <div className="animate-pulse space-y-2 text-ash/60">
           <div className="h-3 w-28 bg-bark/20" />
           <div className="h-4 w-full bg-bark/15" />
           <div className="h-4 w-10/12 bg-bark/15" />
