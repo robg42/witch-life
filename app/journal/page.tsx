@@ -34,11 +34,7 @@ function rowToEntry(row: DbRow): JournalEntry {
 
 export default async function JournalPage() {
   const { userId } = await auth();
-  // Middleware enforces auth before reaching here, but TypeScript needs
-  // a runtime guard.
-  if (!userId) {
-    return null;
-  }
+  if (!userId) return null;
 
   let entries: JournalEntry[] = [];
   let loadError: string | null = null;
@@ -56,21 +52,24 @@ export default async function JournalPage() {
   }
 
   return (
-    <main className="min-h-screen bg-earth text-parchment">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-2xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
-            href="/reading"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-parchment"
+            href="/"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
-            ← Today&rsquo;s reading
+            ← The Verdant Oracle
           </Link>
         </header>
 
-        <h1 className="display mt-10 text-3xl text-parchment md:text-4xl">
+        <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
+          What is moving through you
+        </p>
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           The journal
         </h1>
-        <p className="oracle-body mt-3 text-parchment/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Set down what is moving through you. The oracle reads these — not
           your exact words, only the themes.
         </p>
@@ -81,14 +80,12 @@ export default async function JournalPage() {
 
         <BotanicalDivider className="my-16" />
 
-        <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+        <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
           Previously
         </h2>
 
         {loadError ? (
-          <p className="font-serif text-base italic text-ochre">
-            {loadError}
-          </p>
+          <p className="font-serif text-base italic text-clay">{loadError}</p>
         ) : (
           <JournalList entries={entries} />
         )}

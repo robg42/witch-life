@@ -5,13 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 /*
-  The header right-hand cluster on the landing page. Shows different
-  controls depending on auth state — a Sign-out link when signed in, a
-  small return-to-chart link when signed out. Lives in a client
-  component so it can read Clerk's session.
-
-  Gracefully no-ops without Clerk configured (useAuth returns
-  isLoaded=true, userId=null).
+  Auth-aware control. Shows Sign-out when signed in, Sign-in when not.
+  Themed for the cream herbarium surface.
 */
 export function LandingAuthActions() {
   const router = useRouter();
@@ -26,7 +21,7 @@ export function LandingAuthActions() {
           await signOut();
           router.refresh();
         }}
-        className="font-sans text-[10px] uppercase tracking-[0.3em] text-ash transition-base hover:text-parchment"
+        className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70 transition-base hover:text-clay"
       >
         Sign out
       </button>
@@ -35,7 +30,7 @@ export function LandingAuthActions() {
   return (
     <Link
       href="/sign-in"
-      className="font-sans text-[10px] uppercase tracking-[0.3em] text-ash transition-base hover:text-parchment"
+      className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70 transition-base hover:text-clay"
     >
       Sign in
     </Link>

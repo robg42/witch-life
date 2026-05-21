@@ -16,14 +16,6 @@ import { CardInterpretation } from "@/components/cards/card-interpretation";
 import { BotanicalDivider } from "@/components/site/botanical-divider";
 import { VOICE_LABEL } from "@/lib/voices";
 
-/*
-  On-demand single-card pull. Separate from the daily seeded card on
-  /reading — every visit here is a fresh draw against today's sky.
-
-  Free-tier rate limiting (one pull per day) is intentionally deferred to
-  Phase 6 when Supabase-authenticated traffic exists to throttle against.
-*/
-
 export function OnDemandDraw() {
   const router = useRouter();
   const [birth, setBirth] = useState<BirthDetails | null>(null);
@@ -65,8 +57,8 @@ export function OnDemandDraw() {
 
   if (!birth || !pendingCard || !sky || !natal) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-earth">
-        <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+      <main className="flex min-h-screen items-center justify-center">
+        <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
           Shuffling…
         </span>
       </main>
@@ -74,24 +66,27 @@ export function OnDemandDraw() {
   }
 
   return (
-    <main className="min-h-screen bg-earth text-parchment">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-2xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
-            href="/reading"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-parchment"
+            href="/"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
-            ← Today&rsquo;s reading
+            ← The Verdant Oracle
           </Link>
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
-            Voice: <span className="text-ochre">{VOICE_LABEL[birth.voice]}</span>
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
+            Voice: <span className="text-clay">{VOICE_LABEL[birth.voice]}</span>
           </span>
         </header>
 
-        <h1 className="display mt-10 text-3xl text-parchment md:text-4xl">
+        <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
+          A single draw
+        </p>
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           A card, just for you
         </h1>
-        <p className="oracle-body mt-3 text-parchment/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Different from the daily symbol. Pulled fresh against your chart
           and the sky as it is right now.
         </p>
@@ -117,7 +112,7 @@ export function OnDemandDraw() {
             <button
               type="button"
               onClick={drawAnother}
-              className="mt-10 font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/20 px-6 py-3 text-parchment transition-base hover:bg-moss/40"
+              className="mt-10 font-sans text-xs uppercase tracking-[0.25em] border border-bark/40 bg-linen/60 px-6 py-3 text-ink transition-base hover:border-clay hover:text-clay"
             >
               Draw another
             </button>

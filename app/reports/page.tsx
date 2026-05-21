@@ -26,9 +26,7 @@ export default async function ReportsPage() {
   const sb = supabaseAdmin();
   const { data: userRow } = await sb
     .from("users")
-    .select(
-      "id, birth_date, birth_time, birth_lat, birth_lng, oracle_voice",
-    )
+    .select("id, birth_date, birth_time, birth_lat, birth_lng, oracle_voice")
     .eq("clerk_id", userId)
     .maybeSingle();
 
@@ -42,9 +40,6 @@ export default async function ReportsPage() {
       ).data as ReportRow[]) ?? []
     : [];
 
-  // Figure out which one-time reports are currently available against this
-  // chart and today's sky — for the conditional reports (Saturn return,
-  // eclipse season) we suppress the buy button when irrelevant.
   let natal: NatalChart | null = null;
   if (userRow?.birth_date) {
     const [y, m, d] = userRow.birth_date.split("-").map(Number);
@@ -71,25 +66,28 @@ export default async function ReportsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-earth text-parchment">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-3xl px-6 py-12 md:px-10 md:py-16">
         <Link
-          href="/reading"
-          className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-parchment"
+          href="/"
+          className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
         >
-          ← Today&rsquo;s reading
+          ← The Verdant Oracle
         </Link>
 
-        <h1 className="display mt-10 text-3xl text-parchment md:text-4xl">
+        <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
+          Long-form readings
+        </p>
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           In-depth reports
         </h1>
-        <p className="oracle-body mt-3 text-parchment/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Long-form readings, written once and yours to keep. Each is
           generated specifically for your chart in your chosen voice.
         </p>
 
         {!natal && (
-          <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-ochre">
+          <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-clay">
             Add your birth details before purchasing —{" "}
             <Link href="/onboarding" className="underline-offset-4 hover:underline">
               edit chart
@@ -100,7 +98,7 @@ export default async function ReportsPage() {
         <BotanicalDivider className="my-12" />
 
         <section>
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
             Available reports
           </h2>
           <div className="grid gap-6 sm:grid-cols-2">
@@ -133,11 +131,11 @@ export default async function ReportsPage() {
         <BotanicalDivider className="my-16" />
 
         <section>
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
             Yours
           </h2>
           {purchases.length === 0 ? (
-            <p className="font-serif text-base italic text-ash">
+            <p className="font-serif text-base italic text-bark/70">
               No reports yet.
             </p>
           ) : (
@@ -148,14 +146,16 @@ export default async function ReportsPage() {
                 return (
                   <li
                     key={row.id}
-                    className="hairline rounded-md bg-bark/30 px-5 py-4"
+                    className="rounded-sm border border-bark/25 bg-linen/40 px-5 py-4"
                   >
                     <Link
                       href={`/reports/${row.id}`}
-                      className="flex items-baseline justify-between text-parchment transition-base hover:text-ochre"
+                      className="flex items-baseline justify-between text-ink transition-base hover:text-clay"
                     >
-                      <span className="font-serif text-lg">{meta?.title ?? row.report_type}</span>
-                      <span className="font-sans text-xs uppercase tracking-[0.2em] text-ash">
+                      <span className="font-serif text-lg">
+                        {meta?.title ?? row.report_type}
+                      </span>
+                      <span className="font-sans text-xs uppercase tracking-[0.2em] text-bark/60">
                         {new Date(row.created_at).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",
@@ -164,7 +164,7 @@ export default async function ReportsPage() {
                       </span>
                     </Link>
                     {pending && (
-                      <p className="mt-2 font-sans text-xs uppercase tracking-[0.2em] text-ochre">
+                      <p className="mt-2 font-sans text-xs uppercase tracking-[0.2em] text-clay">
                         Awaiting generation · {pending}
                       </p>
                     )}

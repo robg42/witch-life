@@ -15,19 +15,19 @@ export function OracleSection({
   children: React.ReactNode;
 }) {
   const labelColour: Record<typeof tone, string> = {
-    default: "text-ash",
-    expand: "text-sage",
-    contract: "text-moss",
-    protect: "text-ochre",
-    question: "text-ochre",
-    journal: "text-ash",
+    default: "text-bark/70",
+    expand: "text-moss",
+    contract: "text-bark",
+    protect: "text-clay",
+    question: "text-clay",
+    journal: "text-bark/70",
   };
   return (
     <section className="mt-12 first:mt-0">
       <div className="mb-3 font-sans text-xs uppercase tracking-[0.25em]">
         <span className={labelColour[tone]}>{label}</span>
       </div>
-      <div className="oracle-body text-parchment/95">{children}</div>
+      <div className="oracle-body text-ink/95">{children}</div>
     </section>
   );
 }

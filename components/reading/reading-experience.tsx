@@ -25,14 +25,7 @@ import { dailyCard, type Card } from "@/lib/deck";
 import { VOICE_LABEL } from "@/lib/voices";
 
 /*
-  Top-level client orchestration for /reading.
-
-  - Reads birth details from localStorage. If absent, redirects to onboarding.
-  - Computes SkyState + NatalChart synchronously via the pure astro engine.
-  - Fires the main reading and weekly arc fetches concurrently. (The card
-    interpretation in Phase 3 is intentionally still a placeholder; Phase 4
-    fills in the real deck and wires its own AI call.)
-  - Renders skeletons for sections that are still loading.
+  Reading page on the cream herbarium surface.
 */
 
 export function ReadingExperience() {
@@ -80,7 +73,6 @@ function ReadingPage({
   onQuestionChange,
   onAskQuestion,
 }: InnerProps) {
-  // Compute sky + natal + today's card once per mount per birth.
   const { sky, natal, todayISO, card } = useMemo(() => {
     const now = new Date();
     const sky = getSkyState(now, { lat: birth.lat });
@@ -98,7 +90,6 @@ function ReadingPage({
     };
   }, [birth]);
 
-  // Card revealed by the reader on flip → triggers AI interpretation.
   const [revealedCard, setRevealedCard] = useState<Card | null>(null);
 
   const [reading, setReading] = useState<
@@ -116,16 +107,11 @@ function ReadingPage({
     setReading({ status: "loading" });
     setWeekly({ status: "loading" });
 
-    // Weekly arc doesn't depend on journal context — fire immediately.
     fetchWeekly(todayISO, natal, birth.voice).then((r) => {
       if (cancelled) return;
       setWeekly(r);
     });
 
-    // Try to load recent journal entries. If the reader isn't signed in,
-    // we get a 401 and silently skip — the reading still runs, just
-    // without journal awareness. If we do get entries, we compress them
-    // into a short summary that goes to the oracle for theme-sensing.
     fetchRecentJournal().then((entries) => {
       if (cancelled) return;
       const summary = entries.length > 0 ? summariseEntries(entries) : undefined;
@@ -142,21 +128,21 @@ function ReadingPage({
   }, [sky, natal, birth.voice, question, todayISO]);
 
   return (
-    <main className="min-h-screen bg-earth text-parchment">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-3xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
             href="/"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-parchment"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
-            The Verdant Oracle
+            ← The Verdant Oracle
           </Link>
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
-            Voice: <span className="text-ochre">{VOICE_LABEL[birth.voice]}</span>{" "}
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
+            Voice: <span className="text-clay">{VOICE_LABEL[birth.voice]}</span>{" "}
             ·{" "}
             <Link
               href="/onboarding"
-              className="underline-offset-4 hover:text-parchment hover:underline"
+              className="underline-offset-4 hover:text-ink hover:underline"
             >
               edit chart
             </Link>
@@ -173,7 +159,7 @@ function ReadingPage({
 
         <section className="mt-12 flex flex-col items-center">
           <TarotCard card={card} onFlip={(c) => setRevealedCard(c)} />
-          <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-ash">
+          <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Today&rsquo;s symbol — drawn for everyone
           </p>
           <CardInterpretation
@@ -186,7 +172,6 @@ function ReadingPage({
 
         <BotanicalDivider className="my-12 mx-auto" />
 
-        {/* Energetic weather + the rest of the AI-generated reading */}
         {reading.status === "loading" && <ReadingSkeleton />}
         {reading.status === "error" && (
           <ErrorBlock
@@ -203,11 +188,11 @@ function ReadingPage({
         )}
 
         {/* Question form */}
-        <section className="mt-16 border-t border-moss/40 pt-10">
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+        <section className="mt-16 border-t border-bark/25 pt-10">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Ask the oracle
           </h2>
-          <p className="oracle-body mt-2 text-parchment/85">
+          <p className="oracle-body mt-2 text-ink/85">
             One question. The oracle answers it through the day&rsquo;s sky.
           </p>
           <div className="mt-4 flex gap-4">
@@ -216,12 +201,12 @@ function ReadingPage({
               value={questionValue}
               onChange={(e) => onQuestionChange(e.target.value)}
               placeholder="What should I be paying attention to?"
-              className="flex-1 border-b border-moss bg-transparent px-1 py-2 font-serif text-lg text-parchment outline-none focus:border-ochre"
+              className="flex-1 border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/50 focus:border-clay"
             />
             <button
               onClick={onAskQuestion}
               disabled={!questionValue.trim()}
-              className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/20 px-6 py-3 text-parchment transition-base hover:bg-moss/40 disabled:cursor-not-allowed disabled:opacity-60"
+              className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/15 px-6 py-3 text-ink transition-base hover:bg-moss/25 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Ask
             </button>
@@ -231,7 +216,7 @@ function ReadingPage({
         <BotanicalDivider className="my-16 mx-auto" />
 
         <section>
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
             The week ahead
           </h2>
           {weekly.status === "loading" && <WeeklySkeleton />}
@@ -255,7 +240,7 @@ function ReadingPage({
           <FooterLink href="/reports" label="Deeper reports" />
         </section>
 
-        <footer className="mt-24 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-ash">
+        <footer className="mt-24 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
           {transitFooter(sky, natal)}
         </footer>
       </div>
@@ -299,7 +284,7 @@ function ReadingBody({
         </OracleSection>
       )}
 
-      <div className="mt-10 hairline rounded-md bg-bark/30 p-6">
+      <div className="mt-10 rounded-sm border border-clay/40 bg-clay/5 p-6">
         <OracleSection label="Protect your energy" tone="protect">
           {reading.protectYourEnergy}
         </OracleSection>
@@ -310,12 +295,12 @@ function ReadingBody({
 
 function ReadingSkeleton() {
   return (
-    <div className="animate-pulse space-y-6 text-parchment/40">
-      <div className="h-3 w-32 bg-moss/30" />
+    <div className="animate-pulse space-y-6 text-bark/40">
+      <div className="h-3 w-32 bg-bark/20" />
       <div className="space-y-2">
-        <div className="h-4 w-full bg-moss/20" />
-        <div className="h-4 w-11/12 bg-moss/20" />
-        <div className="h-4 w-10/12 bg-moss/20" />
+        <div className="h-4 w-full bg-bark/15" />
+        <div className="h-4 w-11/12 bg-bark/15" />
+        <div className="h-4 w-10/12 bg-bark/15" />
       </div>
     </div>
   );
@@ -325,7 +310,7 @@ function WeeklySkeleton() {
   return (
     <div className="grid animate-pulse grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
       {Array.from({ length: 7 }).map((_, i) => (
-        <div key={i} className="h-28 border border-moss/30 bg-bark/20" />
+        <div key={i} className="h-28 border border-bark/20 bg-bark/5" />
       ))}
     </div>
   );
@@ -333,11 +318,11 @@ function WeeklySkeleton() {
 
 function ErrorBlock({ label, detail }: { label: string; detail: string }) {
   return (
-    <div className="hairline rounded-md bg-bark/40 px-6 py-5">
-      <p className="font-sans text-xs uppercase tracking-[0.25em] text-ochre">
+    <div className="rounded-sm border border-clay/40 bg-clay/5 px-6 py-5">
+      <p className="font-sans text-xs uppercase tracking-[0.25em] text-clay">
         {label}
       </p>
-      <p className="mt-2 font-serif text-base text-parchment/80">{detail}</p>
+      <p className="mt-2 font-serif text-base text-ink/85">{detail}</p>
     </div>
   );
 }
@@ -346,7 +331,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="hairline rounded-md bg-bark/30 px-4 py-3 text-center font-sans text-xs uppercase tracking-[0.25em] text-parchment transition-base hover:bg-bark/60 hover:text-ochre"
+      className="rounded-sm border border-bark/25 bg-linen/40 px-4 py-3 text-center font-sans text-xs uppercase tracking-[0.25em] text-ink transition-base hover:border-clay hover:bg-linen/70 hover:text-clay"
     >
       {label}
     </Link>
@@ -355,19 +340,14 @@ function FooterLink({ href, label }: { href: string; label: string }) {
 
 function BootingState() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-earth">
-      <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+    <main className="flex min-h-screen items-center justify-center">
+      <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
         Casting…
       </span>
     </main>
   );
 }
 
-/*
-  A small editorial footer summarising any notable transits the engine
-  detected today. Not a leak — these are the same insights the oracle
-  is already using to shape the reading.
-*/
 function transitFooter(sky: SkyState, natal: NatalChart): string {
   const t = computeTransits(sky, natal);
   return [...t.activeTransits, ...t.significantWindows].join(" · ") || "—";

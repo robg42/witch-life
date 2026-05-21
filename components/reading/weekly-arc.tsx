@@ -3,14 +3,17 @@ import { SIGN_GLYPH } from "@/lib/zodiac";
 
 /*
   Seven-day grid with colour-coded energy quality and the day's moon
-  phase + sign. Today is highlighted.
+  phase + sign. Today is highlighted. Cream-surface theme.
 */
-const QUALITY_COLOUR: Record<string, string> = {
-  expand: "border-energy-expand text-energy-expand",
-  flow: "border-energy-flow text-energy-flow",
-  inward: "border-energy-inward text-energy-inward",
-  contract: "border-energy-contract text-energy-contract",
-  friction: "border-energy-friction text-energy-friction",
+const QUALITY_TONE: Record<
+  string,
+  { border: string; text: string; bg: string }
+> = {
+  expand: { border: "border-moss", text: "text-moss", bg: "bg-moss/10" },
+  flow: { border: "border-saffron", text: "text-saffron", bg: "bg-saffron/10" },
+  inward: { border: "border-bark/40", text: "text-bark/80", bg: "bg-bark/5" },
+  contract: { border: "border-clay/60", text: "text-clay", bg: "bg-clay/10" },
+  friction: { border: "border-clay", text: "text-clay", bg: "bg-clay/15" },
 };
 
 export function WeeklyArc({
@@ -25,27 +28,26 @@ export function WeeklyArc({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
         {weekly.days.map((day) => {
           const isToday = day.date === todayISO;
-          const colour =
-            QUALITY_COLOUR[day.energyQuality] ?? QUALITY_COLOUR.flow;
+          const tone = QUALITY_TONE[day.energyQuality] ?? QUALITY_TONE.flow;
           return (
             <div
               key={day.date}
-              className={`flex flex-col items-center gap-2 border ${colour.split(" ")[0]} bg-bark/30 px-3 py-4 ${
-                isToday ? "ring-1 ring-ochre" : ""
+              className={`flex flex-col items-center gap-2 border ${tone.border} ${tone.bg} px-3 py-4 ${
+                isToday ? "ring-1 ring-clay" : ""
               }`}
             >
-              <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-ash">
+              <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-bark/70">
                 {formatDate(day.date)}
               </span>
               <span
-                className={`font-sans text-[10px] uppercase tracking-[0.2em] ${colour.split(" ")[1]}`}
+                className={`font-sans text-[10px] uppercase tracking-[0.2em] ${tone.text}`}
               >
                 {day.energyQuality}
               </span>
-              <span className="font-serif text-base text-parchment">
+              <span className="font-serif text-base text-ink">
                 {day.descriptor}
               </span>
-              <span className="text-xs text-ash">
+              <span className="text-xs text-bark/70">
                 {phaseSymbol(day.moonPhase)} {SIGN_GLYPH[day.moonSign as keyof typeof SIGN_GLYPH] ?? ""}
               </span>
             </div>
@@ -53,7 +55,7 @@ export function WeeklyArc({
         })}
       </div>
       {weekly.narrativeArc && (
-        <p className="mt-6 oracle-body text-parchment/90">
+        <p className="mt-6 oracle-body text-ink/90">
           {weekly.narrativeArc}
         </p>
       )}
@@ -62,7 +64,6 @@ export function WeeklyArc({
 }
 
 function formatDate(iso: string): string {
-  // Render "Mon 3 Jun" style without pulling in a date library.
   const d = new Date(iso + "T00:00:00Z");
   const weekday = d.toLocaleString("en-GB", {
     weekday: "short",

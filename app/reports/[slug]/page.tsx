@@ -53,19 +53,19 @@ export default async function ReportDetail({
       : null;
 
   return (
-    <main className="min-h-screen bg-earth text-parchment">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-2xl px-6 py-12 md:px-10 md:py-16">
         <Link
           href="/reports"
-          className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-parchment"
+          className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
         >
           ← Reports
         </Link>
 
-        <h1 className="display mt-10 text-3xl text-parchment md:text-4xl">
+        <h1 className="display mt-10 text-3xl text-ink md:text-5xl">
           {meta?.title ?? report.report_type}
         </h1>
-        <p className="font-sans text-xs uppercase tracking-[0.25em] text-ash mt-3">
+        <p className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mt-3">
           {new Date(report.created_at).toLocaleDateString("en-GB", {
             day: "numeric",
             month: "long",
@@ -76,18 +76,23 @@ export default async function ReportDetail({
         <BotanicalDivider className="my-10" />
 
         {pendingReason ? (
-          <div className="hairline rounded-md bg-bark/40 px-6 py-5">
-            <p className="font-sans text-xs uppercase tracking-[0.25em] text-ochre">
+          <div className="rounded-sm border border-clay/40 bg-clay/5 px-6 py-5">
+            <p className="font-sans text-xs uppercase tracking-[0.25em] text-clay">
               Awaiting generation
             </p>
-            <p className="oracle-body mt-2 text-parchment/85">
+            <p className="oracle-body mt-2 text-ink/85">
               {pendingReason}. Once your birth details are saved, the report
               will be generated in the background.
             </p>
-            <p className="mt-3 font-sans text-xs text-ash">Report id: {report.id}</p>
+            <p className="mt-3 font-sans text-xs text-bark/60">
+              Report id: {report.id}
+            </p>
           </div>
         ) : (
-          <ReportRenderer report={report.report_json as ReportJson["data"]} type={report.report_type} />
+          <ReportRenderer
+            report={report.report_json as ReportJson["data"]}
+            type={report.report_type}
+          />
         )}
       </div>
     </main>

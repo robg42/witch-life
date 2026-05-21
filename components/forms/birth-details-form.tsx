@@ -61,7 +61,7 @@ export function BirthDetailsForm({
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
-          className="border-b border-moss bg-transparent px-1 py-2 font-serif text-lg text-parchment outline-none focus:border-ochre"
+          className="border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none focus:border-clay"
         />
       </Field>
 
@@ -75,7 +75,7 @@ export function BirthDetailsForm({
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="border-b border-moss bg-transparent px-1 py-2 font-serif text-lg text-parchment outline-none focus:border-ochre"
+          className="border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none focus:border-clay"
         />
       </Field>
 
@@ -90,7 +90,7 @@ export function BirthDetailsForm({
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="e.g. Glasgow"
-          className="border-b border-moss bg-transparent px-1 py-2 font-serif text-lg text-parchment outline-none focus:border-ochre"
+          className="border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/40 focus:border-clay"
         />
       </Field>
 
@@ -107,7 +107,7 @@ export function BirthDetailsForm({
             value={lat}
             onChange={(e) => setLat(e.target.value)}
             placeholder="latitude"
-            className="w-32 border-b border-moss bg-transparent px-1 py-2 font-serif text-lg text-parchment outline-none focus:border-ochre"
+            className="w-32 border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/40 focus:border-clay"
           />
           <input
             id="birth-lng"
@@ -116,13 +116,13 @@ export function BirthDetailsForm({
             value={lng}
             onChange={(e) => setLng(e.target.value)}
             placeholder="longitude"
-            className="w-32 border-b border-moss bg-transparent px-1 py-2 font-serif text-lg text-parchment outline-none focus:border-ochre"
+            className="w-32 border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/40 focus:border-clay"
           />
         </div>
       </Field>
 
       <fieldset>
-        <legend className="mb-3 font-sans text-xs uppercase tracking-[0.25em] text-ash">
+        <legend className="mb-3 font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
           Choose your voice
         </legend>
         <div className="flex flex-col gap-2">
@@ -130,8 +130,8 @@ export function BirthDetailsForm({
             <label
               key={key}
               className={`flex cursor-pointer items-baseline gap-4 border-l-2 ${
-                voice === key ? "border-ochre" : "border-moss/30"
-              } px-4 py-3 transition-base`}
+                voice === key ? "border-clay bg-clay/5" : "border-bark/20"
+              } px-4 py-3 transition-base hover:bg-clay/5`}
             >
               <input
                 type="radio"
@@ -141,8 +141,8 @@ export function BirthDetailsForm({
                 onChange={() => setVoice(key)}
                 className="sr-only"
               />
-              <span className="accent text-lg text-ochre">{VOICE_LABEL[key]}</span>
-              <span className="font-serif text-base text-parchment/80">
+              <span className="accent text-lg text-clay">{VOICE_LABEL[key]}</span>
+              <span className="font-serif text-base text-ink/85">
                 {VOICE_TAGLINE[key]}
               </span>
             </label>
@@ -151,14 +151,14 @@ export function BirthDetailsForm({
       </fieldset>
 
       {error && (
-        <p className="font-sans text-sm text-ochre">{error}</p>
+        <p className="font-sans text-sm text-clay">{error}</p>
       )}
 
       <div>
         <button
           type="submit"
           disabled={submitting}
-          className="font-sans text-sm uppercase tracking-[0.25em] border border-moss bg-moss/20 px-8 py-3 text-parchment transition-base hover:bg-moss/40 disabled:cursor-not-allowed disabled:opacity-60"
+          className="font-sans text-sm uppercase tracking-[0.25em] border border-clay bg-clay px-8 py-3 text-parchment transition-base hover:bg-clay/85 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Casting…" : "Cast the chart"}
         </button>
@@ -182,12 +182,12 @@ function Field({
     <div className="flex flex-col">
       <label
         htmlFor={htmlFor}
-        className="mb-1 font-sans text-xs uppercase tracking-[0.25em] text-ash"
+        className="mb-1 font-sans text-xs uppercase tracking-[0.25em] text-bark/70"
       >
         {label}
       </label>
       {hint && (
-        <p className="mb-2 font-serif text-sm italic text-ash/80">{hint}</p>
+        <p className="mb-2 font-serif text-sm italic text-bark/70">{hint}</p>
       )}
       {children}
     </div>

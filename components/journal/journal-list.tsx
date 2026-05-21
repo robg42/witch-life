@@ -4,11 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { JournalEntry } from "@/lib/journal";
 
-/*
-  A chronological list of journal entries. Editorial in feel: date,
-  moon-phase glyph, then prose. No streaks, no badges, no scoring.
-*/
-
 const PHASE_SYMBOL: Record<string, string> = {
   New: "●",
   "Waxing Crescent": "☽",
@@ -23,7 +18,7 @@ const PHASE_SYMBOL: Record<string, string> = {
 export function JournalList({ entries }: { entries: JournalEntry[] }) {
   if (entries.length === 0) {
     return (
-      <p className="font-serif text-base italic text-ash">
+      <p className="font-serif text-base italic text-bark/70">
         Nothing yet. The first entry is the hardest. Everything after is easier.
       </p>
     );
@@ -54,12 +49,12 @@ function EntryRow({ entry }: { entry: JournalEntry }) {
 
   return (
     <li>
-      <header className="mb-3 flex items-baseline justify-between border-b border-moss/30 pb-2">
-        <div className="flex items-baseline gap-4 font-sans text-xs uppercase tracking-[0.25em] text-ash">
+      <header className="mb-3 flex items-baseline justify-between border-b border-bark/20 pb-2">
+        <div className="flex items-baseline gap-4 font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
           <span>{formatDate(entry.entryDate)}</span>
           {entry.moonPhase && (
             <span>
-              <span className="mr-1 text-base text-parchment">
+              <span className="mr-1 text-base text-ink">
                 {PHASE_SYMBOL[entry.moonPhase] ?? ""}
               </span>
               {entry.moonPhase}
@@ -71,13 +66,13 @@ function EntryRow({ entry }: { entry: JournalEntry }) {
           type="button"
           onClick={onDelete}
           disabled={deleting}
-          className="font-sans text-[10px] uppercase tracking-[0.2em] text-ash transition-base hover:text-ochre disabled:opacity-50"
+          className="font-sans text-[10px] uppercase tracking-[0.2em] text-bark/60 transition-base hover:text-clay disabled:opacity-50"
         >
           {deleting ? "…" : "remove"}
         </button>
       </header>
 
-      <div className="flex flex-col gap-3 font-serif text-base leading-relaxed text-parchment/90">
+      <div className="flex flex-col gap-3 font-serif text-base leading-relaxed text-ink/90">
         {entry.whatLanded && (
           <Block label="What landed">{entry.whatLanded}</Block>
         )}
@@ -100,7 +95,7 @@ function Block({
   return (
     <div>
       {label && (
-        <span className="mb-1 block font-sans text-[10px] uppercase tracking-[0.25em] text-sage">
+        <span className="mb-1 block font-sans text-[10px] uppercase tracking-[0.25em] text-moss">
           {label}
         </span>
       )}

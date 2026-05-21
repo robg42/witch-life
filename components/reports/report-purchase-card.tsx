@@ -44,34 +44,32 @@ export function ReportPurchaseCard({
   };
 
   return (
-    <div className="hairline rounded-md bg-bark/30 px-5 py-5">
-      <h3 className="accent text-xl text-parchment">{title}</h3>
-      <p className="oracle-body mt-2 text-parchment/85">{blurb}</p>
+    <div className="rounded-sm border border-bark/25 bg-linen/40 px-5 py-5">
+      <h3 className="accent text-xl text-ink">{title}</h3>
+      <p className="oracle-body mt-2 text-ink/85">{blurb}</p>
       <div className="mt-5 flex items-center justify-between">
-        <span className="font-serif text-base text-ochre">
-          £{priceGBP}
-        </span>
+        <span className="font-serif text-base text-clay">£{priceGBP}</span>
         {available ? (
           <button
             type="button"
             onClick={buy}
             disabled={pending}
-            className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/20 px-5 py-2 text-parchment transition-base hover:bg-moss/40 disabled:cursor-not-allowed disabled:opacity-60"
+            className="font-sans text-xs uppercase tracking-[0.25em] border border-clay bg-clay px-5 py-2 text-parchment transition-base hover:bg-clay/85 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {pending ? "Opening Stripe…" : "Purchase"}
           </button>
         ) : (
-          <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-ash">
+          <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
             Not currently relevant
           </span>
         )}
       </div>
       {!available && unavailableReason && (
-        <p className="mt-2 font-serif text-sm italic text-ash">
+        <p className="mt-2 font-serif text-sm italic text-bark/70">
           {unavailableReason}
         </p>
       )}
-      {error && <p className="mt-3 font-sans text-sm text-ochre">{error}</p>}
+      {error && <p className="mt-3 font-sans text-sm text-clay">{error}</p>}
     </div>
   );
 }

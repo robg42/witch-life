@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 
 /*
   The journal entry form. Three fields — two prompted, one free.
-  Submits via /api/journal POST; on success, refreshes the page so the
-  newly-inserted entry shows up in the list.
+  Themed for the cream herbarium surface.
 */
 
 export function JournalForm() {
@@ -48,6 +47,9 @@ export function JournalForm() {
     }
   };
 
+  const inputCls =
+    "w-full resize-y border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg leading-relaxed text-ink outline-none placeholder:text-bark/40 focus:border-clay";
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-8">
       <Field
@@ -58,7 +60,7 @@ export function JournalForm() {
           value={whatLanded}
           onChange={(e) => setWhatLanded(e.target.value)}
           rows={3}
-          className="w-full resize-y border-b border-moss bg-transparent px-1 py-2 font-serif text-lg leading-relaxed text-parchment outline-none focus:border-ochre"
+          className={inputCls}
         />
       </Field>
 
@@ -70,7 +72,7 @@ export function JournalForm() {
           value={movingToward}
           onChange={(e) => setMovingToward(e.target.value)}
           rows={3}
-          className="w-full resize-y border-b border-moss bg-transparent px-1 py-2 font-serif text-lg leading-relaxed text-parchment outline-none focus:border-ochre"
+          className={inputCls}
         />
       </Field>
 
@@ -80,19 +82,17 @@ export function JournalForm() {
           onChange={(e) => setFreeText(e.target.value)}
           rows={4}
           placeholder="Open field. Write nothing in particular."
-          className="w-full resize-y border-b border-moss bg-transparent px-1 py-2 font-serif text-lg leading-relaxed text-parchment outline-none focus:border-ochre placeholder:text-ash/50"
+          className={inputCls}
         />
       </Field>
 
-      {error && (
-        <p className="font-sans text-sm text-ochre">{error}</p>
-      )}
+      {error && <p className="font-sans text-sm text-clay">{error}</p>}
 
       <div>
         <button
           type="submit"
           disabled={submitting}
-          className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/20 px-8 py-3 text-parchment transition-base hover:bg-moss/40 disabled:cursor-not-allowed disabled:opacity-60"
+          className="font-sans text-xs uppercase tracking-[0.25em] border border-clay bg-clay px-8 py-3 text-parchment transition-base hover:bg-clay/85 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Saving…" : "Set it down"}
         </button>
@@ -112,11 +112,11 @@ function Field({
 }) {
   return (
     <div className="flex flex-col">
-      <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+      <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
         {label}
       </span>
       {hint && (
-        <p className="mt-1 font-serif text-sm italic text-ash/80">{hint}</p>
+        <p className="mt-1 font-serif text-sm italic text-bark/70">{hint}</p>
       )}
       <div className="mt-3">{children}</div>
     </div>

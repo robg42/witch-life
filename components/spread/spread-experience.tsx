@@ -22,17 +22,6 @@ import { OracleSection } from "@/components/reading/oracle-section";
 import { UpgradeCard } from "@/components/paywall/upgrade-card";
 import { VOICE_LABEL } from "@/lib/voices";
 
-/*
-  Three-card spread experience.
-
-  - Picks three cards on mount (deterministic per draw, no repeats).
-  - Layout chooser: Situation / Action / Outcome (default) or
-    Past / Present / Future.
-  - Reader can flip each card individually; after all three are revealed
-    the page fires /api/spread once and renders the synthesised reading.
-  - 402 from the API means the reader isn't subscribed → soft gate.
-*/
-
 const LAYOUT_LABELS: Record<SpreadLayout, [string, string, string]> = {
   sao: ["Situation", "Action", "Outcome"],
   ppf: ["Past", "Present", "Future"],
@@ -77,8 +66,6 @@ export function SpreadExperience() {
 
   const allRevealed = revealed.every(Boolean);
 
-  // Spread reading state. Fires once all three flipped, with the question
-  // that was active at that moment.
   const [reading, setReading] = useState<
     | { kind: "idle" }
     | { kind: "loading" }
@@ -140,42 +127,47 @@ export function SpreadExperience() {
 
   if (!state) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-earth">
-        <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+      <main className="flex min-h-screen items-center justify-center">
+        <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
           Shuffling…
         </span>
       </main>
     );
   }
 
+  const tabBase =
+    "font-sans text-xs uppercase tracking-[0.25em] border px-4 py-2 transition-base";
+
   return (
-    <main className="min-h-screen bg-earth text-parchment">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-3xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
-            href="/reading"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-parchment"
+            href="/"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
-            ← Today&rsquo;s reading
+            ← The Verdant Oracle
           </Link>
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
-            Voice: <span className="text-ochre">{VOICE_LABEL[state.birth.voice]}</span>
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
+            Voice: <span className="text-clay">{VOICE_LABEL[state.birth.voice]}</span>
           </span>
         </header>
 
-        <h1 className="display mt-10 text-3xl text-parchment md:text-4xl">
+        <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
+          A spread
+        </p>
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           A three-card spread
         </h1>
-        <p className="oracle-body mt-3 text-parchment/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Pick the shape. Ask a question if you have one. Turn each card.
           The oracle reads the three together.
         </p>
 
         <BotanicalDivider className="my-10" />
 
-        {/* Layout toggle */}
         <div className="flex flex-wrap items-center gap-4">
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Shape
           </span>
           {(["sao", "ppf"] as const).map((key) => (
@@ -186,10 +178,10 @@ export function SpreadExperience() {
                 setLayout(key);
                 drawAgain();
               }}
-              className={`font-sans text-xs uppercase tracking-[0.25em] border px-4 py-2 transition-base ${
+              className={`${tabBase} ${
                 layout === key
-                  ? "border-ochre text-parchment"
-                  : "border-moss/40 text-ash hover:text-parchment"
+                  ? "border-clay bg-clay/10 text-ink"
+                  : "border-bark/30 text-bark/70 hover:border-clay hover:text-ink"
               }`}
             >
               {LAYOUT_LABELS[key].join(" / ")}
@@ -197,14 +189,13 @@ export function SpreadExperience() {
           ))}
         </div>
 
-        {/* Question */}
         <div className="mt-8 flex gap-4">
           <input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Optional question"
-            className="flex-1 border-b border-moss bg-transparent px-1 py-2 font-serif text-lg text-parchment outline-none focus:border-ochre"
+            className="flex-1 border-b border-bark/40 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/40 focus:border-clay"
           />
           <button
             type="button"
@@ -212,17 +203,16 @@ export function SpreadExperience() {
               setAppliedQuestion(question || undefined);
               drawAgain();
             }}
-            className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/20 px-4 py-2 text-parchment transition-base hover:bg-moss/40"
+            className="font-sans text-xs uppercase tracking-[0.25em] border border-bark/40 bg-linen/60 px-4 py-2 text-ink transition-base hover:border-clay hover:text-clay"
           >
             Set
           </button>
         </div>
 
-        {/* Cards */}
         <div className="mt-12 grid grid-cols-1 gap-10 sm:grid-cols-3">
           {state.cards.map((card, i) => (
             <div key={drawId + ":" + i} className="flex flex-col items-center">
-              <span className="mb-3 font-sans text-[10px] uppercase tracking-[0.3em] text-ash">
+              <span className="mb-3 font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
                 {positions[i]}
               </span>
               <TarotCard
@@ -240,13 +230,12 @@ export function SpreadExperience() {
           ))}
         </div>
 
-        {/* Reading */}
         <div className="mt-12">
           {reading.kind === "loading" && (
-            <div className="animate-pulse space-y-3 text-parchment/40">
-              <div className="h-3 w-28 bg-moss/30" />
-              <div className="h-4 w-full bg-moss/20" />
-              <div className="h-4 w-10/12 bg-moss/20" />
+            <div className="animate-pulse space-y-3 text-bark/40">
+              <div className="h-3 w-28 bg-bark/20" />
+              <div className="h-4 w-full bg-bark/15" />
+              <div className="h-4 w-10/12 bg-bark/15" />
             </div>
           )}
           {reading.kind === "paywall" && (
@@ -261,7 +250,7 @@ export function SpreadExperience() {
             />
           )}
           {reading.kind === "error" && (
-            <p className="font-sans text-xs uppercase tracking-[0.25em] text-ochre">
+            <p className="font-sans text-xs uppercase tracking-[0.25em] text-clay">
               The oracle could not respond · {reading.message}
             </p>
           )}
@@ -284,7 +273,7 @@ export function SpreadExperience() {
             <button
               type="button"
               onClick={drawAgain}
-              className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/20 px-6 py-3 text-parchment transition-base hover:bg-moss/40"
+              className="font-sans text-xs uppercase tracking-[0.25em] border border-bark/40 bg-linen/60 px-6 py-3 text-ink transition-base hover:border-clay hover:text-clay"
             >
               Draw another spread
             </button>

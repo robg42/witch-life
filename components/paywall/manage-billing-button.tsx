@@ -28,11 +28,11 @@ export function ManageBillingButton() {
         type="button"
         onClick={onClick}
         disabled={pending}
-        className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/20 px-6 py-3 text-parchment transition-base hover:bg-moss/40 disabled:cursor-not-allowed disabled:opacity-60"
+        className="font-sans text-xs uppercase tracking-[0.25em] border border-bark/40 bg-linen/60 px-6 py-3 text-ink transition-base hover:border-clay hover:text-clay disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Opening Stripe…" : "Manage billing"}
       </button>
-      {error && <p className="mt-3 font-sans text-sm text-ochre">{error}</p>}
+      {error && <p className="mt-3 font-sans text-sm text-clay">{error}</p>}
     </div>
   );
 }
