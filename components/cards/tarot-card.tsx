@@ -53,7 +53,7 @@ export function TarotCard({
         </div>
       </button>
       {label !== "" && (
-        <span className="mt-4 font-sans text-[11px] uppercase tracking-[0.25em] text-ash">
+        <span className="mt-4 font-sans text-[11px] uppercase tracking-[0.25em] text-bark/70">
           {label ?? (flipped ? "drawn" : "tap to draw")}
         </span>
       )}
@@ -64,7 +64,7 @@ export function TarotCard({
 function Back() {
   return (
     <div
-      className="absolute inset-0 flex items-center justify-center border border-bark bg-bark text-bone shadow-md"
+      className="absolute inset-0 flex items-center justify-center border border-bark/30 bg-bark text-bone shadow-md"
       style={{ backfaceVisibility: "hidden" }}
     >
       <svg
@@ -94,7 +94,7 @@ function Back() {
 function Front({ card }: { card: Card }) {
   return (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-between gap-2 border border-bark bg-parchment p-5 text-wax shadow-md"
+      className="absolute inset-0 flex flex-col items-center justify-between gap-2 border border-bark/30 bg-parchment p-5 text-ink shadow-md"
       style={{
         backfaceVisibility: "hidden",
         transform: "rotateY(180deg)",
@@ -107,7 +107,7 @@ function Front({ card }: { card: Card }) {
         <CardArt card={card} />
       </div>
       <div className="flex flex-col items-center text-center">
-        <span className="accent text-2xl text-wax">{card.name}</span>
+        <span className="accent text-2xl text-ink">{card.name}</span>
         <p className="mt-1 font-serif text-xs italic leading-snug text-bark/80">
           {card.description}
         </p>

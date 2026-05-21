@@ -13,12 +13,12 @@ export default function GlobalError({
         <p className="font-sans text-xs uppercase tracking-[0.3em] text-clay">
           The oracle has stumbled
         </p>
-        <p className="oracle-body mt-4 text-wax/90">
+        <p className="oracle-body mt-4 text-ink/90">
           Something didn&rsquo;t come through cleanly. Try again in a moment —
           if it keeps happening, the sky may need to settle.
         </p>
         {error.digest && (
-          <p className="mt-4 font-sans text-[10px] uppercase tracking-[0.2em] text-ash/80">
+          <p className="mt-4 font-sans text-[10px] uppercase tracking-[0.2em] text-bark/60">
             ref · {error.digest}
           </p>
         )}

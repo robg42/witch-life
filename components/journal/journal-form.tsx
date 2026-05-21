@@ -48,7 +48,7 @@ export function JournalForm() {
   };
 
   const inputCls =
-    "w-full resize-y border-b border-bark bg-transparent px-1 py-2 font-serif text-lg leading-relaxed text-wax outline-none placeholder:text-ash/60 focus:border-clay";
+    "w-full resize-y border-b border-bark/30 bg-transparent px-1 py-2 font-serif text-lg leading-relaxed text-ink outline-none placeholder:text-bark/40 focus:border-clay";
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-8">
@@ -112,11 +112,11 @@ function Field({
 }) {
   return (
     <div className="flex flex-col">
-      <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+      <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
         {label}
       </span>
       {hint && (
-        <p className="mt-1 font-serif text-sm italic text-ash">{hint}</p>
+        <p className="mt-1 font-serif text-sm italic text-bark/70">{hint}</p>
       )}
       <div className="mt-3">{children}</div>
     </div>

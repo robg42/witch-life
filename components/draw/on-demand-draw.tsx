@@ -58,7 +58,7 @@ export function OnDemandDraw() {
   if (!birth || !pendingCard || !sky || !natal) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+        <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
           Shuffling…
         </span>
       </main>
@@ -66,16 +66,16 @@ export function OnDemandDraw() {
   }
 
   return (
-    <main className="min-h-screen text-wax">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-2xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
             href="/"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-clay"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
             ← Witch Life
           </Link>
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Voice: <span className="text-clay">{VOICE_LABEL[birth.voice]}</span>
           </span>
         </header>
@@ -83,10 +83,10 @@ export function OnDemandDraw() {
         <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
           A single draw
         </p>
-        <h1 className="display mt-3 text-3xl text-wax md:text-5xl">
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           A card, just for you
         </h1>
-        <p className="oracle-body mt-4 text-wax/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Different from the daily symbol. Pulled fresh against your chart
           and the sky as it is right now.
         </p>
@@ -112,7 +112,7 @@ export function OnDemandDraw() {
             <button
               type="button"
               onClick={drawAnother}
-              className="mt-10 font-sans text-xs uppercase tracking-[0.25em] border border-bark bg-smoke/60 px-6 py-3 text-wax transition-base hover:border-clay hover:text-clay"
+              className="mt-10 font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-linen/60 px-6 py-3 text-ink transition-base hover:border-clay hover:text-clay"
             >
               Draw another
             </button>

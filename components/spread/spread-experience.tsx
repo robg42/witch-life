@@ -128,7 +128,7 @@ export function SpreadExperience() {
   if (!state) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+        <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
           Shuffling…
         </span>
       </main>
@@ -139,16 +139,16 @@ export function SpreadExperience() {
     "font-sans text-xs uppercase tracking-[0.25em] border px-4 py-2 transition-base";
 
   return (
-    <main className="min-h-screen text-wax">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-3xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
             href="/"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-clay"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
             ← Witch Life
           </Link>
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Voice: <span className="text-clay">{VOICE_LABEL[state.birth.voice]}</span>
           </span>
         </header>
@@ -156,10 +156,10 @@ export function SpreadExperience() {
         <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
           A spread
         </p>
-        <h1 className="display mt-3 text-3xl text-wax md:text-5xl">
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           A three-card spread
         </h1>
-        <p className="oracle-body mt-4 text-wax/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Pick the shape. Ask a question if you have one. Turn each card.
           The oracle reads the three together.
         </p>
@@ -167,7 +167,7 @@ export function SpreadExperience() {
         <BotanicalDivider className="my-10" />
 
         <div className="flex flex-wrap items-center gap-4">
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Shape
           </span>
           {(["sao", "ppf"] as const).map((key) => (
@@ -180,8 +180,8 @@ export function SpreadExperience() {
               }}
               className={`${tabBase} ${
                 layout === key
-                  ? "border-clay bg-clay/10 text-wax"
-                  : "border-bark/80 text-ash hover:border-clay hover:text-wax"
+                  ? "border-clay bg-clay/10 text-ink"
+                  : "border-bark/30 text-bark/70 hover:border-clay hover:text-ink"
               }`}
             >
               {LAYOUT_LABELS[key].join(" / ")}
@@ -195,7 +195,7 @@ export function SpreadExperience() {
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Optional question"
-            className="flex-1 border-b border-bark bg-transparent px-1 py-2 font-serif text-lg text-wax outline-none placeholder:text-ash/60 focus:border-clay"
+            className="flex-1 border-b border-bark/30 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/40 focus:border-clay"
           />
           <button
             type="button"
@@ -203,7 +203,7 @@ export function SpreadExperience() {
               setAppliedQuestion(question || undefined);
               drawAgain();
             }}
-            className="font-sans text-xs uppercase tracking-[0.25em] border border-bark bg-smoke/60 px-4 py-2 text-wax transition-base hover:border-clay hover:text-clay"
+            className="font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-linen/60 px-4 py-2 text-ink transition-base hover:border-clay hover:text-clay"
           >
             Set
           </button>
@@ -232,7 +232,7 @@ export function SpreadExperience() {
 
         <div className="mt-12">
           {reading.kind === "loading" && (
-            <div className="animate-pulse space-y-3 text-ash/60">
+            <div className="animate-pulse space-y-3 text-bark/40">
               <div className="h-3 w-28 bg-bark/20" />
               <div className="h-4 w-full bg-bark/15" />
               <div className="h-4 w-10/12 bg-bark/15" />
@@ -273,7 +273,7 @@ export function SpreadExperience() {
             <button
               type="button"
               onClick={drawAgain}
-              className="font-sans text-xs uppercase tracking-[0.25em] border border-bark bg-smoke/60 px-6 py-3 text-wax transition-base hover:border-clay hover:text-clay"
+              className="font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-linen/60 px-6 py-3 text-ink transition-base hover:border-clay hover:text-clay"
             >
               Draw another spread
             </button>

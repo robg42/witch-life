@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 import {
   Cinzel,
   Cormorant_Garamond,
@@ -51,9 +50,8 @@ export const metadata: Metadata = {
 };
 
 /*
-  Clerk appearance — dark theme with the Witch Life palette. Targets
-  every visible element so labels, headers, dividers, and buttons all
-  read clearly against the aged-ink surface.
+  Clerk appearance — Witch Life cream herbarium theme. Light surface,
+  warm-dark ink text, clay terracotta primary, moss accents.
 */
 export default function RootLayout({
   children,
@@ -67,29 +65,27 @@ export default function RootLayout({
       >
         <ClerkProvider
           appearance={{
-            baseTheme: dark,
             variables: {
-              colorPrimary: "#A88543",
-              colorBackground: "#14110D",
-              colorInputBackground: "#1E211B",
-              colorInputText: "#E8DAB5",
-              colorText: "#E8DAB5",
-              colorTextSecondary: "#D8CCAB",
-              colorNeutral: "#E8DAB5",
+              colorPrimary: "#2E4326",
+              colorBackground: "#F4E9CC",
+              colorInputBackground: "#FFFAEC",
+              colorInputText: "#1F1810",
+              colorText: "#1F1810",
+              colorTextSecondary: "#4A3F30",
+              colorNeutral: "#1F1810",
               fontFamily: "var(--font-inter)",
               borderRadius: "2px",
             },
             elements: {
               rootBox: { backgroundColor: "transparent" },
               card: {
-                backgroundColor: "rgba(30, 33, 27, 0.7)",
-                border: "1px solid rgba(58, 51, 40, 0.7)",
+                backgroundColor: "rgba(244, 233, 204, 0.85)",
+                border: "1px solid rgba(74, 63, 48, 0.35)",
                 boxShadow:
-                  "0 0 80px rgba(168, 133, 67, 0.08), 0 1px 4px rgba(0, 0, 0, 0.5)",
-                backdropFilter: "blur(4px)",
+                  "0 0 60px rgba(184, 92, 58, 0.12), 0 1px 4px rgba(31, 24, 16, 0.08)",
               },
               headerTitle: {
-                color: "#E8DAB5",
+                color: "#1F1810",
                 fontFamily: "var(--font-cinzel), serif",
                 letterSpacing: "0.1em",
                 fontSize: "1.25rem",
@@ -97,26 +93,21 @@ export default function RootLayout({
                 fontWeight: 500,
               },
               headerSubtitle: {
-                color: "rgba(216, 204, 171, 0.65)",
+                color: "rgba(31, 24, 16, 0.65)",
                 fontFamily: "var(--font-cormorant), serif",
                 fontStyle: "italic",
                 fontSize: "1rem",
               },
               formFieldLabel: {
-                color: "rgba(232, 218, 181, 0.8)",
+                color: "#1F1810",
                 fontSize: "0.7rem",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 fontFamily: "var(--font-inter)",
               },
-              formFieldInput: {
-                backgroundColor: "rgba(30, 33, 27, 0.8)",
-                borderColor: "rgba(58, 51, 40, 0.8)",
-                color: "#E8DAB5",
-              },
               formButtonPrimary: {
-                backgroundColor: "#A88543",
-                color: "#14110D",
+                backgroundColor: "#B85C3A",
+                color: "#F4E9CC",
                 fontFamily: "var(--font-inter)",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
@@ -124,23 +115,23 @@ export default function RootLayout({
                 fontWeight: 500,
                 border: "none",
               },
-              dividerLine: { backgroundColor: "rgba(58, 51, 40, 0.7)" },
+              dividerLine: { backgroundColor: "rgba(74, 63, 48, 0.35)" },
               dividerText: {
-                color: "rgba(216, 204, 171, 0.5)",
+                color: "rgba(31, 24, 16, 0.5)",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 fontSize: "0.65rem",
               },
-              footerActionText: { color: "rgba(216, 204, 171, 0.6)" },
-              footerActionLink: { color: "#A88543", fontWeight: 500 },
+              footerActionText: { color: "rgba(31, 24, 16, 0.6)" },
+              footerActionLink: { color: "#B85C3A", fontWeight: 500 },
               socialButtonsBlockButton: {
-                border: "1px solid rgba(58, 51, 40, 0.8)",
-                backgroundColor: "rgba(30, 33, 27, 0.4)",
-                color: "#E8DAB5",
+                border: "1px solid rgba(74, 63, 48, 0.35)",
+                backgroundColor: "rgba(255, 250, 236, 0.5)",
+                color: "#1F1810",
               },
               identityPreview: {
-                backgroundColor: "rgba(30, 33, 27, 0.6)",
-                border: "1px solid rgba(58, 51, 40, 0.7)",
+                backgroundColor: "rgba(255, 250, 236, 0.5)",
+                border: "1px solid rgba(74, 63, 48, 0.35)",
               },
             },
           }}

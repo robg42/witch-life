@@ -1,17 +1,13 @@
 import type { Config } from "tailwindcss";
 
 /*
-  Tailwind config maps directly to the CSS custom properties in globals.css.
-  All theme values are derived from the tokens — changing a token reskins
-  the entire app.
+  Tailwind config maps directly to the CSS custom properties in
+  globals.css. All theme values are derived from the tokens — changing
+  a token reskins the entire app.
 
-  Witch Life palette: aged ink (ink), forest floor (forest), smoke
-  (smoke), warm cream (wax/bone), tarnished gold (gold), ember rust
-  (ember), deep moss (moss), warm smoke-grey (ash).
-
-  Legacy alias colours (earth, parchment, ochre, clay, linen) are kept
-  so existing utility classes resolve to the right new token without
-  rewriting every page.
+  Witch Life palette: cream herbarium surfaces (bone, parchment, linen),
+  warm dark inks (ink, bark, ash), and earthy accents
+  (clay/ember/ochre/saffron, moss/sage, aubergine).
 */
 const config: Config = {
   content: [
@@ -23,26 +19,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Witch Life surface tokens
-        ink: "var(--color-ink)",
-        forest: "var(--color-forest)",
-        smoke: "var(--color-smoke)",
-        wax: "var(--color-wax)",
+        // Surfaces
         bone: "var(--color-bone)",
-        gold: "var(--color-gold)",
+        parchment: "var(--color-parchment)",
+        linen: "var(--color-linen)",
+        // Ink
+        ink: "var(--color-ink)",
+        bark: "var(--color-bark)",
+        ash: "var(--color-ash)",
+        // Accents
+        clay: "var(--color-clay)",
         ember: "var(--color-ember)",
+        ochre: "var(--color-ochre)",
+        saffron: "var(--color-saffron)",
         moss: "var(--color-moss)",
         sage: "var(--color-sage)",
-        ash: "var(--color-ash)",
-        bark: "var(--color-bark)",
-        // Legacy aliases — resolve to the new palette so older utility
-        // classes keep working.
+        aubergine: "var(--color-aubergine)",
+        // Legacy aliases — resolve to current palette so older utility
+        // classes still work.
         earth: "var(--color-earth)",
-        parchment: "var(--color-parchment)",
-        ochre: "var(--color-ochre)",
-        clay: "var(--color-clay)",
-        linen: "var(--color-linen)",
-        saffron: "var(--color-saffron)",
+        wax: "var(--color-wax)",
+        gold: "var(--color-gold)",
+        smoke: "var(--color-smoke)",
+        forest: "var(--color-forest)",
       },
       fontFamily: {
         display: ["var(--font-display)"],

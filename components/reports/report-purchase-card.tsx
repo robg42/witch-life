@@ -44,9 +44,9 @@ export function ReportPurchaseCard({
   };
 
   return (
-    <div className="rounded-sm border border-bark/70 bg-smoke/40 px-5 py-5">
-      <h3 className="accent text-xl text-wax">{title}</h3>
-      <p className="oracle-body mt-2 text-wax/85">{blurb}</p>
+    <div className="rounded-sm border border-bark/25 bg-linen/40 px-5 py-5">
+      <h3 className="accent text-xl text-ink">{title}</h3>
+      <p className="oracle-body mt-2 text-ink/85">{blurb}</p>
       <div className="mt-5 flex items-center justify-between">
         <span className="font-serif text-base text-clay">£{priceGBP}</span>
         {available ? (
@@ -59,13 +59,13 @@ export function ReportPurchaseCard({
             {pending ? "Opening Stripe…" : "Purchase"}
           </button>
         ) : (
-          <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-ash/80">
+          <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
             Not currently relevant
           </span>
         )}
       </div>
       {!available && unavailableReason && (
-        <p className="mt-2 font-serif text-sm italic text-ash">
+        <p className="mt-2 font-serif text-sm italic text-bark/70">
           {unavailableReason}
         </p>
       )}

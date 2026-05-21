@@ -11,7 +11,7 @@ const QUALITY_TONE: Record<
 > = {
   expand: { border: "border-moss", text: "text-moss", bg: "bg-moss/10" },
   flow: { border: "border-saffron", text: "text-saffron", bg: "bg-saffron/10" },
-  inward: { border: "border-bark", text: "text-bark/80", bg: "bg-bark/5" },
+  inward: { border: "border-bark/30", text: "text-bark/80", bg: "bg-bark/5" },
   contract: { border: "border-clay/60", text: "text-clay", bg: "bg-clay/10" },
   friction: { border: "border-clay", text: "text-clay", bg: "bg-clay/15" },
 };
@@ -36,7 +36,7 @@ export function WeeklyArc({
                 isToday ? "ring-1 ring-clay" : ""
               }`}
             >
-              <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-ash">
+              <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-bark/70">
                 {formatDate(day.date)}
               </span>
               <span
@@ -44,10 +44,10 @@ export function WeeklyArc({
               >
                 {day.energyQuality}
               </span>
-              <span className="font-serif text-base text-wax">
+              <span className="font-serif text-base text-ink">
                 {day.descriptor}
               </span>
-              <span className="text-xs text-ash">
+              <span className="text-xs text-bark/70">
                 {phaseSymbol(day.moonPhase)} {SIGN_GLYPH[day.moonSign as keyof typeof SIGN_GLYPH] ?? ""}
               </span>
             </div>
@@ -55,7 +55,7 @@ export function WeeklyArc({
         })}
       </div>
       {weekly.narrativeArc && (
-        <p className="mt-6 oracle-body text-wax/90">
+        <p className="mt-6 oracle-body text-ink/90">
           {weekly.narrativeArc}
         </p>
       )}

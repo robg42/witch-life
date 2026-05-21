@@ -13,7 +13,7 @@ import {
 */
 export function NatalStrip({ natal }: { natal: NatalChart }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-b border-bark/60 py-4">
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-b border-bark/20 py-4">
       {PLANET_ORDER.map((p) => {
         const sign = natal[p];
         return (
@@ -60,10 +60,10 @@ function Cell({
       >
         {glyph}
       </span>
-      <span className="font-sans text-xs uppercase tracking-[0.15em] text-ash">
+      <span className="font-sans text-xs uppercase tracking-[0.15em] text-bark/70">
         {name}
       </span>
-      <span className="font-serif text-base text-wax">
+      <span className="font-serif text-base text-ink">
         {signGlyph} {signName}
       </span>
     </div>

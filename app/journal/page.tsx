@@ -52,12 +52,12 @@ export default async function JournalPage() {
   }
 
   return (
-    <main className="min-h-screen text-wax">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-2xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
             href="/"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-clay"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
             ← Witch Life
           </Link>
@@ -66,10 +66,10 @@ export default async function JournalPage() {
         <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
           What is moving through you
         </p>
-        <h1 className="display mt-3 text-3xl text-wax md:text-5xl">
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           The journal
         </h1>
-        <p className="oracle-body mt-4 text-wax/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Set down what is moving through you. The oracle reads these — not
           your exact words, only the themes.
         </p>
@@ -80,7 +80,7 @@ export default async function JournalPage() {
 
         <BotanicalDivider className="my-16" />
 
-        <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+        <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
           Previously
         </h2>
 

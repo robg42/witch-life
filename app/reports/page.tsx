@@ -66,11 +66,11 @@ export default async function ReportsPage() {
   ];
 
   return (
-    <main className="min-h-screen text-wax">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-3xl px-6 py-12 md:px-10 md:py-16">
         <Link
           href="/"
-          className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-clay"
+          className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
         >
           ← Witch Life
         </Link>
@@ -78,10 +78,10 @@ export default async function ReportsPage() {
         <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mt-10">
           Long-form readings
         </p>
-        <h1 className="display mt-3 text-3xl text-wax md:text-5xl">
+        <h1 className="display mt-3 text-3xl text-ink md:text-5xl">
           In-depth reports
         </h1>
-        <p className="oracle-body mt-4 text-wax/85">
+        <p className="oracle-body mt-4 text-ink/85">
           Long-form readings, written once and yours to keep. Each is
           generated specifically for your chart in your chosen voice.
         </p>
@@ -98,7 +98,7 @@ export default async function ReportsPage() {
         <BotanicalDivider className="my-12" />
 
         <section>
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
             Available reports
           </h2>
           <div className="grid gap-6 sm:grid-cols-2">
@@ -131,11 +131,11 @@ export default async function ReportsPage() {
         <BotanicalDivider className="my-16" />
 
         <section>
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
             Yours
           </h2>
           {purchases.length === 0 ? (
-            <p className="font-serif text-base italic text-ash">
+            <p className="font-serif text-base italic text-bark/70">
               No reports yet.
             </p>
           ) : (
@@ -146,16 +146,16 @@ export default async function ReportsPage() {
                 return (
                   <li
                     key={row.id}
-                    className="rounded-sm border border-bark/70 bg-smoke/40 px-5 py-4"
+                    className="rounded-sm border border-bark/25 bg-linen/40 px-5 py-4"
                   >
                     <Link
                       href={`/reports/${row.id}`}
-                      className="flex items-baseline justify-between text-wax transition-base hover:text-clay"
+                      className="flex items-baseline justify-between text-ink transition-base hover:text-clay"
                     >
                       <span className="font-serif text-lg">
                         {meta?.title ?? row.report_type}
                       </span>
-                      <span className="font-sans text-xs uppercase tracking-[0.2em] text-ash/80">
+                      <span className="font-sans text-xs uppercase tracking-[0.2em] text-bark/60">
                         {new Date(row.created_at).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",

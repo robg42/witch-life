@@ -128,21 +128,21 @@ function ReadingPage({
   }, [sky, natal, birth.voice, question, todayISO]);
 
   return (
-    <main className="min-h-screen text-wax">
+    <main className="min-h-screen text-ink">
       <div className="mx-auto max-w-3xl px-6 py-12 md:px-10 md:py-16">
         <header className="flex items-baseline justify-between">
           <Link
             href="/"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-ash transition-base hover:text-clay"
+            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
           >
             ← Witch Life
           </Link>
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Voice: <span className="text-clay">{VOICE_LABEL[birth.voice]}</span>{" "}
             ·{" "}
             <Link
               href="/onboarding"
-              className="underline-offset-4 hover:text-wax hover:underline"
+              className="underline-offset-4 hover:text-ink hover:underline"
             >
               edit chart
             </Link>
@@ -159,7 +159,7 @@ function ReadingPage({
 
         <section className="mt-12 flex flex-col items-center">
           <TarotCard card={card} onFlip={(c) => setRevealedCard(c)} />
-          <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-ash">
+          <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Today&rsquo;s symbol — drawn for everyone
           </p>
           <CardInterpretation
@@ -188,11 +188,11 @@ function ReadingPage({
         )}
 
         {/* Question form */}
-        <section className="mt-16 border-t border-bark/70 pt-10">
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+        <section className="mt-16 border-t border-bark/25 pt-10">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
             Ask the oracle
           </h2>
-          <p className="oracle-body mt-2 text-wax/85">
+          <p className="oracle-body mt-2 text-ink/85">
             One question. The oracle answers it through the day&rsquo;s sky.
           </p>
           <div className="mt-4 flex gap-4">
@@ -201,12 +201,12 @@ function ReadingPage({
               value={questionValue}
               onChange={(e) => onQuestionChange(e.target.value)}
               placeholder="What should I be paying attention to?"
-              className="flex-1 border-b border-bark bg-transparent px-1 py-2 font-serif text-lg text-wax outline-none placeholder:text-ash/70 focus:border-clay"
+              className="flex-1 border-b border-bark/30 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/50 focus:border-clay"
             />
             <button
               onClick={onAskQuestion}
               disabled={!questionValue.trim()}
-              className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/15 px-6 py-3 text-wax transition-base hover:bg-moss/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/15 px-6 py-3 text-ink transition-base hover:bg-moss/25 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Ask
             </button>
@@ -216,7 +216,7 @@ function ReadingPage({
         <BotanicalDivider className="my-16 mx-auto" />
 
         <section>
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-ash mb-6">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
             The week ahead
           </h2>
           {weekly.status === "loading" && <WeeklySkeleton />}
@@ -240,7 +240,7 @@ function ReadingPage({
           <FooterLink href="/reports" label="Deeper reports" />
         </section>
 
-        <footer className="mt-24 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-ash/80">
+        <footer className="mt-24 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
           {transitFooter(sky, natal)}
         </footer>
       </div>
@@ -295,7 +295,7 @@ function ReadingBody({
 
 function ReadingSkeleton() {
   return (
-    <div className="animate-pulse space-y-6 text-ash/60">
+    <div className="animate-pulse space-y-6 text-bark/40">
       <div className="h-3 w-32 bg-bark/20" />
       <div className="space-y-2">
         <div className="h-4 w-full bg-bark/15" />
@@ -310,7 +310,7 @@ function WeeklySkeleton() {
   return (
     <div className="grid animate-pulse grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
       {Array.from({ length: 7 }).map((_, i) => (
-        <div key={i} className="h-28 border border-bark/60 bg-bark/5" />
+        <div key={i} className="h-28 border border-bark/20 bg-bark/5" />
       ))}
     </div>
   );
@@ -322,7 +322,7 @@ function ErrorBlock({ label, detail }: { label: string; detail: string }) {
       <p className="font-sans text-xs uppercase tracking-[0.25em] text-clay">
         {label}
       </p>
-      <p className="mt-2 font-serif text-base text-wax/85">{detail}</p>
+      <p className="mt-2 font-serif text-base text-ink/85">{detail}</p>
     </div>
   );
 }
@@ -331,7 +331,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="rounded-sm border border-bark/70 bg-smoke/40 px-4 py-3 text-center font-sans text-xs uppercase tracking-[0.25em] text-wax transition-base hover:border-clay hover:bg-linen/70 hover:text-clay"
+      className="rounded-sm border border-bark/25 bg-linen/40 px-4 py-3 text-center font-sans text-xs uppercase tracking-[0.25em] text-ink transition-base hover:border-clay hover:bg-linen/70 hover:text-clay"
     >
       {label}
     </Link>
@@ -341,7 +341,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
 function BootingState() {
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <span className="font-sans text-xs uppercase tracking-[0.25em] text-ash">
+      <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
         Casting…
       </span>
     </main>

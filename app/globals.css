@@ -5,31 +5,41 @@
 /*
   Witch Life — design tokens.
 
-  Direction: aged ink, forest floor, smoke, old wax, tarnished gold. Not
-  bright, not cosy, not generic mystical. Deep considered tones — the
-  inside of a fine letterpress book about plant medicine and the dead.
+  Direction: earthy, alive, organic. Aged parchment. Pressed botanicals.
+  Stained glass at the back of a chapel. Warm clay, deep moss, oxidised
+  brass — the colours of a folk almanac with the spine cracked open.
+  Not dark mode. Not spacey. Cream as the floor, colour as the life.
+
   Tokens are the source of truth. Do not hardcode hex outside this file.
 */
 
 :root {
-  /* Colour palette */
-  --color-ink: #14110D;          /* aged ink — primary background, near-black with warm brown undertone */
-  --color-forest: #1E211B;       /* forest floor — elevated surface, dark mossy green-brown */
-  --color-smoke: #2A2722;        /* smoke — secondary elevated surface, warm dark grey */
-  --color-wax: #E8DAB5;          /* old wax — primary text on dark, warm aged cream */
-  --color-bone: #D8CCAB;         /* bone — secondary cream, slightly dustier than wax */
-  --color-gold: #A88543;         /* tarnished gold — primary accent, oxidized brass */
-  --color-ember: #B5572E;        /* ember — warm fire accent, deep rust, used sparingly */
-  --color-moss: #4A5A3A;         /* deep moss — botanical accent for illustrations */
-  --color-sage: #7E9277;         /* dusted sage — secondary green, used rarely */
-  --color-ash: #7C746A;          /* warm smoke — muted text on dark */
-  --color-bark: #3A3328;         /* dark warm bark — hairline borders, dividers */
-  --color-parchment: #F0E4C8;    /* legacy alias = wax-with-more-light, used as text-parchment */
-  --color-earth: #14110D;        /* legacy alias for ink, kept so existing utilities map cleanly */
-  --color-linen: #2A2722;        /* legacy alias for smoke (used for elevated cards) */
-  --color-clay: #B5572E;         /* legacy alias for ember */
-  --color-ochre: #A88543;        /* legacy alias for tarnished gold */
-  --color-saffron: #C99C39;      /* spice yellow — only on illustrations */
+  /* Cream surfaces — primary "paper" */
+  --color-bone: #E8D8B4;         /* primary surface — warm aged cream */
+  --color-parchment: #F4E9CC;    /* elevated cream — brighter, used for cards */
+  --color-linen: #DCC9A3;        /* deeper cream — recessed surface, slightly olive */
+
+  /* Inks — dark warm browns for text and lines */
+  --color-ink: #1F1810;          /* primary body text — deep coffee brown */
+  --color-bark: #4A3F30;         /* secondary text + hairline borders */
+  --color-ash: #6B6353;          /* muted text — warm grey-brown */
+
+  /* Accents — earthy, alive */
+  --color-clay: #B85C3A;         /* primary accent — terracotta */
+  --color-ember: #C24D2A;        /* deeper rust — used for highlights, fire */
+  --color-ochre: #C68A2A;        /* warm gold — secondary accent */
+  --color-saffron: #D4A12B;      /* spice yellow — illustration accent */
+  --color-moss: #2E4326;         /* deep moss green — botanical primary */
+  --color-sage: #6F8862;         /* dusted sage — botanical secondary */
+  --color-aubergine: #4A2C3A;    /* deep berry — rarely used, for emphasis */
+
+  /* Legacy aliases — resolve to current palette so old utility names work */
+  --color-earth: #1F1810;        /* legacy alias for ink */
+  --color-wax: #E8D8B4;          /* legacy alias for bone */
+  --color-gold: #C68A2A;         /* legacy alias for ochre */
+  --color-smoke: #DCC9A3;        /* legacy alias for linen */
+  --color-forest: #2E4326;       /* legacy alias for moss */
+  --color-ink-legacy: #1F1810;   /* kept for safety */
 
   /* Typography */
   --font-display: var(--font-cinzel), serif;
@@ -48,7 +58,7 @@
   --text-4xl: 2.25rem;
   --text-5xl: 3rem;
 
-  /* Spacing scale — 4px base */
+  /* Spacing scale */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -64,7 +74,7 @@
   --radius-md: 4px;
   --radius-lg: 8px;
 
-  /* Borders — fine lines, nothing chunky */
+  /* Borders */
   --border-hair: 0.5px solid var(--color-bark);
   --border-default: 1px solid var(--color-bark);
 
@@ -74,30 +84,41 @@
 
 html,
 body {
-  color: var(--color-wax);
+  color: var(--color-ink);
   font-family: var(--font-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /*
-  Body surface: deep aged ink with the faintest forest-floor wash near the
-  bottom. No drifting glow, no candle bloom, no breath animation — the
-  brief said "let the content carry the mysticism". The surface is quiet.
+  Bone surface with multi-tone gradient washes — warm clay glow at top
+  left, mossy shadow lower right, saffron warmth at the foot. Reads
+  like a page that's been handled, sun-faded in places, slightly
+  stained. The page itself is the thing.
 */
 body {
   min-height: 100vh;
-  background-color: var(--color-ink);
+  background-color: var(--color-bone);
   background-image:
     radial-gradient(
-      ellipse 80% 60% at 50% 110%,
-      rgba(30, 33, 27, 0.5) 0%,
-      transparent 70%
+      ellipse 70% 50% at 15% 10%,
+      rgba(184, 92, 58, 0.13) 0%,
+      transparent 60%
     ),
     radial-gradient(
-      ellipse 70% 50% at 50% -10%,
-      rgba(58, 51, 40, 0.35) 0%,
-      transparent 75%
+      ellipse 50% 45% at 85% 30%,
+      rgba(46, 67, 38, 0.1) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 85% 50% at 50% 100%,
+      rgba(212, 161, 43, 0.12) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(232, 216, 180, 0) 0%,
+      rgba(220, 201, 163, 0.4) 100%
     );
   background-attachment: fixed;
   background-size: cover;
@@ -105,8 +126,39 @@ body {
 }
 
 /*
-  A barely-there paper-fibre noise. Just enough to stop the dark from
-  reading as flat paint.
+  Drifting warm spot — like sun moving across a page through a window.
+  Animates slowly so it reads at the edge of perception.
+*/
+@keyframes wl-drift {
+  0%,
+  100% {
+    transform: translate(0%, 0%);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(20%, 8%);
+    opacity: 0.85;
+  }
+}
+
+body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: -10%;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 35% 28% at 30% 25%,
+    rgba(198, 138, 42, 0.18) 0%,
+    transparent 65%
+  );
+  animation: wl-drift 32s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+
+/*
+  Organic paper-fibre noise. Subtle on its own, but multiplied across
+  the whole surface it gives the bone a real material feel.
 */
 body::before {
   content: "";
@@ -114,10 +166,10 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.07;
-  mix-blend-mode: screen;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.91 0 0 0 0 0.85 0 0 0 0 0.71 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 220px 220px;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.29 0 0 0 0 0.25 0 0 0 0 0.19 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
 }
 
 body > * {
@@ -140,13 +192,13 @@ body > * {
   text-transform: uppercase;
 }
 
-/* Archaic accents — pull quotes, card names. */
+/* Archaic accents — pull quotes, card names, hand-set captions. */
 .accent {
   font-family: var(--font-accent);
   font-style: italic;
 }
 
-/* UI chrome — Inter. */
+/* UI chrome — Inter for buttons, labels, navigation. */
 .ui {
   font-family: var(--font-sans);
 }
@@ -155,16 +207,33 @@ body > * {
   .text-balance {
     text-wrap: balance;
   }
-
   .hairline {
     border: var(--border-hair);
   }
 }
 
 /*
-  Slow editorial fade-up. Used for staggered hero copy on key pages —
-  text emerges the way wax cools.
+  Halo for elements that should feel lit from within — warm clay glow,
+  not generic glow.
 */
+.glow-warm {
+  position: relative;
+}
+.glow-warm::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  z-index: -1;
+  background: radial-gradient(
+    circle at center,
+    rgba(198, 138, 42, 0.22) 0%,
+    rgba(184, 92, 58, 0.07) 40%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+/* Editorial fade-up — slow, the page coming into focus. */
 @keyframes wl-fade-up {
   from {
     opacity: 0;
@@ -181,10 +250,7 @@ body > * {
   animation: wl-fade-up 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
 
-/*
-  Section divider hairline on dark surfaces.
-*/
 .section-rule {
   position: relative;
-  border-top: 1px solid var(--color-bark);
+  border-top: 1px solid rgba(74, 63, 48, 0.35);
 }
