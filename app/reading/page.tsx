@@ -1,7 +1,9 @@
-import { ReadingExperience } from "@/components/reading/reading-experience";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default function ReadingPage() {
-  return <ReadingExperience />;
+/*
+  /reading used to be the daily reading page; the leaf model has moved
+  today's reading onto / itself. Redirect any old bookmarks home.
+*/
+export default function ReadingRedirect() {
+  redirect("/");
 }
