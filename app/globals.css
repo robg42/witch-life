@@ -14,18 +14,25 @@
 */
 
 :root {
-  /* ─── Colour ──────────────────────────────────────────────────── */
-  --c-paper: #f0cdb4;         /* faded vintage coral — the ground */
-  --c-paper-2: #e3bb9e;       /* slightly deeper coral for inset surfaces */
-  --c-paper-3: #f8dac1;       /* highlighted coral for cards / inputs */
-  --c-ink: #14110a;           /* deep ink — primary text */
-  --c-rule: #2a1f12;          /* hard hairline colour */
-  --c-vermilion: #b83a2e;     /* single bright accent — the printer's red */
-  --c-rust: #8b3a1e;          /* deeper red, for inset/hover */
-  --c-bone: #dcc9a6;          /* sepia divisions / table tints */
-  --c-sage: #6b7c5f;          /* pressed-leaf green, very sparing */
-  --c-ash: #6b5e50;           /* muted text / hairline labels */
-  --c-marginalia: #8a7d6b;    /* very muted, for numbered margins */
+  /* ─── Colour ───────────────────────────────────────────────────
+     Direction: a flamingo floating toward a sunset. Soft warm peach
+     paper, deep warm brown for text (not black — too harsh), a
+     rose-coral accent instead of bright red, and a sunshine gold as
+     a secondary accent so the warmth has both pink and gold notes.
+  */
+  --c-paper: #f3d4b8;          /* soft peach — sunset-coloured paper */
+  --c-paper-2: #e7bd9d;        /* deeper peach for inset surfaces */
+  --c-paper-3: #f9ddc4;        /* lighter peach for cards / inputs */
+  --c-ink: #3d201a;            /* warm dark brown — soft, readable, never harsh */
+  --c-rule: #5c342a;           /* hairline colour — deep brown */
+  --c-vermilion: #b96058;      /* rose-coral — the soft "red" accent */
+  --c-rust: #964139;           /* deeper rose for inset / hover */
+  --c-sunshine: #dda758;       /* warm gold — sunset secondary accent */
+  --c-flamingo: #de9c98;       /* pink wash for atmosphere only */
+  --c-bone: #efcaa9;            /* warm sand — divisions / table tints */
+  --c-sage: #98987a;            /* dusty olive — used sparingly */
+  --c-ash: #886a5c;             /* warm grey-brown — muted text */
+  --c-marginalia: #a98975;      /* muted warm */
 
   /* Legacy aliases — preserve existing utility classes during migration. */
   --color-ink: var(--c-ink);
@@ -34,8 +41,8 @@
   --color-linen: var(--c-paper-2);
   --color-clay: var(--c-vermilion);
   --color-ember: var(--c-rust);
-  --color-ochre: var(--c-vermilion);
-  --color-saffron: var(--c-vermilion);
+  --color-ochre: var(--c-sunshine);
+  --color-saffron: var(--c-sunshine);
   --color-bark: var(--c-rule);
   --color-ash: var(--c-ash);
   --color-moss: var(--c-sage);
@@ -43,7 +50,7 @@
   --color-aubergine: var(--c-rust);
   --color-earth: var(--c-ink);
   --color-wax: var(--c-paper);
-  --color-gold: var(--c-vermilion);
+  --color-gold: var(--c-sunshine);
   --color-smoke: var(--c-paper-2);
   --color-forest: var(--c-sage);
 
@@ -104,20 +111,30 @@ body {
   min-height: 100vh;
   background-color: var(--c-paper);
   /*
-    Aged paper texture — a uniform SVG noise multiplied onto the ivory.
-    Subtle vignette at the edges hints at a press impression rather
-    than a flat screen.
+    Sunset wash — soft golden warmth in the upper right, flamingo
+    pink in the lower left, deeper rose at the foot. Watercolour
+    feel, not letterpress. The base coral peach holds it together.
   */
   background-image:
     radial-gradient(
-      ellipse 100% 70% at 50% 0%,
-      rgba(20, 17, 10, 0) 0%,
-      rgba(20, 17, 10, 0.025) 100%
+      ellipse 65% 55% at 92% 8%,
+      rgba(232, 178, 102, 0.42) 0%,
+      transparent 65%
     ),
     radial-gradient(
-      ellipse 100% 70% at 50% 100%,
-      rgba(20, 17, 10, 0) 0%,
-      rgba(20, 17, 10, 0.04) 100%
+      ellipse 70% 60% at 0% 95%,
+      rgba(222, 156, 152, 0.45) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 110% 60% at 50% 100%,
+      rgba(150, 65, 57, 0.12) 0%,
+      transparent 75%
+    ),
+    radial-gradient(
+      ellipse 90% 50% at 50% 0%,
+      rgba(255, 230, 200, 0.3) 0%,
+      transparent 70%
     );
   background-attachment: fixed;
   position: relative;
@@ -129,10 +146,11 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.18;
+  opacity: 0.12;
   mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.17 0 0 0 0 0.12 0 0 0 0 0.06 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 240px 240px;
+  /* Noise tinted toward warm brown to match the new ink. */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.24 0 0 0 0 0.13 0 0 0 0 0.10 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 260px 260px;
 }
 
 body > * {
@@ -141,8 +159,8 @@ body > * {
 }
 
 ::selection {
-  background-color: var(--c-vermilion);
-  color: var(--c-paper);
+  background-color: var(--c-sunshine);
+  color: var(--c-ink);
 }
 
 /* ─── Type primitives ─────────────────────────────────────────────── */
