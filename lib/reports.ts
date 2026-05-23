@@ -82,10 +82,12 @@ export const REPORT_META: Record<ReportType, ReportMeta> = {
   },
 };
 
-const MODEL_FOR_REPORTS =
-  process.env.ANTHROPIC_REPORT_MODEL ??
-  process.env.ANTHROPIC_MODEL ??
-  "claude-sonnet-4-5-20250929";
+/**
+ * The Claude model used for long-form reports. Hardcoded so a stray
+ * env var can't break things. If we ever want to upgrade reports to
+ * a larger model (e.g. Opus for the natal report), change here.
+ */
+const MODEL_FOR_REPORTS = "claude-sonnet-4-5-20250929";
 
 let _client: Anthropic | null = null;
 function client(): Anthropic {

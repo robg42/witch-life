@@ -16,14 +16,18 @@ if (typeof window !== "undefined") {
   throw new Error("lib/anthropic must not be imported in client code");
 }
 
-export const ORACLE_MODEL =
-  process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5-20250929";
+/**
+ * The Claude model Witch Life uses for short-form calls (daily
+ * practice, card interpretation, three-card spread). Hardcoded so a
+ * stray env var can't break things — change here if we ever upgrade.
+ */
+export const ORACLE_MODEL = "claude-sonnet-4-5-20250929";
 
 /**
  * Validate that an env-var-derived string contains only ASCII (≤127).
  * If not, throw a diagnostic that pinpoints the offending character.
- * Used to catch stray em dashes / curly quotes pasted into Vercel env
- * vars at server-side init time, before the SDK can throw a more
+ * Used to catch stray em dashes / curly quotes pasted into Vercel
+ * env vars at server-side init time, before the SDK can throw a more
  * cryptic ByteString error.
  */
 function assertAscii(name: string, value: string): void {
@@ -50,7 +54,6 @@ function client(): Anthropic {
     );
   }
   assertAscii("ANTHROPIC_API_KEY", apiKey);
-  assertAscii("ANTHROPIC_MODEL", ORACLE_MODEL);
   _client = new Anthropic({ apiKey });
   return _client;
 }

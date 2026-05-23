@@ -19,7 +19,7 @@ Three voices the oracle speaks in: **The Root** (ancient, earthy, unhurried), **
 - **Supabase** (Postgres + Row-Level Security) — Auth disabled; Clerk handles identity via a JWT template
 - **Clerk** for auth (email/password + Google)
 - **Stripe** for subscriptions (£9/mo or £79/yr) and one-time reports (£15–25)
-- **Anthropic Claude** (Sonnet 4.5 default; Opus 4.7 optional for reports) — server-side only
+- **Anthropic Claude** (Sonnet 4.5, model pinned in `lib/anthropic.ts` and `lib/reports.ts`) — server-side only
 - **Tailwind**, custom design tokens
 - **Vitest** for tests (43+ tests including astronomical, deck, correspondences, sabbats)
 
