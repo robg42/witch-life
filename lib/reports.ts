@@ -1,18 +1,17 @@
 /*
-  Paid one-time reports. Four flavours:
-    - natal           — full natal chart interpretation (£20)
-    - year_ahead      — month-by-month forecast (£25)
-    - saturn_return   — surfaces only inside the return window (£18)
-    - eclipse_season  — surfaces only during eclipse seasons (£15)
+  Paid one-time reports — now written as PRACTICE PLANS, not interpretive
+  prose. Four flavours:
+    - natal           — every placement translated into a recurring
+                        practice for this chart (£20)
+    - year_ahead      — a practice per month for the next twelve (£25)
+    - saturn_return   — the practice for the Saturn-return season,
+                        surfaces only inside the window (£18)
+    - eclipse_season  — the eclipse-window practice, surfaces only
+                        during eclipse seasons (£15)
 
   Each report is generated once on payment, stored in the `reports` table
-  as JSONB, and re-rendered any time after that. Generation runs on the
-  Stripe webhook so the user never waits in line — by the time they're
-  redirected back from Checkout, the row is in place.
-
-  Report quality matters more than cost here, so we override the default
-  model with Opus when set — falls back to Sonnet if ANTHROPIC_REPORT_MODEL
-  is absent.
+  as JSONB, and rendered by components/reports/report-renderer.tsx.
+  Generation runs on the Stripe webhook.
 */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -42,32 +41,31 @@ export interface ReportMeta {
   blurb: string;
   /** Display price in GBP. The authoritative price lives in Stripe. */
   priceGBP: number;
-  /** A report's relevance can be conditional on chart + sky. */
   isAvailable(input: { natal: NatalChart; sky: SkyState; date: Date }): boolean;
 }
 
 export const REPORT_META: Record<ReportType, ReportMeta> = {
   natal: {
     type: "natal",
-    title: "Your natal chart, read in full",
+    title: "Your chart, as practice",
     blurb:
-      "A deep reading of every placement in your chart — luminaries, personal planets, social planets, ascendant — written in your chosen voice.",
+      "Every placement in your chart turned into a real practice you can do. Eight placements, eight rituals, one synthesis. Yours to keep and return to.",
     priceGBP: 20,
     isAvailable: () => true,
   },
   year_ahead: {
     type: "year_ahead",
-    title: "The year ahead",
+    title: "A year of practice",
     blurb:
-      "Month by month, twelve readings of the year unfolding against your chart. What's building, what's loosening, what to watch for.",
+      "Twelve months of practices, each shaped by what is moving in the sky against your chart that month. A practice per month — concrete, doable, yours.",
     priceGBP: 25,
     isAvailable: () => true,
   },
   saturn_return: {
     type: "saturn_return",
-    title: "Saturn's return",
+    title: "The Saturn-return practice",
     blurb:
-      "The Saturn return is not a crisis. It is a settlement. This report names what is being asked of you, what must be set down, and what is being built underneath.",
+      "Saturn returning to its natal sign is not a crisis but a settlement. This report names what is being asked of you and gives you a recurring weekly practice for the duration.",
     priceGBP: 18,
     isAvailable: ({ natal, date }) => {
       const window = saturnReturn(date, natal.saturn);
@@ -76,9 +74,9 @@ export const REPORT_META: Record<ReportType, ReportMeta> = {
   },
   eclipse_season: {
     type: "eclipse_season",
-    title: "The eclipse window",
+    title: "The eclipse practice",
     blurb:
-      "Eclipses do not arrive politely. This report reads the current eclipses against your chart and names where the field is being shaken.",
+      "Eclipses do not arrive politely. This report reads the current eclipses against your chart and gives you a specific practice for each one.",
     priceGBP: 15,
     isAvailable: ({ date }) => isInEclipseSeason(date),
   },
@@ -98,22 +96,36 @@ function client(): Anthropic {
   return _client;
 }
 
+// ─── Shared practice shape ─────────────────────────────────────────────
+
+export interface PracticeBlock {
+  gather: string[];
+  steps: { duration: string; action: string }[];
+  reflectionPrompt: string;
+}
+
 // ─── Report data shapes (what's stored in reports.report_json) ──────────
+
+export interface NatalPlacementPractice {
+  /** e.g. "Sun in Taurus", "Moon in Pisces", "Rising in Capricorn" */
+  placement: string;
+  /** 2-3 sentences: what this placement asks of the reader */
+  asks: string;
+  /** A recurring practice this placement specifically wants */
+  practice: PracticeBlock;
+}
 
 export interface NatalReportJson {
   title: string;
-  summary: string;
-  luminaries: string;
-  personal_planets: string;
-  social_planets: string;
-  ascendant: string | null;
-  synthesis: string;
+  overview: string; // 2-3 sentences orienting the reader
+  placements: NatalPlacementPractice[]; // 7 or 8 entries
+  synthesis: string; // 1-2 paragraph close
 }
 
 export interface YearAheadMonth {
-  month: string; // e.g. "January 2027"
-  narrative: string;
-  watchFor: string;
+  month: string; // "May 2026"
+  theme: string; // 1 sentence
+  practice: PracticeBlock;
 }
 
 export interface YearAheadReportJson {
@@ -123,26 +135,31 @@ export interface YearAheadReportJson {
   closing: string;
 }
 
+export interface SaturnAsk {
+  ask: string; // 1 sentence
+  expansion: string; // 1-2 sentences
+}
+
 export interface SaturnReturnReportJson {
   title: string;
-  whatItMeans: string;
-  whatItUndoes: string;
-  whatItBuilds: string;
-  howToMeetIt: string;
+  opening: string; // 1-2 paragraphs
+  threeAsks: SaturnAsk[]; // exactly 3
+  weeklyPractice: PracticeBlock; // a practice to repeat each week of the window
+  closing: string; // 1 paragraph
 }
 
 export interface EclipseEntry {
   date: string;
   type: "solar" | "lunar";
   sign: string;
-  whatItDisturbs: string;
+  practice: PracticeBlock;
 }
 
 export interface EclipseReportJson {
   title: string;
   opening: string;
   eclipses: EclipseEntry[];
-  howToMove: string;
+  followUp: string; // 1-2 paragraphs: how to keep tending after the window
 }
 
 export type ReportJson =
@@ -216,14 +233,25 @@ function stripFences(text: string): string {
   return inner.replace(/```\s*$/, "").trim();
 }
 
+const PRACTICE_BLOCK_SCHEMA = `{
+    "gather": ["3-5 real, findable items"],
+    "steps": [{ "duration": "2 min | 30s | etc", "action": "specific physical/vocal action" }],
+    "reflectionPrompt": "1 specific question for the journal"
+  }`;
+
+// ─── Natal ──────────────────────────────────────────────────────────────
+
 const NATAL_SCHEMA = `{
   "title": "string",
-  "summary": "2-3 sentence orientation",
-  "luminaries": "3-4 paragraphs on Sun and Moon",
-  "personal_planets": "2-3 paragraphs on Mercury, Venus, Mars together",
-  "social_planets": "2 paragraphs on Jupiter and Saturn",
-  "ascendant": "1-2 paragraphs on rising sign, or the JSON value null if no rising sign was given",
-  "synthesis": "1 closing paragraph"
+  "overview": "2-3 sentences orienting the reader to what this report is for.",
+  "placements": [
+    {
+      "placement": "Sun in Taurus / Moon in Pisces / etc — name the placement explicitly",
+      "asks": "2-3 sentences: what this placement is asking the reader to learn and inhabit",
+      "practice": ${PRACTICE_BLOCK_SCHEMA}
+    }
+  ],
+  "synthesis": "1-2 paragraphs weaving the placements into one practice arc"
 }`;
 
 async function generateNatal({
@@ -232,13 +260,21 @@ async function generateNatal({
 }: GenerateInput): Promise<NatalReportJson> {
   return callJson<NatalReportJson>({
     voice,
-    maxTokens: 3000,
+    maxTokens: 6000,
     schema: NATAL_SCHEMA,
     userMessage: [
-      "Write a full natal chart interpretation for this reader. Read each",
-      "placement specifically — by sign — and weave them together into a",
-      "single voice. Do not summarise the meanings of signs; speak about",
-      "this particular configuration. Stay in voice.",
+      "Translate this reader's natal chart into a practice plan. For each",
+      "major placement (Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn,",
+      "and Rising if present), give a 2-3 sentence reading of what that",
+      "placement asks of the reader followed by a CONCRETE PRACTICE that",
+      "placement wants — gather, steps with durations, reflection prompt.",
+      "",
+      "Each practice is a recurring one the reader can return to whenever",
+      "they want to tend that part of their chart. Not generic sign",
+      "descriptions — this specific configuration.",
+      "",
+      "End with a synthesis: how the eight placements ask to be held",
+      "together over time.",
       "",
       "Natal chart:",
       JSON.stringify(natal, null, 2),
@@ -246,13 +282,19 @@ async function generateNatal({
   });
 }
 
+// ─── Year ahead ────────────────────────────────────────────────────────
+
 const YEAR_SCHEMA = `{
   "title": "string",
-  "opening": "1 paragraph orientation",
+  "opening": "1-2 paragraphs orienting the reader to the year",
   "months": [
-    { "month": "Month YYYY", "narrative": "2-3 paragraphs", "watchFor": "single short line" }
+    {
+      "month": "Month YYYY — use the exact strings provided",
+      "theme": "1 sentence naming what this month is for",
+      "practice": ${PRACTICE_BLOCK_SCHEMA}
+    }
   ],
-  "closing": "1 paragraph"
+  "closing": "1-2 paragraphs closing the year"
 }`;
 
 async function generateYearAhead({
@@ -267,13 +309,15 @@ async function generateYearAhead({
   });
   return callJson<YearAheadReportJson>({
     voice,
-    maxTokens: 5000,
+    maxTokens: 8000,
     schema: YEAR_SCHEMA,
     userMessage: [
-      "Read the year ahead for this reader month by month. Twelve months",
-      "starting from the month given. For each month, ground the reading",
-      "in major transits against the natal placements. The watchFor line",
-      "is short — a single image, not a list.",
+      "Build a year-of-practice plan. Twelve months from the month given.",
+      "Each month gets a theme (1 sentence, grounded in what's moving in",
+      "the sky against this chart that month) and a CONCRETE PRACTICE",
+      "for the month — gather, steps with durations, reflection prompt.",
+      "The practice can be done on a specific day of the month or",
+      "repeated weekly through the month.",
       "",
       "Months to cover (use these exact strings as the `month` field):",
       JSON.stringify(months),
@@ -284,12 +328,17 @@ async function generateYearAhead({
   });
 }
 
+// ─── Saturn return ─────────────────────────────────────────────────────
+
 const SATURN_SCHEMA = `{
   "title": "string",
-  "whatItMeans": "2-3 paragraphs naming what Saturn returning to its natal sign asks of this particular chart",
-  "whatItUndoes": "1-2 paragraphs on what is being loosened or removed",
-  "whatItBuilds": "1-2 paragraphs on what is being constructed underneath",
-  "howToMeetIt": "1-2 paragraphs of practical posture, not advice"
+  "opening": "1-2 paragraphs naming what Saturn returning to this specific natal sign is doing to this chart",
+  "threeAsks": [
+    { "ask": "1 sentence: a specific thing this Saturn return is asking the reader to do/become",
+      "expansion": "1-2 sentences explaining the ask" }
+  ],
+  "weeklyPractice": ${PRACTICE_BLOCK_SCHEMA},
+  "closing": "1 paragraph: how to know when the return has done its work"
 }`;
 
 async function generateSaturnReturn({
@@ -300,19 +349,23 @@ async function generateSaturnReturn({
   const window = saturnReturn(date, natal.saturn);
   return callJson<SaturnReturnReportJson>({
     voice,
-    maxTokens: 2500,
+    maxTokens: 3000,
     schema: SATURN_SCHEMA,
     userMessage: [
-      "Read this reader's Saturn return. Saturn is in their natal sign of",
-      `${natal.saturn} and is currently ${
+      "Build a Saturn-return practice for this reader. Saturn is in their",
+      `natal sign of ${natal.saturn}, currently ${
         Math.abs(window.offsetDegrees) < 1
           ? "exactly on natal"
           : window.offsetDegrees < 0
             ? `approaching natal (about ${Math.round(-window.offsetDegrees)}° away)`
             : `separating from natal (about ${Math.round(window.offsetDegrees)}° past exact)`
       }.`,
-      "Speak to what this Saturn return — at this specific configuration —",
-      "is actually doing. Do not give generic Saturn-return talk.",
+      "",
+      "Open with what this specific Saturn return is doing. Name three",
+      "asks: concrete things Saturn is asking of THIS chart (not generic",
+      "Saturn-return talk). Then give a single weekly practice the reader",
+      "can repeat every week for the duration of the return window.",
+      "Close with how to recognise when the return has done its work.",
       "",
       "Full natal chart:",
       JSON.stringify(natal, null, 2),
@@ -320,13 +373,20 @@ async function generateSaturnReturn({
   });
 }
 
+// ─── Eclipse ───────────────────────────────────────────────────────────
+
 const ECLIPSE_SCHEMA = `{
   "title": "string",
-  "opening": "1-2 paragraphs naming what an eclipse season is doing to this chart",
+  "opening": "1-2 paragraphs on what this eclipse window is doing to this chart",
   "eclipses": [
-    { "date": "YYYY-MM-DD", "type": "solar | lunar", "sign": "string", "whatItDisturbs": "1-2 sentences specific to this chart" }
+    {
+      "date": "YYYY-MM-DD",
+      "type": "solar | lunar",
+      "sign": "string",
+      "practice": ${PRACTICE_BLOCK_SCHEMA}
+    }
   ],
-  "howToMove": "2-3 paragraphs of practical posture"
+  "followUp": "1-2 paragraphs: how to keep tending the disturbance after the window closes"
 }`;
 
 async function generateEclipseSeason({
@@ -337,12 +397,14 @@ async function generateEclipseSeason({
   const eclipses: Eclipse[] = eclipsesNear(date, 30);
   return callJson<EclipseReportJson>({
     voice,
-    maxTokens: 2500,
+    maxTokens: 3500,
     schema: ECLIPSE_SCHEMA,
     userMessage: [
-      "Read the current eclipse window against this natal chart. For",
-      "each eclipse listed, name where in the chart it lands and what it",
-      "is disturbing.",
+      "Build a practice plan for the current eclipse window. For each",
+      "eclipse in the window, give a CONCRETE PRACTICE the reader can do",
+      "ON or NEAR the day of that eclipse — gather, steps with durations,",
+      "reflection prompt. Then a follow-up practice for the weeks after",
+      "the window closes.",
       "",
       "Eclipses in this window:",
       JSON.stringify(eclipses, null, 2),
