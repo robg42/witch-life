@@ -6,15 +6,9 @@ import type { NatalChart, SkyState } from "@/lib/astro";
 import type { VoiceKey } from "@/lib/voices";
 
 /*
-  Three-card spread interpretation. Subscriber-only.
-
-  Layout choices match the brief:
-    - sao : Situation / Action / Outcome (default)
-    - ppf : Past / Present / Future
-
-  The client draws three cards locally (no repeats), reveals them one at
-  a time, and only then asks the server for a single coherent reading
-  across all three.
+  Three-card spread, output as practice. Each position now returns
+  interpretation + action. The synthesis is a week-shaped practice:
+  an intention for the week + three concrete steps spread across it.
 */
 
 export type SpreadLayout = "sao" | "ppf";
@@ -26,11 +20,20 @@ interface RequestBody {
   natal: NatalChart;
   voice: VoiceKey;
   question?: string;
+  seasonalContext?: string;
+}
+
+export interface SpreadPosition {
+  interpretation: string; // 1 sentence
+  action: string; // 1 paragraph, concrete, 5-10 min
 }
 
 export interface SpreadResponse {
-  positionReadings: [string, string, string];
-  synthesis: string;
+  positions: [SpreadPosition, SpreadPosition, SpreadPosition];
+  weekPractice: {
+    intention: string; // 1 sentence: what to hold across the week
+    steps: { day: string; action: string }[]; // 3 entries — early week, mid week, weekend
+  };
 }
 
 const LAYOUT_LABELS: Record<SpreadLayout, [string, string, string]> = {
@@ -39,8 +42,15 @@ const LAYOUT_LABELS: Record<SpreadLayout, [string, string, string]> = {
 };
 
 const SCHEMA = `{
-  "positionReadings": ["3 sentences for position 1", "3 sentences for position 2", "3 sentences for position 3"],
-  "synthesis": "2-3 sentences weaving the three positions into one coherent narrative"
+  "positions": [
+    { "interpretation": "1 sentence reading this position's card against the chart and the day.", "action": "1 paragraph, a 5-10 minute concrete practice for this position." }
+  ],
+  "weekPractice": {
+    "intention": "1 sentence: what to hold across the next seven days.",
+    "steps": [
+      { "day": "Early week | Mid week | Weekend", "action": "1 sentence: a concrete action for that part of the week." }
+    ]
+  }
 }`;
 
 export async function POST(req: Request) {
@@ -67,15 +77,16 @@ export async function POST(req: Request) {
   const positions = LAYOUT_LABELS[body.layout] ?? LAYOUT_LABELS.sao;
 
   const userMessage = [
-    "A three-card spread for this reader.",
+    "A three-card spread, output as practice.",
     `Layout: ${positions.join(" / ")}`,
     body.question ? `Question: "${body.question}"` : "",
+    body.seasonalContext ? `On the land: ${body.seasonalContext}` : "",
     "",
     "Cards drawn (in position order):",
     body.cards
       .map(
         (c, i) =>
-          `  ${positions[i]} — ${c.name} (suit of ${c.suit}). Description on card: "${c.description}"`,
+          `  ${positions[i]} — ${c.name} (suit of ${c.suit}). Line on the card: "${c.description}"`,
       )
       .join("\n"),
     "",
@@ -85,9 +96,7 @@ export async function POST(req: Request) {
     "Reader's natal chart:",
     JSON.stringify(body.natal, null, 2),
     "",
-    "Read each position specifically, then synthesise across all three.",
-    "Stay in voice. Do not give generic card meanings — read these cards in",
-    "this configuration for this person on this day.",
+    "Read each position specifically as interpretation + concrete 5-10 minute action. Then weave the three together into a week-shaped practice: an intention plus three actions spread across early-week, mid-week, and the weekend.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -96,7 +105,7 @@ export async function POST(req: Request) {
     const result = await callOracle<SpreadResponse>({
       voice: body.voice,
       userMessage,
-      maxTokens: 1500,
+      maxTokens: 1800,
       schema: SCHEMA,
     });
     return NextResponse.json(result);

@@ -5,12 +5,11 @@ import type { Card } from "@/lib/deck";
 import type { NatalChart, SkyState } from "@/lib/astro";
 import type { VoiceKey } from "@/lib/voices";
 import type { CardResponse } from "@/app/api/card/route";
-import { OracleSection } from "@/components/reading/oracle-section";
 
 /*
-  Fetches the oracle's reading of a specific card against today's sky and
-  the reader's natal chart. The fetch is keyed on the card name so a new
-  card revealed on /draw replaces the prior interpretation cleanly.
+  Fetches and renders the action-shaped card reading: a one-sentence
+  interpretation followed by a single paragraph telling the reader what
+  to do with this card today.
 */
 
 interface Props {
@@ -18,13 +17,20 @@ interface Props {
   sky: SkyState;
   natal: NatalChart;
   voice: VoiceKey;
+  seasonalContext?: string;
 }
 
-export function CardInterpretation({ card, sky, natal, voice }: Props) {
+export function CardInterpretation({
+  card,
+  sky,
+  natal,
+  voice,
+  seasonalContext,
+}: Props) {
   const [state, setState] = useState<
     | { kind: "idle" }
     | { kind: "loading" }
-    | { kind: "ok"; reading: string }
+    | { kind: "ok"; data: CardResponse }
     | { kind: "error"; message: string }
   >({ kind: "idle" });
 
@@ -38,7 +44,7 @@ export function CardInterpretation({ card, sky, natal, voice }: Props) {
     fetch("/api/card", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ card, sky, natal, voice }),
+      body: JSON.stringify({ card, sky, natal, voice, seasonalContext }),
     })
       .then(async (res) => {
         if (cancelled) return;
@@ -51,7 +57,7 @@ export function CardInterpretation({ card, sky, natal, voice }: Props) {
           return;
         }
         const data = (await res.json()) as CardResponse;
-        setState({ kind: "ok", reading: data.cardReading });
+        setState({ kind: "ok", data });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -63,7 +69,7 @@ export function CardInterpretation({ card, sky, natal, voice }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [card, sky, natal, voice]);
+  }, [card, sky, natal, voice, seasonalContext]);
 
   if (!card || state.kind === "idle") return null;
 
@@ -71,9 +77,10 @@ export function CardInterpretation({ card, sky, natal, voice }: Props) {
     <div className="mt-6 w-full max-w-xl">
       {state.kind === "loading" && (
         <div className="animate-pulse space-y-2 text-bark/40">
-          <div className="h-3 w-28 bg-bark/20" />
+          <div className="h-3 w-32 bg-bark/20" />
           <div className="h-4 w-full bg-bark/15" />
           <div className="h-4 w-10/12 bg-bark/15" />
+          <div className="h-4 w-9/12 bg-bark/15" />
         </div>
       )}
       {state.kind === "error" && (
@@ -82,9 +89,20 @@ export function CardInterpretation({ card, sky, natal, voice }: Props) {
         </p>
       )}
       {state.kind === "ok" && (
-        <OracleSection label={`On the ${card.name}`}>
-          {state.reading}
-        </OracleSection>
+        <div className="fade-up">
+          <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+            The {card.name}
+          </p>
+          <p className="oracle-body mt-3 text-ink/95">
+            {state.data.interpretation}
+          </p>
+          <div className="mt-6 rounded-sm border border-clay/40 bg-clay/5 p-5">
+            <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+              What to do
+            </p>
+            <p className="oracle-body mt-2 text-ink/95">{state.data.action}</p>
+          </div>
+        </div>
       )}
     </div>
   );

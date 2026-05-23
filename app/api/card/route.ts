@@ -4,10 +4,9 @@ import type { VoiceKey } from "@/lib/voices";
 import type { NatalChart, SkyState } from "@/lib/astro";
 
 /*
-  Card interpretation. Fires when a card is flipped on the reading page or
-  in /draw. The deck itself is built in Phase 4; for now we accept any
-  card name + suit + description and ask the oracle to interpret it
-  against this chart and this sky.
+  Card interpretation, reframed as ACTION. Returns a one-sentence
+  interpretation plus a single paragraph describing what to actually
+  do today with this card, in 5-10 minutes.
 */
 
 interface RequestBody {
@@ -19,14 +18,17 @@ interface RequestBody {
   sky: SkyState;
   natal: NatalChart;
   voice: VoiceKey;
+  seasonalContext?: string;
 }
 
 export interface CardResponse {
-  cardReading: string;
+  interpretation: string; // 1 sentence: what this card is naming for this reader today
+  action: string; // 1 paragraph: a specific 5-10 minute thing to do, ending with a concrete next step
 }
 
 const SCHEMA = `{
-  "cardReading": "3-4 sentences specific to this card, this natal chart, and today's sky. Do not give a generic card meaning — read it through the placements you can see."
+  "interpretation": "1 sentence. What this card is naming for this reader today, read against the day's sky and the natal chart. No generic card meanings.",
+  "action": "1 paragraph. A specific 5 to 10 minute practice the reader can do today, ending with one concrete next step. Real things: an item they can find, a sentence to say, a person to text, a window to open, a walk to take. No abstractions."
 }`;
 
 export async function POST(req: Request) {
@@ -45,28 +47,34 @@ export async function POST(req: Request) {
 
   const userMessage = [
     `Card drawn: ${body.card.name} (suit of ${body.card.suit}).`,
-    `Poetic description on the card: "${body.card.description}"`,
+    `Line on the card: "${body.card.description}"`,
+    body.seasonalContext ? `On the land: ${body.seasonalContext}` : "",
     "",
-    "Today's sky:",
+    "Today's sky (for grounding):",
     JSON.stringify(body.sky, null, 2),
     "",
     "Reader's natal chart:",
     JSON.stringify(body.natal, null, 2),
     "",
-    "Interpret this card for this person on this day. Stay in voice.",
-  ].join("\n");
+    "Give a 1-sentence interpretation, then a single paragraph naming what to do today with this card. The action is concrete and 5-10 minutes. End the action with a single explicit next step.",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   try {
     const result = await callOracle<CardResponse>({
       voice: body.voice,
       userMessage,
-      maxTokens: 500,
+      maxTokens: 600,
       schema: SCHEMA,
     });
     return NextResponse.json(result);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Oracle failed to respond";
-    return NextResponse.json({ error: message }, { status: 502 });
+    return NextResponse.json(
+      {
+        error: err instanceof Error ? err.message : "Oracle failed to respond",
+      },
+      { status: 502 },
+    );
   }
 }

@@ -5,27 +5,28 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   computeNatalChart,
-  computeTransits,
   getSkyState,
   type NatalChart,
   type SkyState,
 } from "@/lib/astro";
 import { birthToUtcDate, loadBirth, type BirthDetails } from "@/lib/birth-details";
-import type { ReadingResponse } from "@/app/api/reading/route";
-import type { WeeklyResponse } from "@/app/api/weekly/route";
+import type {
+  ReadingResponse,
+  PracticeStep,
+} from "@/app/api/reading/route";
 import { summariseEntries, type JournalEntry } from "@/lib/journal";
-import { BotanicalDivider } from "@/components/site/botanical-divider";
-import { CosmicBar } from "@/components/reading/cosmic-bar";
-import { NatalStrip } from "@/components/reading/natal-strip";
-import { OracleSection } from "@/components/reading/oracle-section";
-import { WeeklyArc } from "@/components/reading/weekly-arc";
-import { TarotCard } from "@/components/cards/tarot-card";
-import { CardInterpretation } from "@/components/cards/card-interpretation";
+import { almanacFor } from "@/lib/almanac";
+import { TodayPanel } from "@/components/site/today-panel";
 import { dailyCard, type Card } from "@/lib/deck";
+import { CardArt } from "@/components/cards/card-art";
 import { VOICE_LABEL } from "@/lib/voices";
 
 /*
-  Reading page on the cream herbarium surface.
+  Today's Practice page. The output of /api/reading is now a practice
+  (gather, steps, reflect) rather than interpretive prose. This file
+  renders that practice as a real, usable thing: a checklist of items
+  to gather, a numbered sequence of timed steps, a reflection prompt
+  to take to the journal, and the day's card with its action.
 */
 
 export function ReadingExperience() {
@@ -73,7 +74,7 @@ function ReadingPage({
   onQuestionChange,
   onAskQuestion,
 }: InnerProps) {
-  const { sky, natal, todayISO, card } = useMemo(() => {
+  const { sky, natal, card, seasonalContext } = useMemo(() => {
     const now = new Date();
     const sky = getSkyState(now, { lat: birth.lat });
     const birthDate = birthToUtcDate(birth);
@@ -82,22 +83,21 @@ function ReadingPage({
       lat: birth.lat,
       lng: birth.lng,
     });
+    const almanac = almanacFor(now, {
+      hemisphere: birth.hemisphere ?? "N",
+    });
     return {
       sky,
       natal,
-      todayISO: now.toISOString().slice(0, 10),
       card: dailyCard(now),
+      seasonalContext: `${almanac.season} · ${almanac.marker}; ${almanac.land}`,
     };
   }, [birth]);
 
-  const [revealedCard, setRevealedCard] = useState<Card | null>(null);
-
   const [reading, setReading] = useState<
-    { status: "loading" } | { status: "ok"; data: ReadingResponse } | { status: "error"; error: string }
-  >({ status: "loading" });
-
-  const [weekly, setWeekly] = useState<
-    { status: "loading" } | { status: "ok"; data: WeeklyResponse } | { status: "error"; error: string }
+    | { status: "loading" }
+    | { status: "ok"; data: ReadingResponse }
+    | { status: "error"; error: string }
   >({ status: "loading" });
 
   const [hasJournal, setHasJournal] = useState(false);
@@ -105,18 +105,22 @@ function ReadingPage({
   useEffect(() => {
     let cancelled = false;
     setReading({ status: "loading" });
-    setWeekly({ status: "loading" });
-
-    fetchWeekly(todayISO, natal, birth.voice).then((r) => {
-      if (cancelled) return;
-      setWeekly(r);
-    });
 
     fetchRecentJournal().then((entries) => {
       if (cancelled) return;
-      const summary = entries.length > 0 ? summariseEntries(entries) : undefined;
+      const summary =
+        entries.length > 0 ? summariseEntries(entries) : undefined;
       setHasJournal(entries.length > 0);
-      fetchReading(sky, natal, birth.voice, question, summary).then((r) => {
+      fetchReading({
+        sky,
+        natal,
+        voice: birth.voice,
+        question,
+        recentJournal: summary,
+        intentions: birth.intentions,
+        seasonalContext,
+        dailyCard: card,
+      }).then((r) => {
         if (cancelled) return;
         setReading(r);
       });
@@ -125,193 +129,275 @@ function ReadingPage({
     return () => {
       cancelled = true;
     };
-  }, [sky, natal, birth.voice, question, todayISO]);
+  }, [sky, natal, birth.voice, birth.intentions, question, card, seasonalContext]);
 
   return (
     <main className="min-h-screen text-ink">
-      <div className="mx-auto max-w-3xl px-6 py-12 md:px-10 md:py-16">
+      <div className="mx-auto max-w-3xl px-6 py-10 md:px-10 md:py-14">
         <header className="flex items-baseline justify-between">
           <Link
             href="/"
-            className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 transition-base hover:text-clay"
+            className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70 transition-base hover:text-clay"
           >
             ← Witch Life
           </Link>
-          <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
-            Voice: <span className="text-clay">{VOICE_LABEL[birth.voice]}</span>{" "}
-            ·{" "}
-            <Link
-              href="/onboarding"
-              className="underline-offset-4 hover:text-ink hover:underline"
-            >
-              edit chart
-            </Link>
+          <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
+            Voice ·{" "}
+            <span className="text-clay">{VOICE_LABEL[birth.voice]}</span>
           </span>
         </header>
 
-        <section className="mt-10">
-          <CosmicBar sky={sky} />
-        </section>
-
-        <section className="mt-8">
-          <NatalStrip natal={natal} />
-        </section>
-
-        <section className="mt-12 flex flex-col items-center">
-          <TarotCard card={card} onFlip={(c) => setRevealedCard(c)} />
-          <p className="mt-4 font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
-            Today&rsquo;s symbol — drawn for everyone
+        {/* Hero — page title */}
+        <section className="mt-8 fade-up">
+          <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay">
+            Today
           </p>
-          <CardInterpretation
-            card={revealedCard}
-            sky={sky}
-            natal={natal}
-            voice={birth.voice}
-          />
+          <h1 className="display mt-2 text-3xl text-ink md:text-5xl">
+            Your practice
+          </h1>
+          <p className="oracle-body mt-4 max-w-2xl text-ink/85">
+            Five to fifteen minutes. Gather the things. Walk through the steps.
+            Reflect when you&rsquo;re finished.
+          </p>
         </section>
 
-        <BotanicalDivider className="my-12 mx-auto" />
+        {/* Almanac context */}
+        <section className="mt-8 fade-up" style={{ animationDelay: "100ms" }}>
+          <TodayPanel sky={sky} />
+        </section>
 
-        {reading.status === "loading" && <ReadingSkeleton />}
-        {reading.status === "error" && (
-          <ErrorBlock
-            label="The oracle could not respond"
-            detail={reading.error}
-          />
-        )}
-        {reading.status === "ok" && (
-          <ReadingBody
-            reading={reading.data}
-            hasJournal={hasJournal}
-            hasQuestion={!!question}
-          />
-        )}
+        {/* Practice body */}
+        <section className="mt-12">
+          {reading.status === "loading" && <PracticeSkeleton />}
+          {reading.status === "error" && (
+            <ErrorBlock
+              label="The oracle could not respond"
+              detail={reading.error}
+            />
+          )}
+          {reading.status === "ok" && (
+            <PracticeBody
+              reading={reading.data}
+              card={card}
+              hasJournal={hasJournal}
+              hasQuestion={!!question}
+            />
+          )}
+        </section>
 
         {/* Question form */}
         <section className="mt-16 border-t border-bark/25 pt-10">
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
+          <h2 className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
             Ask the oracle
           </h2>
           <p className="oracle-body mt-2 text-ink/85">
-            One question. The oracle answers it through the day&rsquo;s sky.
+            One question. The practice will be shaped to answer it.
           </p>
-          <div className="mt-4 flex gap-4">
+          <div className="mt-4 flex gap-3">
             <input
               type="text"
               value={questionValue}
               onChange={(e) => onQuestionChange(e.target.value)}
-              placeholder="What should I be paying attention to?"
+              placeholder="What am I avoiding?"
               className="flex-1 border-b border-bark/30 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/50 focus:border-clay"
             />
             <button
               onClick={onAskQuestion}
               disabled={!questionValue.trim()}
-              className="font-sans text-xs uppercase tracking-[0.25em] border border-moss bg-moss/15 px-6 py-3 text-ink transition-base hover:bg-moss/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="font-sans text-xs uppercase tracking-[0.25em] border border-clay bg-clay px-6 py-3 text-parchment transition-base hover:bg-clay/85 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Ask
             </button>
           </div>
         </section>
 
-        <BotanicalDivider className="my-16 mx-auto" />
-
-        <section>
-          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
-            The week ahead
-          </h2>
-          {weekly.status === "loading" && <WeeklySkeleton />}
-          {weekly.status === "error" && (
-            <ErrorBlock
-              label="The weekly arc could not be drawn"
-              detail={weekly.error}
-            />
-          )}
-          {weekly.status === "ok" && (
-            <WeeklyArc weekly={weekly.data} todayISO={todayISO} />
-          )}
-        </section>
-
-        <BotanicalDivider className="my-16 mx-auto" />
-
-        <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <footer className="mt-16 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <FooterLink href="/draw" label="Pull a card" />
           <FooterLink href="/spread" label="Three-card spread" />
           <FooterLink href="/journal" label="The journal" />
-          <FooterLink href="/reports" label="Deeper reports" />
-        </section>
-
-        <footer className="mt-24 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
-          {transitFooter(sky, natal)}
+          <FooterLink href="/library" label="The library" />
         </footer>
       </div>
     </main>
   );
 }
 
-function ReadingBody({
+// ─── Body sections ─────────────────────────────────────────────────────────
+
+function PracticeBody({
   reading,
+  card,
   hasJournal,
   hasQuestion,
 }: {
   reading: ReadingResponse;
+  card: Card;
   hasJournal: boolean;
   hasQuestion: boolean;
 }) {
   return (
     <div>
-      <OracleSection label="Energetic weather">
-        {reading.energeticWeather}
-      </OracleSection>
+      {/* Intention line — the frame for today */}
+      <p className="oracle-body text-ink/95 fade-up">
+        {reading.intentionLine}
+      </p>
 
-      <div className="mt-10 grid gap-8 md:grid-cols-2">
-        <OracleSection label="Expand" tone="expand">
-          {reading.expand}
-        </OracleSection>
-        <OracleSection label="Contract" tone="contract">
-          {reading.contract}
-        </OracleSection>
+      {/* Gather + Do, side by side on desktop */}
+      <div className="mt-12 grid gap-10 md:grid-cols-2">
+        <GatherList items={reading.gather} />
+        <StepsList steps={reading.steps} />
       </div>
 
+      {/* Reflect */}
+      <div className="mt-12 rounded-sm border border-clay/40 bg-clay/5 p-6 fade-up">
+        <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+          Then write
+        </p>
+        <p className="oracle-body mt-3 text-ink/95">
+          {reading.reflectionPrompt}
+        </p>
+        <Link
+          href="/journal"
+          className="mt-5 inline-block font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-bone/60 px-5 py-2 text-ink transition-base hover:border-clay hover:text-clay"
+        >
+          Take it to the journal →
+        </Link>
+      </div>
+
+      {/* Today's card with its action */}
+      {reading.cardAction && (
+        <div className="mt-12 fade-up">
+          <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+            Today&rsquo;s card
+          </p>
+          <div className="mt-4 grid grid-cols-[auto,1fr] items-start gap-6">
+            <div className="flex flex-col items-center">
+              <div className="flex h-44 w-28 flex-col items-center justify-between border border-bark/30 bg-bone/60 px-2 py-3">
+                <span className="font-sans text-[8px] uppercase tracking-[0.25em] text-moss">
+                  {card.suit}
+                </span>
+                <div className="text-moss">
+                  <CardArt card={card} />
+                </div>
+                <span className="accent text-sm text-ink">{card.name}</span>
+              </div>
+            </div>
+            <p className="oracle-body text-ink/95">{reading.cardAction}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Optional sections */}
       {hasJournal && reading.journalAwareness && (
-        <OracleSection label="What's been moving through you" tone="journal">
-          {reading.journalAwareness}
-        </OracleSection>
+        <div className="mt-12 border-l-2 border-moss/40 pl-5 fade-up">
+          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-moss">
+            What&rsquo;s been moving through you
+          </p>
+          <p className="oracle-body mt-2 text-ink/90">
+            {reading.journalAwareness}
+          </p>
+        </div>
       )}
 
       {hasQuestion && reading.questionGuidance && (
-        <OracleSection label="On your question" tone="question">
-          {reading.questionGuidance}
-        </OracleSection>
+        <div className="mt-10 border-l-2 border-clay/40 pl-5 fade-up">
+          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
+            On your question
+          </p>
+          <p className="oracle-body mt-2 text-ink/95">
+            {reading.questionGuidance}
+          </p>
+        </div>
       )}
 
-      <div className="mt-10 rounded-sm border border-clay/40 bg-clay/5 p-6">
-        <OracleSection label="Protect your energy" tone="protect">
-          {reading.protectYourEnergy}
-        </OracleSection>
-      </div>
+      {reading.tonightNote && (
+        <div className="mt-10 fade-up">
+          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
+            Tonight
+          </p>
+          <p className="oracle-body mt-2 italic text-bark/85">
+            {reading.tonightNote}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
 
-function ReadingSkeleton() {
+function GatherList({ items }: { items: string[] }) {
   return (
-    <div className="animate-pulse space-y-6 text-bark/40">
-      <div className="h-3 w-32 bg-bark/20" />
+    <div className="fade-up">
+      <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+        Gather
+      </p>
+      <ul className="mt-4 space-y-3">
+        {items.map((item, i) => (
+          <li
+            key={i}
+            className="flex items-baseline gap-3 border-b border-bark/15 pb-3 last:border-b-0"
+          >
+            <span
+              aria-hidden
+              className="font-sans text-[10px] uppercase tracking-[0.25em] text-moss"
+            >
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span className="font-serif text-base text-ink/95">{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function StepsList({ steps }: { steps: PracticeStep[] }) {
+  return (
+    <div className="fade-up">
+      <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+        Do
+      </p>
+      <ol className="mt-4 space-y-4">
+        {steps.map((s, i) => (
+          <li key={i} className="flex items-baseline gap-4">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-clay/50 bg-bone/60 font-sans text-[10px] tracking-wider text-clay">
+              {i + 1}
+            </span>
+            <div className="flex-1">
+              <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
+                {s.duration}
+              </p>
+              <p className="mt-1 font-serif text-base leading-relaxed text-ink/95">
+                {s.action}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function PracticeSkeleton() {
+  return (
+    <div className="animate-pulse space-y-8 text-bark/40">
       <div className="space-y-2">
         <div className="h-4 w-full bg-bark/15" />
         <div className="h-4 w-11/12 bg-bark/15" />
-        <div className="h-4 w-10/12 bg-bark/15" />
       </div>
-    </div>
-  );
-}
-
-function WeeklySkeleton() {
-  return (
-    <div className="grid animate-pulse grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
-      {Array.from({ length: 7 }).map((_, i) => (
-        <div key={i} className="h-28 border border-bark/20 bg-bark/5" />
-      ))}
+      <div className="grid gap-10 md:grid-cols-2">
+        <div className="space-y-3">
+          <div className="h-3 w-20 bg-clay/20" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-5 w-full bg-bark/10" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          <div className="h-3 w-20 bg-clay/20" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-5 w-full bg-bark/10" />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -331,7 +417,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="rounded-sm border border-bark/25 bg-linen/40 px-4 py-3 text-center font-sans text-xs uppercase tracking-[0.25em] text-ink transition-base hover:border-clay hover:bg-linen/70 hover:text-clay"
+      className="rounded-sm border border-bark/25 bg-linen/40 px-4 py-3 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-ink transition-base hover:border-clay hover:bg-linen/70 hover:text-clay"
     >
       {label}
     </Link>
@@ -341,24 +427,28 @@ function FooterLink({ href, label }: { href: string; label: string }) {
 function BootingState() {
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <span className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
+      <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
         Casting…
       </span>
     </main>
   );
 }
 
-function transitFooter(sky: SkyState, natal: NatalChart): string {
-  const t = computeTransits(sky, natal);
-  return [...t.activeTransits, ...t.significantWindows].join(" · ") || "—";
+// ─── Fetchers ─────────────────────────────────────────────────────────────
+
+interface FetchReadingArgs {
+  sky: SkyState;
+  natal: NatalChart;
+  voice: BirthDetails["voice"];
+  question: string | undefined;
+  recentJournal: string | undefined;
+  intentions: string[] | undefined;
+  seasonalContext: string | undefined;
+  dailyCard: Card | undefined;
 }
 
 async function fetchReading(
-  sky: SkyState,
-  natal: NatalChart,
-  voice: BirthDetails["voice"],
-  question: string | undefined,
-  recentJournal: string | undefined,
+  args: FetchReadingArgs,
 ): Promise<
   | { status: "ok"; data: ReadingResponse }
   | { status: "error"; error: string }
@@ -367,7 +457,7 @@ async function fetchReading(
     const res = await fetch("/api/reading", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sky, natal, voice, question, recentJournal }),
+      body: JSON.stringify(args),
     });
     if (!res.ok) {
       const body = await safeJson(res);
@@ -377,37 +467,6 @@ async function fetchReading(
       };
     }
     const data = (await res.json()) as ReadingResponse;
-    return { status: "ok", data };
-  } catch (err) {
-    return {
-      status: "error",
-      error: err instanceof Error ? err.message : "Network error",
-    };
-  }
-}
-
-async function fetchWeekly(
-  startISO: string,
-  natal: NatalChart,
-  voice: BirthDetails["voice"],
-): Promise<
-  | { status: "ok"; data: WeeklyResponse }
-  | { status: "error"; error: string }
-> {
-  try {
-    const res = await fetch("/api/weekly", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ startISO, natal, voice }),
-    });
-    if (!res.ok) {
-      const body = await safeJson(res);
-      return {
-        status: "error",
-        error: body?.error ?? `Server responded ${res.status}`,
-      };
-    }
-    const data = (await res.json()) as WeeklyResponse;
     return { status: "ok", data };
   } catch (err) {
     return {

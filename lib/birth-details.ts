@@ -20,6 +20,10 @@ export interface BirthDetails {
   lng?: number;
   /** Oracle voice preference. */
   voice: VoiceKey;
+  /** Hemisphere — used by the almanac. Defaults to 'N'. */
+  hemisphere?: "N" | "S";
+  /** Practice intentions selected at onboarding. Drives the daily practice generator. */
+  intentions?: string[];
 }
 
 const STORAGE_KEY = "witchlife.birth";

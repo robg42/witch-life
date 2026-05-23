@@ -18,7 +18,6 @@ import { drawThree, type Card } from "@/lib/deck";
 import type { SpreadLayout, SpreadResponse } from "@/app/api/spread/route";
 import { BotanicalDivider } from "@/components/site/botanical-divider";
 import { TarotCard } from "@/components/cards/tarot-card";
-import { OracleSection } from "@/components/reading/oracle-section";
 import { UpgradeCard } from "@/components/paywall/upgrade-card";
 import { VOICE_LABEL } from "@/lib/voices";
 
@@ -255,16 +254,51 @@ export function SpreadExperience() {
             </p>
           )}
           {reading.kind === "ok" && (
-            <>
-              {reading.data.positionReadings.map((text, i) => (
-                <OracleSection key={i} label={positions[i]}>
-                  {text}
-                </OracleSection>
+            <div className="fade-up">
+              {reading.data.positions.map((pos, i) => (
+                <div
+                  key={i}
+                  className="mt-10 first:mt-0 border-l border-clay/30 pl-5"
+                >
+                  <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+                    {positions[i]}
+                  </p>
+                  <p className="oracle-body mt-3 text-ink/95">
+                    {pos.interpretation}
+                  </p>
+                  <div className="mt-4 rounded-sm border border-bark/25 bg-linen/40 p-4">
+                    <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-moss">
+                      What to do
+                    </p>
+                    <p className="oracle-body mt-2 text-ink/95">{pos.action}</p>
+                  </div>
+                </div>
               ))}
-              <OracleSection label="Taken together" tone="protect">
-                {reading.data.synthesis}
-              </OracleSection>
-            </>
+
+              <div className="mt-14 rounded-sm border border-clay/40 bg-clay/5 p-6">
+                <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
+                  This week
+                </p>
+                <p className="oracle-body mt-3 text-ink/95">
+                  {reading.data.weekPractice.intention}
+                </p>
+                <ol className="mt-5 space-y-3">
+                  {reading.data.weekPractice.steps.map((s, i) => (
+                    <li
+                      key={i}
+                      className="flex items-baseline gap-4 border-t border-bark/20 pt-3"
+                    >
+                      <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/70 w-24 shrink-0">
+                        {s.day}
+                      </span>
+                      <span className="font-serif text-base text-ink/95">
+                        {s.action}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
           )}
         </div>
 
