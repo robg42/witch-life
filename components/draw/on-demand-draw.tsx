@@ -14,6 +14,7 @@ import { randomCard, type Card } from "@/lib/deck";
 import { TarotCard } from "@/components/cards/tarot-card";
 import { CardInterpretation } from "@/components/cards/card-interpretation";
 import { BotanicalDivider } from "@/components/site/botanical-divider";
+import { MarkDoneButton } from "@/components/practice/mark-done-button";
 import { VOICE_LABEL } from "@/lib/voices";
 
 export function OnDemandDraw() {
@@ -109,13 +110,19 @@ export function OnDemandDraw() {
           />
 
           {revealedCard && (
-            <button
-              type="button"
-              onClick={drawAnother}
-              className="mt-10 font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-linen/60 px-6 py-3 text-ink transition-base hover:border-clay hover:text-clay"
-            >
-              Draw another
-            </button>
+            <div className="mt-10 flex flex-wrap items-baseline gap-5">
+              <button
+                type="button"
+                onClick={drawAnother}
+                className="font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-linen/60 px-6 py-3 text-ink transition-base hover:border-clay hover:text-clay"
+              >
+                Draw another
+              </button>
+              <MarkDoneButton
+                practiceType="card"
+                sourceCardName={revealedCard.name}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getSkyState } from "@/lib/astro";
+import { upcomingSabbat } from "@/lib/sabbats";
 import { LandingAuthActions } from "@/components/site/landing-auth-actions";
 import { TodayPanel } from "@/components/site/today-panel";
 import { HerbariumStrip } from "@/components/site/herbarium-strip";
@@ -28,6 +29,7 @@ export default async function Home() {
 
   const now = new Date();
   const sky = getSkyState(now);
+  const nextSabbat = upcomingSabbat(now, "N");
 
   return (
     <main className="relative min-h-screen text-ink">
@@ -64,34 +66,34 @@ export default async function Home() {
           >
             <Door
               n="01"
-              label="The reading"
-              sub="Today's growing edge"
-              preview="What the day is loosening, what it is building. Read against your chart, in your voice."
+              label="Today's practice"
+              sub="A five-to-fifteen minute ritual"
+              preview="Gather. Do. Reflect. The day's practice, scaffolded by phase, season, and the card."
               href="/reading"
               glyph={<SeedlingGlyph />}
             />
             <Door
               n="02"
-              label="The card"
-              sub="A single specimen"
-              preview="Twenty-eight botanical cards. Pull one. The oracle reads it through your chart."
-              href="/draw"
+              label="The Library"
+              sub={`Next sabbat: ${nextSabbat.sabbat.name}`}
+              preview="Searchable correspondences — herbs, stones, days, phases. Each becomes a 5-10 min practice."
+              href="/library"
               glyph={<PressedLeafGlyph />}
             />
             <Door
               n="03"
               label="The journal"
               sub="What's moving through you"
-              preview="Set down what landed. The oracle reads your entries before it speaks again."
+              preview="Set down what you did. The oracle reads themes from your entries before it speaks again."
               href="/journal"
               glyph={<FeatherGlyph />}
             />
             <Door
               n="04"
-              label="Your roots"
-              sub="The system that holds you"
-              preview="Birth details, voice preference, the network the readings grow from."
-              href="/onboarding"
+              label="Your practice"
+              sub="The log + your chart"
+              preview="Practices you've completed, your intentions, your chart, your voice. Edit any time."
+              href="/practice"
               glyph={<MyceliumGlyph />}
             />
           </nav>

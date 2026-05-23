@@ -53,8 +53,8 @@ export function JournalForm() {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-8">
       <Field
-        label="What landed today"
-        hint="What from today's reading stayed with you?"
+        label="What I did"
+        hint="The practice today: what you gathered, what you did. A line is enough."
       >
         <textarea
           value={whatLanded}
@@ -65,8 +65,8 @@ export function JournalForm() {
       </Field>
 
       <Field
-        label="Moving toward"
-        hint="What are you consciously moving toward right now?"
+        label="What's moving"
+        hint="What's been moving through you. Underneath the visible."
       >
         <textarea
           value={movingToward}

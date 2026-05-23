@@ -20,6 +20,7 @@ import { BotanicalDivider } from "@/components/site/botanical-divider";
 import { TarotCard } from "@/components/cards/tarot-card";
 import { UpgradeCard } from "@/components/paywall/upgrade-card";
 import { VOICE_LABEL } from "@/lib/voices";
+import { MarkDoneButton } from "@/components/practice/mark-done-button";
 
 const LAYOUT_LABELS: Record<SpreadLayout, [string, string, string]> = {
   sao: ["Situation", "Action", "Outcome"],
@@ -297,6 +298,9 @@ export function SpreadExperience() {
                     </li>
                   ))}
                 </ol>
+                <div className="mt-5">
+                  <MarkDoneButton practiceType="spread" />
+                </div>
               </div>
             </div>
           )}

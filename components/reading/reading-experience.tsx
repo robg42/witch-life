@@ -20,6 +20,7 @@ import { TodayPanel } from "@/components/site/today-panel";
 import { dailyCard, type Card } from "@/lib/deck";
 import { CardArt } from "@/components/cards/card-art";
 import { VOICE_LABEL } from "@/lib/voices";
+import { MarkDoneButton } from "@/components/practice/mark-done-button";
 
 /*
   Today's Practice page. The output of /api/reading is now a practice
@@ -256,12 +257,15 @@ function PracticeBody({
         <p className="oracle-body mt-3 text-ink/95">
           {reading.reflectionPrompt}
         </p>
-        <Link
-          href="/journal"
-          className="mt-5 inline-block font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-bone/60 px-5 py-2 text-ink transition-base hover:border-clay hover:text-clay"
-        >
-          Take it to the journal →
-        </Link>
+        <div className="mt-5 flex flex-wrap items-baseline gap-4">
+          <Link
+            href="/journal"
+            className="inline-block font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-bone/60 px-5 py-2 text-ink transition-base hover:border-clay hover:text-clay"
+          >
+            Take it to the journal →
+          </Link>
+          <MarkDoneButton practiceType="daily" />
+        </div>
       </div>
 
       {/* Today's card with its action */}
