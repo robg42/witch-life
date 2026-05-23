@@ -191,6 +191,20 @@ export async function generateReport(input: GenerateInput): Promise<ReportJson> 
   }
 }
 
+/* Mirror of asciiFold in lib/anthropic.ts — fold typographic characters
+   to their ASCII equivalents before they leave our process. Some
+   hosting environments reject non-ASCII in HTTP headers (ByteString
+   conversion), and SDKs sometimes derive header values from the body. */
+function asciiFold(s: string): string {
+  return s
+    .replace(/[‐-―]/g, "-")
+    .replace(/[‘’‚‛′]/g, "'")
+    .replace(/[“”„‟″]/g, '"')
+    .replace(/…/g, "...")
+    .replace(/[   ]/g, " ")
+    .replace(/[❦❧❋✻✦]/g, "*");
+}
+
 async function callJson<T>({
   voice,
   userMessage,
@@ -202,22 +216,21 @@ async function callJson<T>({
   schema: string;
   maxTokens: number;
 }): Promise<T> {
+  const system = asciiFold(systemPromptFor(voice));
+  const content = asciiFold(
+    `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`,
+  );
   const res = await client().messages.create({
     model: MODEL_FOR_REPORTS,
     max_tokens: maxTokens,
     system: [
       {
         type: "text",
-        text: systemPromptFor(voice),
+        text: system,
         cache_control: { type: "ephemeral" },
       },
     ],
-    messages: [
-      {
-        role: "user",
-        content: `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`,
-      },
-    ],
+    messages: [{ role: "user", content }],
   });
   const block = res.content.find((b) => b.type === "text");
   if (!block || block.type !== "text") {

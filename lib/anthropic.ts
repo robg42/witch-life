@@ -46,6 +46,39 @@ export interface OracleCallOptions {
 }
 
 /**
+ * Some hosting environments (or chained middlewares between us and
+ * api.anthropic.com) reject any HTTP header that contains a character
+ * outside the ISO-8859-1 (ByteString) range — producing the
+ * "Cannot convert argument to a ByteString" error. When that header is
+ * derived from a hash, prefix, or excerpt of the request body, even
+ * benign typographic characters (em dash, en dash, curly quotes,
+ * ellipsis, non-breaking space) blow it up.
+ *
+ * The safe move is to fold the typography in our outgoing prompts to
+ * their ASCII equivalents. Anthropic doesn't care — semantically the
+ * em dash and the two-hyphen sequence are interchangeable here.
+ */
+function asciiFold(s: string): string {
+  return (
+    s
+      // dashes
+      .replace(/[‐-―]/g, "-")
+      // single curly quotes & prime
+      .replace(/[‘’‚‛′]/g, "'")
+      // double curly quotes
+      .replace(/[“”„‟″]/g, '"')
+      // ellipsis
+      .replace(/…/g, "...")
+      // non-breaking and friends
+      .replace(/[   ]/g, " ")
+      // middle dot, bullet
+      .replace(/[·•]/g, "·".charCodeAt(0) < 256 ? "·" : "-")
+      // ornaments we use in UI but never need in prompts
+      .replace(/[❦❧❦❋✻✦]/g, "*")
+  );
+}
+
+/**
  * Single Claude call that returns a parsed JSON object. Strips code
  * fences if Claude wraps the response, then JSON.parses. Throws on
  * malformed output — callers should handle and surface a friendly error.
@@ -56,23 +89,37 @@ export async function callOracle<T>({
   maxTokens = 1024,
   schema,
 }: OracleCallOptions): Promise<T> {
-  const response = await client().messages.create({
-    model: ORACLE_MODEL,
-    max_tokens: maxTokens,
-    system: [
-      {
-        type: "text",
-        text: systemPromptFor(voice),
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    messages: [
-      {
-        role: "user",
-        content: `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`,
-      },
-    ],
-  });
+  const system = asciiFold(systemPromptFor(voice));
+  const userContent = asciiFold(
+    `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`,
+  );
+
+  let response;
+  try {
+    response = await client().messages.create({
+      model: ORACLE_MODEL,
+      max_tokens: maxTokens,
+      system: [
+        {
+          type: "text",
+          text: system,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+      messages: [{ role: "user", content: userContent }],
+    });
+  } catch (err) {
+    // Wrap the SDK's raw error in something more actionable.
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("ByteString")) {
+      throw new Error(
+        "Anthropic request rejected non-ASCII content in a header. " +
+          "Prompts have been normalised; if this persists, check ANTHROPIC_MODEL " +
+          "env var for stray characters.",
+      );
+    }
+    throw err;
+  }
 
   const block = response.content.find((b) => b.type === "text");
   if (!block || block.type !== "text") {
