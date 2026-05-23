@@ -1,14 +1,15 @@
 # Witch Life
 
-A personalised cosmic energy service. Reads the live state of the sky —
-sun, moon, planets — and tells the reader how to move through that
-energy. Not a horoscope. Not a prediction.
+A daily practice tool, shaped by the moon, the season, and your chart. Not a horoscope. Not a prediction. Every AI-generated output is a concrete practice you can do in five to fifteen minutes — gather these real things, do these specific steps, then write this in your journal.
 
-Three layers:
+Built around four surfaces:
 
-- **Daily ritual** — a living, breathing energetic picture that updates each day.
-- **Natal chart** — personalised readings against the reader's birth chart.
-- **Question layer** — the reader can ask something and the oracle speaks directly to it.
+- **Today's practice** — a generated ritual scaffolded by today's moon phase, season, and your natal chart. Gather. Do. Reflect.
+- **The card** — one of twenty-eight botanical / elemental / animist cards, read as an action you take today rather than a meaning to interpret.
+- **The Library** — a searchable reference of correspondences (herbs, stones, days, moon phases, elements, objects) and the eight wheel-of-the-year sabbats. Each correspondence can be turned into a tailored 5–10 minute practice.
+- **The journal** — what you did, what's moving, the rest. Read by the oracle before it speaks again.
+
+Three voices the oracle speaks in: **The Root** (ancient, earthy, unhurried), **The Blade** (sharp, direct, precise), **The Tide** (oceanic, emotional, honest).
 
 ---
 
@@ -19,10 +20,12 @@ Three layers:
 - **Clerk** for auth (email/password + Google)
 - **Stripe** for subscriptions (£9/mo or £79/yr) and one-time reports (£15–25)
 - **Anthropic Claude** (Sonnet 4.5 default; Opus 4.7 optional for reports) — server-side only
-- **Tailwind + shadcn primitives**, heavily customised
-- **Vitest** for tests
+- **Tailwind**, custom design tokens
+- **Vitest** for tests (43+ tests including astronomical, deck, correspondences, sabbats)
 
 The astronomical engine is hand-rolled in [`lib/astro.ts`](lib/astro.ts) — no external astronomy libraries. Julian Day, sun/moon/planet ecliptic longitudes, Mercury retrograde (incl. shadow periods), ascendant, Saturn return windows, eclipse season detection.
+
+The seasonal copy (what is happening on the land, the wheel-of-the-year markers) lives in [`lib/almanac.ts`](lib/almanac.ts) and is hemisphere-aware.
 
 ---
 
@@ -55,40 +58,38 @@ pnpm dev
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
 | `STRIPE_PRICE_SUB_MONTHLY` | Stripe price ID for £9/month |
 | `STRIPE_PRICE_SUB_YEARLY` | Stripe price ID for £79/year |
-| `STRIPE_PRICE_REPORT_NATAL` | Stripe price ID for natal report |
-| `STRIPE_PRICE_REPORT_YEAR_AHEAD` | Stripe price ID for year-ahead report |
-| `STRIPE_PRICE_REPORT_SATURN_RETURN` | Stripe price ID for Saturn-return report |
-| `STRIPE_PRICE_REPORT_ECLIPSE_SEASON` | Stripe price ID for eclipse-season report |
+| `STRIPE_PRICE_REPORT_NATAL` | Your chart, as practice — £20 |
+| `STRIPE_PRICE_REPORT_YEAR_AHEAD` | A year of practice — £25 |
+| `STRIPE_PRICE_REPORT_SATURN_RETURN` | The Saturn-return practice — £18 |
+| `STRIPE_PRICE_REPORT_ECLIPSE_SEASON` | The eclipse practice — £15 |
 
-Without Stripe configured, the paid routes return 503 with a clear
-message and the rest of the app continues to work normally.
+Without Stripe configured, the paid routes return 503 with a clear message and the rest of the app continues to work normally.
 
 ---
 
 ## Supabase setup
 
-Apply the schema once:
+Apply both migrations in order:
 
 ```sh
-# Supabase SQL editor, or:
+# Supabase SQL editor, or via psql:
 psql "$DATABASE_URL" -f supabase/migrations/0001_initial.sql
+psql "$DATABASE_URL" -f supabase/migrations/0002_practice.sql
 ```
 
-RLS policies in the migration authenticate via the Clerk JWT `sub` claim.
-In Clerk, create a JWT Template named **`supabase`** that signs requests
-with your Supabase JWT Secret. The server-side helper at
-[`lib/supabase/server.ts`](lib/supabase/server.ts) attaches that token to
-per-user requests.
+`0001` creates users, journal_entries, readings, reports.
+`0002` adds `hemisphere` and `practice_frequency` to users, plus the `user_intentions` and `practices` tables. RLS policies on both.
 
-The Clerk webhook (`/api/webhooks/clerk`) keeps the `users` table in sync
-on `user.created`, `user.updated`, and `user.deleted`.
+RLS policies authenticate via the Clerk JWT `sub` claim. In Clerk, create a JWT Template named **`supabase`** that signs requests with your Supabase Legacy JWT Secret. The server-side helper at [`lib/supabase/server.ts`](lib/supabase/server.ts) attaches that token to per-user requests.
+
+The Clerk webhook (`/api/webhooks/clerk`) keeps the `users` table in sync on `user.created`, `user.updated`, and `user.deleted`.
 
 ---
 
 ## Stripe setup
 
 1. Create one subscription product with two prices: monthly £9 and yearly £79.
-2. Create one product for each report type, each as a one-time payment.
+2. Create one product for each of the four reports, each as a one-time payment.
 3. Paste the resulting `price_…` IDs into the env vars above.
 4. Add a webhook endpoint pointing at `/api/webhooks/stripe`, subscribed to:
    - `checkout.session.completed`
@@ -116,15 +117,18 @@ on `user.created`, `user.updated`, and `user.deleted`.
 
 | Route | Auth | Tier |
 |---|---|---|
-| `/` | — | Public |
-| `/onboarding` | — | Public |
-| `/reading` | — | Free |
-| `/draw` | — | Free |
+| `/` | — | Public (unauth visitors redirected to `/sign-in`) |
+| `/onboarding` | — | Public (three-step ritual: date, intentions, voice) |
+| `/reading` | — | Free — Today's practice |
+| `/draw` | — | Free — Single card pull |
+| `/library` | — | Free preview / Paid full |
+| `/library/sabbats/[key]` | — | Free preview / Paid full |
 | `/journal` | Required | Free |
-| `/spread` | Required | Paid |
+| `/spread` | Required | Paid (£9/mo subscription) |
 | `/reports` | Required | Free to view, paid per report |
 | `/reports/[slug]` | Required | Owns-row only |
-| `/account` | Required | Free |
+| `/practice` | Required | Free — your log + chart + intentions |
+| `/account` | Required | Free — billing only |
 | `/sign-in` · `/sign-up` | — | Clerk |
 | `/debug/sky` | — | **Dev only** (404 in production) |
 
@@ -132,7 +136,10 @@ on `user.created`, `user.updated`, and `user.deleted`.
 
 ## Build philosophy
 
-- Tokens are the source of truth. Every colour/font/spacing value flows from CSS custom properties in [`app/globals.css`](app/globals.css). Changing a token reskins the entire app.
-- The oracle is the product. The voice prompts in [`lib/voices.ts`](lib/voices.ts) are exact — do not soften them. The model's character depends on those words.
-- All Anthropic calls run through [`lib/anthropic.ts`](lib/anthropic.ts) (or [`lib/reports.ts`](lib/reports.ts) for long-form). Never expose the API key to the client.
-- The astronomical engine is pure TypeScript with no side effects — safe to call from server or client. The reading page actually computes the SkyState client-side and ships it to the API to avoid a round-trip.
+- **The product is a practice tool**, not a horoscope reader. Every AI output is a concrete practice the reader can do in 5–15 minutes with things they already have. The astrology engine tells us when to do what; it doesn't write the headlines.
+- **Tokens are the source of truth**. Every colour/font/spacing value flows from CSS custom properties in [`app/globals.css`](app/globals.css). Changing a token reskins the entire app.
+- **The voice IS the product**. The voice prompts in [`lib/voices.ts`](lib/voices.ts) are exact — do not soften them. The model's character depends on those words. The house rules enforce the practice contract (gather/do/reflect + banned-phrase list).
+- **All Anthropic calls** run through [`lib/anthropic.ts`](lib/anthropic.ts) (short-form) or [`lib/reports.ts`](lib/reports.ts) (long-form). Never expose the API key to the client.
+- **The astronomical engine is pure TypeScript** with no side effects — safe to call from server or client. The reading page computes SkyState client-side and ships it to the API to avoid a round-trip.
+- **Almanac copy** is curated, not AI-generated. Seasonal text and sabbat content come from [`lib/almanac.ts`](lib/almanac.ts) and [`lib/sabbats.ts`](lib/sabbats.ts).
+- **47 correspondences** in [`lib/correspondences.ts`](lib/correspondences.ts) — every entry tested against an intention key so the Library search always returns something.
