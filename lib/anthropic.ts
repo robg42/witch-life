@@ -19,6 +19,27 @@ if (typeof window !== "undefined") {
 export const ORACLE_MODEL =
   process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5-20250929";
 
+/**
+ * Validate that an env-var-derived string contains only ASCII (≤127).
+ * If not, throw a diagnostic that pinpoints the offending character.
+ * Used to catch stray em dashes / curly quotes pasted into Vercel env
+ * vars at server-side init time, before the SDK can throw a more
+ * cryptic ByteString error.
+ */
+function assertAscii(name: string, value: string): void {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code > 127) {
+      throw new Error(
+        `${name} contains a non-ASCII character at position ${i} ` +
+          `(U+${code.toString(16).toUpperCase().padStart(4, "0")}). ` +
+          `This is usually a stray em dash or curly quote from copy-pasting. ` +
+          `Re-enter the value in your env settings.`,
+      );
+    }
+  }
+}
+
 let _client: Anthropic | null = null;
 function client(): Anthropic {
   if (_client) return _client;
@@ -28,6 +49,8 @@ function client(): Anthropic {
       "Missing ANTHROPIC_API_KEY. Add it to .env.local.",
     );
   }
+  assertAscii("ANTHROPIC_API_KEY", apiKey);
+  assertAscii("ANTHROPIC_MODEL", ORACLE_MODEL);
   _client = new Anthropic({ apiKey });
   return _client;
 }
