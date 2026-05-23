@@ -15,9 +15,9 @@
 
 :root {
   /* ─── Colour ──────────────────────────────────────────────────── */
-  --c-paper: #f5efdf;         /* aged ivory — the ground */
-  --c-paper-2: #ede5cf;       /* slightly deeper paper for inset surfaces */
-  --c-paper-3: #fbf7ec;       /* highlighted paper for cards / inputs */
+  --c-paper: #f0cdb4;         /* faded vintage coral — the ground */
+  --c-paper-2: #e3bb9e;       /* slightly deeper coral for inset surfaces */
+  --c-paper-3: #f8dac1;       /* highlighted coral for cards / inputs */
   --c-ink: #14110a;           /* deep ink — primary text */
   --c-rule: #2a1f12;          /* hard hairline colour */
   --c-vermilion: #b83a2e;     /* single bright accent — the printer's red */
