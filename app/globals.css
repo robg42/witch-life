@@ -3,51 +3,63 @@
 @tailwind utilities;
 
 /*
-  Witch Life — design tokens.
+  Witch Life — 19th-century almanac broadsheet design system.
 
-  Direction: earthy, alive, organic. Aged parchment. Pressed botanicals.
-  Stained glass at the back of a chapel. Warm clay, deep moss, oxidised
-  brass — the colours of a folk almanac with the spine cracked open.
-  Not dark mode. Not spacey. Cream as the floor, colour as the life.
+  The page is a broadsheet. Letterpress sensibility: heavy display
+  type, ruled architecture, columnar density, single bright accent.
+  Numbers are everywhere: dates, degrees, durations, days of the
+  cycle. Treat every page like a printed leaf of an almanac.
 
-  Tokens are the source of truth. Do not hardcode hex outside this file.
+  Tokens are the source of truth. No hex outside this file.
 */
 
 :root {
-  /* Cream surfaces — primary "paper" */
-  --color-bone: #E8D8B4;         /* primary surface — warm aged cream */
-  --color-parchment: #F4E9CC;    /* elevated cream — brighter, used for cards */
-  --color-linen: #DCC9A3;        /* deeper cream — recessed surface, slightly olive */
+  /* ─── Colour ──────────────────────────────────────────────────── */
+  --c-paper: #f5efdf;         /* aged ivory — the ground */
+  --c-paper-2: #ede5cf;       /* slightly deeper paper for inset surfaces */
+  --c-paper-3: #fbf7ec;       /* highlighted paper for cards / inputs */
+  --c-ink: #14110a;           /* deep ink — primary text */
+  --c-rule: #2a1f12;          /* hard hairline colour */
+  --c-vermilion: #b83a2e;     /* single bright accent — the printer's red */
+  --c-rust: #8b3a1e;          /* deeper red, for inset/hover */
+  --c-bone: #dcc9a6;          /* sepia divisions / table tints */
+  --c-sage: #6b7c5f;          /* pressed-leaf green, very sparing */
+  --c-ash: #6b5e50;           /* muted text / hairline labels */
+  --c-marginalia: #8a7d6b;    /* very muted, for numbered margins */
 
-  /* Inks — dark warm browns for text and lines */
-  --color-ink: #1F1810;          /* primary body text — deep coffee brown */
-  --color-bark: #4A3F30;         /* secondary text + hairline borders */
-  --color-ash: #6B6353;          /* muted text — warm grey-brown */
+  /* Legacy aliases — preserve existing utility classes during migration. */
+  --color-ink: var(--c-ink);
+  --color-bone: var(--c-paper);
+  --color-parchment: var(--c-paper-3);
+  --color-linen: var(--c-paper-2);
+  --color-clay: var(--c-vermilion);
+  --color-ember: var(--c-rust);
+  --color-ochre: var(--c-vermilion);
+  --color-saffron: var(--c-vermilion);
+  --color-bark: var(--c-rule);
+  --color-ash: var(--c-ash);
+  --color-moss: var(--c-sage);
+  --color-sage: var(--c-sage);
+  --color-aubergine: var(--c-rust);
+  --color-earth: var(--c-ink);
+  --color-wax: var(--c-paper);
+  --color-gold: var(--c-vermilion);
+  --color-smoke: var(--c-paper-2);
+  --color-forest: var(--c-sage);
 
-  /* Accents — earthy, alive */
-  --color-clay: #B85C3A;         /* primary accent — terracotta */
-  --color-ember: #C24D2A;        /* deeper rust — used for highlights, fire */
-  --color-ochre: #C68A2A;        /* warm gold — secondary accent */
-  --color-saffron: #D4A12B;      /* spice yellow — illustration accent */
-  --color-moss: #2E4326;         /* deep moss green — botanical primary */
-  --color-sage: #6F8862;         /* dusted sage — botanical secondary */
-  --color-aubergine: #4A2C3A;    /* deep berry — rarely used, for emphasis */
+  /* ─── Type ────────────────────────────────────────────────────── */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-serif: var(--font-garamond), "EB Garamond", Georgia, serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", Menlo, monospace;
+  --font-accent: var(--font-fraunces), serif; /* italic, used as accent */
 
-  /* Legacy aliases — resolve to current palette so old utility names work */
-  --color-earth: #1F1810;        /* legacy alias for ink */
-  --color-wax: #E8D8B4;          /* legacy alias for bone */
-  --color-gold: #C68A2A;         /* legacy alias for ochre */
-  --color-smoke: #DCC9A3;        /* legacy alias for linen */
-  --color-forest: #2E4326;       /* legacy alias for moss */
-  --color-ink-legacy: #1F1810;   /* kept for safety */
+  /* Old four-font aliases — every existing reference still resolves. */
+  --font-cinzel: var(--font-display);
+  --font-cormorant: var(--font-serif);
+  --font-fell: var(--font-serif);
+  --font-inter: var(--font-mono);
 
-  /* Typography */
-  --font-display: var(--font-cinzel), serif;
-  --font-serif: var(--font-cormorant), serif;
-  --font-accent: var(--font-fell), serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-
-  /* Type scale */
+  /* ─── Scale ────────────────────────────────────────────────────── */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -58,7 +70,6 @@
   --text-4xl: 2.25rem;
   --text-5xl: 3rem;
 
-  /* Spacing scale */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -69,166 +80,58 @@
   --space-16: 4rem;
   --space-24: 6rem;
 
-  /* Radius */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 8px;
+  /* Radii — broadsheets do not round corners. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
 
-  /* Borders */
-  --border-hair: 0.5px solid var(--color-bark);
-  --border-default: 1px solid var(--color-bark);
+  --transition-base: all 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
 
-  /* Transitions */
-  --transition-base: all 0.4s ease;
+* {
+  border-color: var(--c-rule);
 }
 
 html,
 body {
-  color: var(--color-ink);
+  color: var(--c-ink);
   font-family: var(--font-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/*
-  Bone surface with multi-tone gradient washes — warm clay glow at top
-  left, mossy shadow lower right, saffron warmth at the foot. Reads
-  like a page that's been handled, sun-faded in places, slightly
-  stained. The page itself is the thing.
-*/
 body {
   min-height: 100vh;
-  background-color: var(--color-bone);
+  background-color: var(--c-paper);
+  /*
+    Aged paper texture — a uniform SVG noise multiplied onto the ivory.
+    Subtle vignette at the edges hints at a press impression rather
+    than a flat screen.
+  */
   background-image:
     radial-gradient(
-      ellipse 70% 50% at 15% 10%,
-      rgba(184, 92, 58, 0.13) 0%,
-      transparent 60%
+      ellipse 100% 70% at 50% 0%,
+      rgba(20, 17, 10, 0) 0%,
+      rgba(20, 17, 10, 0.025) 100%
     ),
     radial-gradient(
-      ellipse 50% 45% at 85% 30%,
-      rgba(46, 67, 38, 0.1) 0%,
-      transparent 65%
-    ),
-    radial-gradient(
-      ellipse 85% 50% at 50% 100%,
-      rgba(212, 161, 43, 0.12) 0%,
-      transparent 70%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(232, 216, 180, 0) 0%,
-      rgba(220, 201, 163, 0.4) 100%
+      ellipse 100% 70% at 50% 100%,
+      rgba(20, 17, 10, 0) 0%,
+      rgba(20, 17, 10, 0.04) 100%
     );
   background-attachment: fixed;
-  background-size: cover;
   position: relative;
 }
 
-/*
-  Layered celestial motion behind the page. Three drifting washes
-  travelling at different speeds and along different axes — gives the
-  surface a parallax feel without using any literal stars or sparkles.
-  The page itself feels like it's moving with the sky.
-
-    ::after  — warm ochre glow drifting NE → SW over 32 seconds
-    .wl-wash — mossy cool wash drifting E → W over 54 seconds
-    .wl-trail — clay tint slowly orbiting the centre over 120 seconds
-*/
-@keyframes wl-drift-warm {
-  0%,
-  100% {
-    transform: translate(0%, 0%);
-    opacity: 0.55;
-  }
-  50% {
-    transform: translate(22%, 9%);
-    opacity: 0.9;
-  }
-}
-
-@keyframes wl-drift-cool {
-  0%,
-  100% {
-    transform: translate(0%, 0%);
-    opacity: 0.45;
-  }
-  50% {
-    transform: translate(-18%, -6%);
-    opacity: 0.75;
-  }
-}
-
-@keyframes wl-orbit {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-body::after {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  inset: -10%;
-  z-index: 0;
-  background: radial-gradient(
-    ellipse 35% 28% at 28% 25%,
-    rgba(198, 138, 42, 0.2) 0%,
-    transparent 65%
-  );
-  animation: wl-drift-warm 32s ease-in-out infinite;
-  mix-blend-mode: multiply;
-}
-
-/*
-  Second body wash. Mounted on a span we inject below — keeps body::*
-  pseudo-elements available. (See app/layout.tsx for the injection.)
-*/
-.wl-wash {
-  pointer-events: none;
-  position: fixed;
-  inset: -10%;
-  z-index: 0;
-  background: radial-gradient(
-    ellipse 40% 32% at 80% 65%,
-    rgba(46, 67, 38, 0.16) 0%,
-    transparent 65%
-  );
-  animation: wl-drift-cool 54s ease-in-out infinite;
-  mix-blend-mode: multiply;
-}
-
-.wl-trail {
-  pointer-events: none;
-  position: fixed;
-  inset: -25%;
-  z-index: 0;
-  transform-origin: center center;
-  background: radial-gradient(
-    ellipse 12% 8% at 65% 35%,
-    rgba(184, 92, 58, 0.13) 0%,
-    transparent 70%
-  );
-  animation: wl-orbit 180s linear infinite;
-  mix-blend-mode: multiply;
-}
-
-/*
-  Organic paper-fibre noise. Subtle on its own, but multiplied across
-  the whole surface it gives the bone a real material feel.
-*/
 body::before {
   content: "";
   pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.14;
+  opacity: 0.18;
   mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.29 0 0 0 0 0.25 0 0 0 0 0.19 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.17 0 0 0 0 0.12 0 0 0 0 0.06 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 240px 240px;
 }
 
@@ -237,67 +140,167 @@ body > * {
   z-index: 1;
 }
 
-/* Oracle voice body copy — generous size and line-height. */
-.oracle-body {
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  line-height: 1.85;
-  letter-spacing: 0.005em;
+::selection {
+  background-color: var(--c-vermilion);
+  color: var(--c-paper);
 }
 
-/* Display headings — Cinzel uppercase, used sparingly. */
+/* ─── Type primitives ─────────────────────────────────────────────── */
+
 .display {
   font-family: var(--font-display);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 700;
+  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
 }
 
-/* Archaic accents — pull quotes, card names, hand-set captions. */
-.accent {
-  font-family: var(--font-accent);
+.display-italic {
+  font-family: var(--font-display);
   font-style: italic;
+  font-weight: 500;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
-/* UI chrome — Inter for buttons, labels, navigation. */
-.ui {
-  font-family: var(--font-sans);
+.broadsheet {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: "opsz" 144;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
 }
+
+.almanac {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--c-ash);
+}
+
+.almanac-lg {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.italic-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.oracle-body {
+  font-family: var(--font-serif);
+  font-size: 1.18rem;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+/* Drop-cap utility — used on the first paragraph of major prose. */
+.drop-cap::first-letter {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variation-settings: "opsz" 144;
+  float: left;
+  font-size: 4.3em;
+  line-height: 0.82;
+  padding: 0.04em 0.1em 0 0;
+  color: var(--c-vermilion);
+}
+
+/* Marginalia numeral — used in lists where the number lives outside the column. */
+.marginalia {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variation-settings: "opsz" 96;
+  color: var(--c-vermilion);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+/* ─── Layout primitives ───────────────────────────────────────────── */
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .rule-t {
+    border-top: 1.5px solid var(--c-rule);
   }
-  .hairline {
-    border: var(--border-hair);
+  .rule-b {
+    border-bottom: 1.5px solid var(--c-rule);
+  }
+  .rule-double {
+    border-top: 1.5px solid var(--c-rule);
+    box-shadow: 0 3px 0 -1.5px var(--c-rule);
+  }
+  .ink-shadow {
+    box-shadow: 6px 6px 0 -1px var(--c-ink);
+  }
+  .vermilion-shadow {
+    box-shadow: 5px 5px 0 -1px var(--c-vermilion);
+  }
+  .grid-rule > * + * {
+    border-left: 1px solid var(--c-rule);
+  }
+  .stamp {
+    display: inline-block;
+    border: 1.5px solid var(--c-vermilion);
+    color: var(--c-vermilion);
+    padding: 2px 6px 1px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.6rem;
+    font-weight: 500;
+  }
+  .stamp-ink {
+    display: inline-block;
+    border: 1.5px solid var(--c-ink);
+    color: var(--c-ink);
+    padding: 2px 6px 1px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.6rem;
+    font-weight: 500;
   }
 }
 
-/*
-  Halo for elements that should feel lit from within — warm clay glow,
-  not generic glow.
-*/
-.glow-warm {
-  position: relative;
+/* ─── Ornaments — used between sections ──────────────────────────── */
+
+.fleuron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  color: var(--c-rule);
+  margin: 2.5rem 0;
 }
-.glow-warm::before {
+.fleuron::before,
+.fleuron::after {
   content: "";
-  position: absolute;
-  inset: -12%;
-  z-index: -1;
-  background: radial-gradient(
-    circle at center,
-    rgba(198, 138, 42, 0.22) 0%,
-    rgba(184, 92, 58, 0.07) 40%,
-    transparent 72%
-  );
-  pointer-events: none;
+  flex: 1;
+  height: 1.5px;
+  background: currentColor;
+}
+.fleuron-mark {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--c-vermilion);
 }
 
-/* Editorial fade-up — slow, the page coming into focus. */
+/* ─── Motion ──────────────────────────────────────────────────────── */
+
 @keyframes wl-fade-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -307,69 +310,145 @@ body > * {
 
 .fade-up {
   opacity: 0;
-  animation: wl-fade-up 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation: wl-fade-up 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
 
-.section-rule {
+@keyframes wl-ink-spread {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+.ink-spread {
+  animation: wl-ink-spread 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes wl-rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Pulse the vermilion on certain accents */
+@keyframes wl-vermilion-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.pulse-vermilion {
+  animation: wl-vermilion-pulse 4s ease-in-out infinite;
+}
+
+/* Link styling — broadsheet anchors get an underline that grows on hover. */
+a.wl-link {
   position: relative;
-  border-top: 1px solid rgba(74, 63, 48, 0.35);
+  color: var(--c-ink);
+  text-decoration: none;
+  background-image: linear-gradient(
+    to right,
+    var(--c-vermilion) 0,
+    var(--c-vermilion) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 100%;
+  padding-bottom: 1px;
+  transition: var(--transition-base);
+}
+a.wl-link:hover {
+  color: var(--c-vermilion);
+  background-size: 100% 2px;
 }
 
-/*
-  Celestial motion vocabulary — used by botanical and astrological art.
-*/
-
-/* Slow rotation — the wheel of the year. One revolution every 5 min. */
-@keyframes wl-rotate-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* Buttons — sharp, ink-shadowed broadsheet buttons. */
+.btn-vermilion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--c-vermilion);
+  color: var(--c-paper);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 0.85rem 1.5rem;
+  border: 1.5px solid var(--c-ink);
+  box-shadow: 4px 4px 0 -0.5px var(--c-ink);
+  transition: var(--transition-base);
+  cursor: pointer;
 }
-.spin-celestial { animation: wl-rotate-slow 300s linear infinite; }
-.spin-celestial-reverse { animation: wl-rotate-slow 420s linear infinite reverse; }
-
-/* Orbital marker travelling around an unseen ring. */
-@keyframes wl-orbit-90 {
-  from { transform: rotate(0deg) translateX(var(--orbit-r, 110px)) rotate(0deg); }
-  to   { transform: rotate(360deg) translateX(var(--orbit-r, 110px)) rotate(-360deg); }
+.btn-vermilion:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 -0.5px var(--c-ink);
+  background: var(--c-rust);
 }
-.orbit-marker {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  margin-left: -4px;
-  margin-top: -4px;
-  animation: wl-orbit-90 90s linear infinite;
-  transform-origin: 4px 4px;
-}
-
-/* Glow pulse — for the moon halo. Long breath. */
-@keyframes wl-breath {
-  0%, 100% { opacity: 0.55; transform: scale(1); }
-  50%      { opacity: 0.9;  transform: scale(1.06); }
-}
-.breath-slow {
-  animation: wl-breath 11s ease-in-out infinite;
-  transform-origin: center center;
+.btn-vermilion:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 -0.5px var(--c-ink);
 }
 
-/* Botanical sway — for plant illustrations. Small angle, slow period. */
-@keyframes wl-sway {
-  0%, 100% { transform: rotate(-0.6deg); }
-  50%      { transform: rotate(0.6deg); }
+.btn-ink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  color: var(--c-ink);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 0.7rem 1.25rem;
+  border: 1.5px solid var(--c-ink);
+  transition: var(--transition-base);
+  cursor: pointer;
 }
-@keyframes wl-sway-counter {
-  0%, 100% { transform: rotate(0.5deg); }
-  50%      { transform: rotate(-0.5deg); }
+.btn-ink:hover {
+  background: var(--c-ink);
+  color: var(--c-paper);
 }
-.sway       { animation: wl-sway 9s ease-in-out infinite;        transform-origin: bottom center; }
-.sway-slow  { animation: wl-sway 14s ease-in-out infinite;       transform-origin: bottom center; }
-.sway-counter { animation: wl-sway-counter 11s ease-in-out infinite; transform-origin: bottom center; }
 
-/* Stagger helper — used inline with animation-delay on fade-up children. */
-.fade-up-1 { animation-delay: 80ms; }
-.fade-up-2 { animation-delay: 220ms; }
-.fade-up-3 { animation-delay: 380ms; }
-.fade-up-4 { animation-delay: 560ms; }
-.fade-up-5 { animation-delay: 760ms; }
+/* ─── Form chrome ─────────────────────────────────────────────────── */
+
+input,
+textarea,
+select {
+  background: transparent;
+}
+
+/* Custom selection */
+input.broadsheet-input,
+textarea.broadsheet-input {
+  background: var(--c-paper-3);
+  border: 1.5px solid var(--c-rule);
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--c-ink);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+input.broadsheet-input:focus,
+textarea.broadsheet-input:focus {
+  border-color: var(--c-vermilion);
+  box-shadow: 3px 3px 0 -0.5px var(--c-vermilion);
+}
+
+input.broadsheet-input::placeholder,
+textarea.broadsheet-input::placeholder {
+  color: var(--c-marginalia);
+  font-style: italic;
+}

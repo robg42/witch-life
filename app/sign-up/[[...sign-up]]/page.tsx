@@ -1,96 +1,192 @@
 import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { getSkyState } from "@/lib/astro";
-import { HerbariumPlate } from "@/components/site/herbarium-plate";
+import { almanacFor } from "@/lib/almanac";
+import { EditionInfo, Fleuron } from "@/components/broadsheet";
 
 export const dynamic = "force-dynamic";
 
 export default function SignUpPage() {
-  const sky = getSkyState(new Date());
-  const dateLong = new Date().toLocaleDateString("en-GB", {
+  const now = new Date();
+  const sky = getSkyState(now);
+  const almanac = almanacFor(now);
+  const day = now.getUTCDate();
+  const dateLong = now.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+  const mercuryStatus = sky.planets.mercury.retrograde
+    ? "Retrograde"
+    : sky.planets.mercury.shadowPeriod
+      ? "In shadow"
+      : "Direct";
 
   return (
     <main className="min-h-screen text-ink">
-      <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 px-6 py-8 md:grid-cols-12 md:gap-12 md:px-12 md:py-12">
-        <section className="relative flex flex-col justify-between md:col-span-7">
-          <header className="flex items-baseline justify-between font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-            <Link
-              href="/"
-              className="text-ink transition-base hover:text-clay"
-            >
-              Witch Life
-            </Link>
-            <span className="hidden text-bark/60 md:inline">{dateLong}</span>
-          </header>
-
-          <div className="my-8 flex flex-1 flex-col items-center justify-center md:my-0">
-            <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay">
-              Begin the daily ritual
-            </p>
-            <h1 className="display mt-6 text-center text-4xl leading-[1.05] text-ink md:text-6xl lg:text-7xl">
-              What is moving,
-              <br />
-              <span className="text-clay">what is still,</span>
-              <br />
-              what is building.
+      <div className="mx-auto max-w-[1280px] px-5 py-6 md:px-12 md:py-10">
+        <header className="rule-b pb-4">
+          <div className="almanac flex flex-wrap items-end justify-between gap-3">
+            <span>Volume I · For the practitioner</span>
+            <span>{dateLong.toUpperCase()}</span>
+          </div>
+          <div className="mt-2 grid grid-cols-1 items-end gap-2 md:grid-cols-[1fr_auto] md:gap-8">
+            <h1 className="broadsheet text-[clamp(3.2rem,12vw,9rem)] leading-[0.82] fade-up">
+              Witch&nbsp;Life
             </h1>
+            <p
+              className="display-italic text-lg text-ink/85 md:text-right md:text-2xl fade-up"
+              style={{ animationDelay: "120ms" }}
+            >
+              An almanac of daily practice,
+              <br className="hidden md:block" /> drawn from the moon, the season,
+              <br className="hidden md:block" /> the land, and your chart.
+            </p>
+          </div>
+        </header>
 
-            <div className="my-10">
-              <HerbariumPlate className="w-[280px] md:w-[340px]" />
+        <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr] md:gap-16">
+          <article className="fade-up" style={{ animationDelay: "180ms" }}>
+            <div className="flex items-start gap-5">
+              <span className="display text-vermilion text-[clamp(4rem,10vw,7rem)] leading-none">
+                {day}
+              </span>
+              <div className="mt-3">
+                <p className="almanac">For the day</p>
+                <p className="display-italic mt-1 text-2xl text-ink">
+                  {almanac.season} — {almanac.marker.toLowerCase()}.
+                </p>
+              </div>
             </div>
 
-            <p className="font-accent max-w-md text-center text-xl italic leading-snug text-ink/85">
-              &ldquo;The sky is already speaking. The oracle only listens.&rdquo;
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1 font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
-            <span className="text-clay">Today</span>
-            <span>
-              {sky.moon.phaseSymbol} {sky.moon.phaseName} in {sky.moon.sign}
-            </span>
-            <span className="text-bark/30">·</span>
-            <span>Sun in {sky.sun.sign}</span>
-            <span className="text-bark/30">·</span>
-            <span>
-              Mercury{" "}
-              {sky.planets.mercury.retrograde
-                ? "retrograde"
-                : sky.planets.mercury.shadowPeriod
-                  ? "in shadow"
-                  : "direct"}
-            </span>
-          </div>
-        </section>
-
-        <section className="flex flex-col justify-center md:col-span-5">
-          <div className="md:max-w-md">
-            <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay mb-4">
-              Save your chart
-            </p>
-            <h2 className="display text-3xl text-ink md:text-4xl">Begin</h2>
-            <p className="oracle-body mt-4 text-ink/75">
-              An account holds your chart, your journal, your reading history.{" "}
-              <Link
-                href="/sign-in"
-                className="text-clay underline-offset-4 transition-base hover:underline"
-              >
-                Or return if the oracle already knows you
-              </Link>
-              .
+            <p className="oracle-body mt-8 drop-cap text-ink/95">
+              The almanac is opening a new leaf for you. We&rsquo;ll cast your
+              chart against the moment you arrived, ask you to choose one to
+              three intentions for the season, and pick one of three voices
+              the oracle will speak to you in. Then every day you return, the
+              practice that lands here will be shaped by who you are and what
+              the sky is doing.
             </p>
 
-            <div className="mt-8">
-              <SignUp />
+            <Fleuron mark="❋" />
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <Column
+                num="I"
+                title="Your day in the year"
+                body="The date you arrived, plus optional time and place. Enough to know what was overhead when you began."
+              />
+              <Column
+                num="II"
+                title="Your intentions"
+                body="One to three from a menu of ten — clarity, courage, rest, grief, fertility — to shape the practice."
+              />
+              <Column
+                num="III"
+                title="Your voice"
+                body="The Root, the Blade, or the Tide. The oracle will speak in your chosen register."
+              />
             </div>
+
+            <div className="mt-10">
+              <EditionInfo
+                parts={[
+                  {
+                    label: "Moon",
+                    value: (
+                      <span>
+                        <span className="text-vermilion mr-2 text-lg leading-none">
+                          {sky.moon.phaseSymbol}
+                        </span>
+                        {sky.moon.phaseName}
+                      </span>
+                    ),
+                  },
+                  { label: "Sun", value: sky.sun.sign },
+                  {
+                    label: "Mercury",
+                    value: (
+                      <span
+                        className={
+                          sky.planets.mercury.retrograde
+                            ? "text-vermilion"
+                            : sky.planets.mercury.shadowPeriod
+                              ? "text-sage"
+                              : "text-ink"
+                        }
+                      >
+                        {mercuryStatus}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: "Dark moon",
+                    value: `${Math.round(sky.moon.daysToNewMoon)}d`,
+                  },
+                ]}
+              />
+            </div>
+          </article>
+
+          <aside className="md:pl-10 md:border-l md:border-rule">
+            <div
+              className="sticky top-10 fade-up"
+              style={{ animationDelay: "240ms" }}
+            >
+              <p className="almanac">A notice</p>
+              <h2 className="display mt-2 text-4xl md:text-5xl">Begin</h2>
+              <p className="italic-accent mt-3 text-lg text-ink/80">
+                Save your chart. Begin the daily ritual.
+              </p>
+              <p className="oracle-body mt-3 text-ink/80">
+                An account holds your chart, your journal, your practice log.
+                <br />
+                <Link href="/sign-in" className="wl-link">
+                  Or return if the oracle already knows you
+                </Link>
+                .
+              </p>
+
+              <div className="mt-8">
+                <SignUp />
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <footer className="rule-t mt-16 pt-4 almanac">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <span>Witch Life</span>
+            <span className="italic-accent normal-case tracking-normal text-base text-ink/70">
+              Gather. Do. Reflect.
+            </span>
+            <span>No prediction · only attention</span>
           </div>
-        </section>
+        </footer>
       </div>
     </main>
+  );
+}
+
+function Column({
+  num,
+  title,
+  body,
+}: {
+  num: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="rule-t pt-3">
+      <div className="flex items-baseline gap-2">
+        <span className="marginalia text-base">{num}</span>
+        <h3 className="display text-lg text-ink">{title}</h3>
+      </div>
+      <p className="italic-accent mt-2 text-base text-ink/80 leading-snug">
+        {body}
+      </p>
+    </div>
   );
 }

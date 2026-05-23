@@ -12,18 +12,22 @@ import {
 import { INTENTIONS, type IntentionKey } from "@/lib/intentions";
 import { loadBirth } from "@/lib/birth-details";
 import type { LibraryPracticeResponse } from "@/app/api/library/practice/route";
+import { Stamp } from "@/components/broadsheet";
 
 /*
-  Searchable correspondence browser. Free users see PREVIEW_CORRESPONDENCES
-  with an upgrade gate around the rest. Subscribers see everything plus
-  the "Practice with this" affordance.
+  The Library browser as a printed index card with filters at top, a
+  ruled grid of entries below, and a broadsheet-style detail dialog
+  for any entry.
 */
 
 interface Props {
   isSubscribed: boolean;
 }
 
-type Filter = { kind: "all" } | { kind: "type"; type: CorrespondenceType } | { kind: "intention"; intention: IntentionKey };
+type Filter =
+  | { kind: "all" }
+  | { kind: "type"; type: CorrespondenceType }
+  | { kind: "intention"; intention: IntentionKey };
 
 export function LibraryBrowser({ isSubscribed }: Props) {
   const [filter, setFilter] = useState<Filter>({ kind: "all" });
@@ -31,9 +35,7 @@ export function LibraryBrowser({ isSubscribed }: Props) {
   const [selected, setSelected] = useState<Correspondence | null>(null);
 
   const all = useMemo<Correspondence[]>(() => {
-    const source = isSubscribed
-      ? CORRESPONDENCES
-      : PREVIEW_CORRESPONDENCES;
+    const source = isSubscribed ? CORRESPONDENCES : PREVIEW_CORRESPONDENCES;
     let filtered: Correspondence[] = [...source];
     if (filter.kind === "type") {
       filtered = filtered.filter((c) => c.type === filter.type);
@@ -54,64 +56,73 @@ export function LibraryBrowser({ isSubscribed }: Props) {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Search + filters */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-baseline gap-3">
+      {/* Search row */}
+      <div className="flex flex-col gap-5">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
           <input
             type="text"
-            placeholder="Search — rosemary, courage, a candle…"
+            placeholder="rosemary, courage, a candle…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 border-b border-bark/30 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/40 focus:border-clay"
+            className="broadsheet-input"
           />
-          {query && (
-            <button
-              onClick={() => setQuery("")}
-              className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60 hover:text-clay"
-            >
-              clear
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setFilter({ kind: "all" });
+            }}
+            className="btn-ink"
+          >
+            Clear
+          </button>
         </div>
 
-        {/* Type chips */}
-        <div className="flex flex-wrap gap-2">
-          <Chip
-            active={filter.kind === "all"}
-            onClick={() => setFilter({ kind: "all" })}
-            label="All"
-          />
-          {CORRESPONDENCE_TYPES.map(({ type, label }) => (
+        {/* Filters — type and intention rows, separated */}
+        <div className="grid grid-cols-1 gap-4 rule-t pt-4">
+          <FilterRow label="By type">
             <Chip
-              key={type}
-              active={filter.kind === "type" && filter.type === type}
-              onClick={() => setFilter({ kind: "type", type })}
-              label={label}
+              active={filter.kind === "all"}
+              onClick={() => setFilter({ kind: "all" })}
+              label="All"
             />
-          ))}
-        </div>
-
-        {/* Intention chips */}
-        <div className="flex flex-wrap gap-2">
-          <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60 self-center">
-            For
-          </span>
-          {INTENTIONS.map((i) => (
-            <Chip
-              key={i.key}
-              active={
-                filter.kind === "intention" && filter.intention === i.key
-              }
-              onClick={() => setFilter({ kind: "intention", intention: i.key })}
-              label={i.label}
-              tone="moss"
-            />
-          ))}
+            {CORRESPONDENCE_TYPES.map(({ type, label }) => (
+              <Chip
+                key={type}
+                active={filter.kind === "type" && filter.type === type}
+                onClick={() => setFilter({ kind: "type", type })}
+                label={label}
+              />
+            ))}
+          </FilterRow>
+          <FilterRow label="By intention">
+            {INTENTIONS.map((i) => (
+              <Chip
+                key={i.key}
+                active={
+                  filter.kind === "intention" && filter.intention === i.key
+                }
+                onClick={() =>
+                  setFilter({ kind: "intention", intention: i.key })
+                }
+                label={i.label}
+                tone="sage"
+              />
+            ))}
+          </FilterRow>
         </div>
       </div>
 
-      {/* Results */}
-      <div className="grid grid-cols-1 gap-px bg-bark/15 sm:grid-cols-2 md:grid-cols-3">
+      {/* Result count + heading */}
+      <div className="rule-t rule-b py-3 flex items-baseline justify-between almanac">
+        <span>
+          {all.length} {all.length === 1 ? "entry" : "entries"}
+        </span>
+        <span>The index</span>
+      </div>
+
+      {/* Results — ruled grid */}
+      <div className="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3">
         {all.map((c) => (
           <Card
             key={c.id}
@@ -123,17 +134,17 @@ export function LibraryBrowser({ isSubscribed }: Props) {
       </div>
 
       {all.length === 0 && (
-        <p className="font-serif text-base italic text-bark/70">
-          Nothing matches that search yet.
+        <p className="italic-accent text-base text-ink/70">
+          Nothing matches that yet. Try a different word.
         </p>
       )}
 
-      {/* Locked banner for free users */}
       {!isSubscribed && (
-        <LockedBanner remaining={CORRESPONDENCES.length - PREVIEW_CORRESPONDENCES.length} />
+        <LockedBanner
+          remaining={CORRESPONDENCES.length - PREVIEW_CORRESPONDENCES.length}
+        />
       )}
 
-      {/* Detail modal-ish panel */}
       {selected && (
         <DetailPanel
           entry={selected}
@@ -145,29 +156,42 @@ export function LibraryBrowser({ isSubscribed }: Props) {
   );
 }
 
+function FilterRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-2">
+      <span className="almanac w-24 shrink-0">{label}</span>
+      <div className="flex flex-wrap items-baseline gap-2">{children}</div>
+    </div>
+  );
+}
+
 function Chip({
   active,
   onClick,
   label,
-  tone = "clay",
+  tone = "vermilion",
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
-  tone?: "clay" | "moss";
+  tone?: "vermilion" | "sage";
 }) {
-  const activeCls =
-    tone === "moss"
-      ? "border-moss bg-moss/10 text-moss"
-      : "border-clay bg-clay/10 text-clay";
+  const activeBorderCls =
+    tone === "sage" ? "border-sage text-sage bg-sage/5" : "border-vermilion text-vermilion bg-vermilion/5";
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`font-sans text-[10px] uppercase tracking-[0.25em] border px-3 py-1.5 transition-base ${
+      className={`font-mono text-[10px] uppercase tracking-[0.2em] border-[1.5px] px-3 py-1.5 transition-base ${
         active
-          ? activeCls
-          : "border-bark/25 text-bark/70 hover:border-clay hover:text-clay"
+          ? activeBorderCls
+          : "border-rule text-ink/70 hover:border-vermilion hover:text-vermilion"
       }`}
     >
       {label}
@@ -188,37 +212,34 @@ function Card({
     <button
       type="button"
       onClick={onOpen}
-      className="group flex flex-col items-start gap-2 bg-bone/90 px-5 py-5 text-left transition-base hover:bg-parchment"
+      className="group relative flex flex-col items-start gap-2 bg-paper px-5 py-5 text-left transition-base hover:bg-paper-3"
     >
-      <div className="flex w-full items-baseline justify-between">
-        <span className="font-sans text-[9px] uppercase tracking-[0.3em] text-clay">
-          {entry.type}
-        </span>
-        <span className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/50 group-hover:text-clay">
-          {isSubscribed ? "open" : "preview"} →
+      <div className="flex w-full items-baseline justify-between almanac">
+        <span className="text-vermilion">{entry.type}</span>
+        <span className="text-ink/50 group-hover:text-vermilion">
+          {isSubscribed ? "Open" : "Preview"} →
         </span>
       </div>
-      <span className="accent text-2xl text-ink">{entry.name}</span>
-      <p className="font-serif text-sm italic text-ink/85">{entry.summary}</p>
+      <h3 className="display-italic text-3xl text-ink leading-none mt-1">
+        {entry.name}
+      </h3>
+      <p className="italic-accent text-base text-ink/80 leading-snug">
+        {entry.summary}
+      </p>
     </button>
   );
 }
 
 function LockedBanner({ remaining }: { remaining: number }) {
   return (
-    <div className="rounded-sm border border-clay/40 bg-clay/5 px-6 py-5">
-      <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
-        {remaining}+ more in the full library
+    <div className="border-[2px] border-vermilion bg-vermilion/5 px-6 py-5 vermilion-shadow">
+      <Stamp tone="vermilion">For subscribers</Stamp>
+      <p className="oracle-body mt-3 text-ink/90 max-w-2xl">
+        {remaining}+ more entries in the full library. Subscribers also get
+        the &ldquo;Practice with this&rdquo; generator — each correspondence
+        can be turned into a tailored five-to-ten minute ritual.
       </p>
-      <p className="oracle-body mt-2 text-ink/85">
-        Subscribers get every entry plus the Practice generator — each
-        correspondence can be turned into a 5–10 minute ritual using that
-        specific thing.
-      </p>
-      <Link
-        href="/account"
-        className="mt-4 inline-block font-sans text-xs uppercase tracking-[0.25em] border border-clay bg-clay px-6 py-3 text-parchment transition-base hover:bg-clay/85"
-      >
+      <Link href="/account" className="btn-vermilion mt-5 no-underline">
         Subscribe — £9 / month
       </Link>
     </div>
@@ -246,7 +267,7 @@ function DetailPanel({
     if (!birth) {
       setPractice({
         kind: "error",
-        message: "Cast your chart first — visit Your roots.",
+        message: "Cast your chart first — visit Your practice.",
       });
       return;
     }
@@ -289,145 +310,144 @@ function DetailPanel({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 px-4 py-8 md:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 px-4 py-6 md:items-center md:py-12"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-sm border border-bark/30 bg-bone p-6 shadow-xl md:p-8"
+        className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto border-[2px] border-ink bg-paper-3 ink-shadow"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="flex items-baseline justify-between">
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
-            {entry.type}
-          </p>
+        {/* Detail header */}
+        <header className="rule-b sticky top-0 bg-paper-3 px-6 py-3 flex items-baseline justify-between almanac z-10">
+          <span className="text-vermilion">{entry.type}</span>
           <button
             type="button"
             onClick={onClose}
-            className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60 hover:text-clay"
+            className="text-ink/60 hover:text-vermilion"
           >
             close ✕
           </button>
         </header>
 
-        <h2 className="accent mt-2 text-3xl text-ink md:text-4xl">
-          {entry.name}
-        </h2>
-        <p className="font-accent mt-2 text-lg italic text-ink/85">
-          {entry.summary}
-        </p>
-
-        <section className="mt-6">
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-            Traditional uses
-          </p>
-          <ul className="mt-3 space-y-2">
-            {entry.traditionalUses.map((u, i) => (
-              <li
-                key={i}
-                className="font-serif text-base text-ink/90 before:mr-2 before:text-clay before:content-['•']"
-              >
-                {u}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="mt-6">
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-            Best for
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {entry.bestFor.map((i) => (
-              <span
-                key={i}
-                className="font-sans text-[10px] uppercase tracking-[0.25em] text-moss"
-              >
-                {i}
-              </span>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-8 rounded-sm border border-clay/40 bg-clay/5 p-5">
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
-            Practice with this
-          </p>
-          <p className="oracle-body mt-2 text-ink/90">
-            {entry.practiceHint}
+        <div className="px-6 py-7 md:px-10 md:py-10">
+          <h2 className="display text-[clamp(3rem,7vw,5rem)] leading-[0.85]">
+            {entry.name}
+          </h2>
+          <p className="display-italic mt-3 text-xl text-ink/85 md:text-2xl">
+            {entry.summary}
           </p>
 
-          {isSubscribed && practice.kind === "idle" && (
-            <button
-              type="button"
-              onClick={generate}
-              className="mt-4 font-sans text-xs uppercase tracking-[0.25em] border border-clay bg-clay px-5 py-2 text-parchment transition-base hover:bg-clay/85"
-            >
-              Generate a full practice
-            </button>
-          )}
-          {!isSubscribed && (
-            <p className="mt-4 font-sans text-[10px] uppercase tracking-[0.25em] text-bark/70">
-              Subscribers can generate a tailored ritual using this entry.
-            </p>
-          )}
+          <section className="rule-t mt-8 pt-4">
+            <p className="almanac">Traditional uses</p>
+            <ul className="mt-3 space-y-2">
+              {entry.traditionalUses.map((u, i) => (
+                <li
+                  key={i}
+                  className="font-serif text-lg text-ink/95 grid grid-cols-[2rem_1fr] items-baseline gap-3"
+                >
+                  <span className="font-mono text-vermilion text-sm">—</span>
+                  <span>{u}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-          {practice.kind === "loading" && (
-            <p className="mt-4 font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
-              Generating…
-            </p>
-          )}
-          {practice.kind === "error" && (
-            <p className="mt-4 font-sans text-xs text-clay">
-              {practice.message}
-            </p>
-          )}
-          {practice.kind === "ok" && (
-            <div className="mt-5 fade-up">
-              <p className="accent text-xl text-ink">{practice.data.title}</p>
-              <p className="oracle-body mt-2 text-ink/90">
-                {practice.data.intentionLine}
-              </p>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
-                    Gather
-                  </p>
-                  <ul className="mt-2 space-y-1.5">
-                    {practice.data.gather.map((g, i) => (
-                      <li
-                        key={i}
-                        className="font-serif text-sm text-ink/90"
-                      >
-                        — {g}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
-                    Do
-                  </p>
-                  <ol className="mt-2 space-y-2">
-                    {practice.data.steps.map((s, i) => (
-                      <li key={i} className="font-serif text-sm text-ink/90">
-                        <span className="font-sans text-[9px] uppercase tracking-wider text-bark/60">
-                          {s.duration}
-                        </span>
-                        <br />
-                        {s.action}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </div>
-              <p className="mt-4 font-serif text-sm italic text-ink/85">
-                Then write: {practice.data.reflectionPrompt}
-              </p>
+          <section className="rule-t mt-6 pt-4">
+            <p className="almanac">Best for</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {entry.bestFor.map((i) => (
+                <Stamp key={i} tone="sage">
+                  {i}
+                </Stamp>
+              ))}
             </div>
-          )}
-        </section>
+          </section>
+
+          <section className="mt-8 border-[2px] border-vermilion bg-vermilion/5 px-6 py-5">
+            <div className="flex items-baseline justify-between almanac">
+              <Stamp tone="vermilion">Practice with this</Stamp>
+              <span className="text-ink/50">5–10 min</span>
+            </div>
+            <p className="oracle-body mt-3 text-ink/90 italic-accent">
+              {entry.practiceHint}
+            </p>
+
+            {isSubscribed && practice.kind === "idle" && (
+              <button
+                type="button"
+                onClick={generate}
+                className="btn-vermilion mt-5 no-underline"
+              >
+                Generate a full practice <span>→</span>
+              </button>
+            )}
+            {!isSubscribed && (
+              <p className="almanac mt-4 text-ink/60">
+                Subscribers can generate a tailored ritual using this entry.
+              </p>
+            )}
+
+            {practice.kind === "loading" && (
+              <p className="almanac mt-5">Generating…</p>
+            )}
+            {practice.kind === "error" && (
+              <p className="mt-5 font-mono text-sm text-vermilion">
+                {practice.message}
+              </p>
+            )}
+            {practice.kind === "ok" && (
+              <div className="mt-6 fade-up">
+                <h3 className="display text-2xl text-ink">
+                  {practice.data.title}
+                </h3>
+                <p className="oracle-body mt-2 text-ink/90">
+                  {practice.data.intentionLine}
+                </p>
+                <div className="mt-5 grid gap-6 md:grid-cols-2">
+                  <div>
+                    <p className="almanac text-vermilion">Gather</p>
+                    <ul className="mt-2 space-y-1.5">
+                      {practice.data.gather.map((g, i) => (
+                        <li
+                          key={i}
+                          className="font-serif text-base text-ink/95 grid grid-cols-[1.5rem_1fr] gap-2"
+                        >
+                          <span className="font-mono text-sm text-vermilion">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <span>{g}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="almanac text-vermilion">Do</p>
+                    <ol className="mt-2 space-y-3">
+                      {practice.data.steps.map((s, i) => (
+                        <li
+                          key={i}
+                          className="font-serif text-base text-ink/95"
+                        >
+                          <span className="font-mono text-xs uppercase tracking-[0.15em] text-vermilion">
+                            {s.duration}
+                          </span>
+                          <br />
+                          {s.action}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+                <p className="rule-t mt-6 pt-4 italic-accent text-base text-ink/85">
+                  <span className="almanac mr-3">Then write</span>
+                  {practice.data.reflectionPrompt}
+                </p>
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   );

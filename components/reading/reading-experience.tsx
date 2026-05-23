@@ -10,24 +10,25 @@ import {
   type SkyState,
 } from "@/lib/astro";
 import { birthToUtcDate, loadBirth, type BirthDetails } from "@/lib/birth-details";
-import type {
-  ReadingResponse,
-  PracticeStep,
-} from "@/app/api/reading/route";
+import type { ReadingResponse, PracticeStep } from "@/app/api/reading/route";
 import { summariseEntries, type JournalEntry } from "@/lib/journal";
 import { almanacFor } from "@/lib/almanac";
-import { TodayPanel } from "@/components/site/today-panel";
 import { dailyCard, type Card } from "@/lib/deck";
-import { CardArt } from "@/components/cards/card-art";
 import { VOICE_LABEL } from "@/lib/voices";
 import { MarkDoneButton } from "@/components/practice/mark-done-button";
+import {
+  EditionInfo,
+  Fleuron,
+  Frame,
+  Stamp,
+  SectionHeader,
+} from "@/components/broadsheet";
 
 /*
-  Today's Practice page. The output of /api/reading is now a practice
-  (gather, steps, reflect) rather than interpretive prose. This file
-  renders that practice as a real, usable thing: a checklist of items
-  to gather, a numbered sequence of timed steps, a reflection prompt
-  to take to the journal, and the day's card with its action.
+  Today&rsquo;s practice rendered as a broadsheet recipe page. The intention
+  is set with a drop cap; the gather list lives in the margin as
+  numbered marginalia; the steps are a ruled table; the reflection is
+  a framed inset with a vermilion stamp.
 */
 
 export function ReadingExperience() {
@@ -47,7 +48,7 @@ export function ReadingExperience() {
     setBirth(b);
   }, [router]);
 
-  if (!birth) return <BootingState />;
+  if (!birth) return <Booting />;
 
   return (
     <ReadingPage
@@ -75,7 +76,7 @@ function ReadingPage({
   onQuestionChange,
   onAskQuestion,
 }: InnerProps) {
-  const { sky, natal, card, seasonalContext } = useMemo(() => {
+  const { sky, natal, card, seasonalContext, almanac } = useMemo(() => {
     const now = new Date();
     const sky = getSkyState(now, { lat: birth.lat });
     const birthDate = birthToUtcDate(birth);
@@ -84,14 +85,13 @@ function ReadingPage({
       lat: birth.lat,
       lng: birth.lng,
     });
-    const almanac = almanacFor(now, {
-      hemisphere: birth.hemisphere ?? "N",
-    });
+    const a = almanacFor(now, { hemisphere: birth.hemisphere ?? "N" });
     return {
       sky,
       natal,
       card: dailyCard(now),
-      seasonalContext: `${almanac.season} · ${almanac.marker}; ${almanac.land}`,
+      seasonalContext: `${a.season} · ${a.marker}; ${a.land}`,
+      almanac: a,
     };
   }, [birth]);
 
@@ -106,7 +106,6 @@ function ReadingPage({
   useEffect(() => {
     let cancelled = false;
     setReading({ status: "loading" });
-
     fetchRecentJournal().then((entries) => {
       if (cancelled) return;
       const summary =
@@ -126,49 +125,109 @@ function ReadingPage({
         setReading(r);
       });
     });
-
     return () => {
       cancelled = true;
     };
   }, [sky, natal, birth.voice, birth.intentions, question, card, seasonalContext]);
 
+  const now = new Date();
+  const day = now.getUTCDate();
+  const dateLine = now.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
   return (
     <main className="min-h-screen text-ink">
-      <div className="mx-auto max-w-3xl px-6 py-10 md:px-10 md:py-14">
-        <header className="flex items-baseline justify-between">
+      <div className="mx-auto max-w-[1100px] px-5 py-6 md:px-10 md:py-10">
+        {/* ─── Masthead strip ────────────────────────────────────── */}
+        <header className="rule-b pb-3 almanac flex flex-wrap items-end justify-between gap-3">
           <Link
             href="/"
-            className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70 transition-base hover:text-clay"
+            className="wl-link no-underline"
           >
             ← Witch Life
           </Link>
-          <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-            Voice ·{" "}
-            <span className="text-clay">{VOICE_LABEL[birth.voice]}</span>
+          <span>{dateLine.toUpperCase()}</span>
+          <span>
+            Voice: <span className="text-vermilion">{VOICE_LABEL[birth.voice]}</span>
           </span>
         </header>
 
-        {/* Hero — page title */}
-        <section className="mt-8 fade-up">
-          <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-clay">
-            Today
-          </p>
-          <h1 className="display mt-2 text-3xl text-ink md:text-5xl">
-            Your practice
-          </h1>
-          <p className="oracle-body mt-4 max-w-2xl text-ink/85">
-            Five to fifteen minutes. Gather the things. Walk through the steps.
-            Reflect when you&rsquo;re finished.
-          </p>
+        {/* ─── Title + sky data ──────────────────────────────────── */}
+        <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-[auto_1fr] md:gap-12">
+          <div className="flex items-start gap-5">
+            <span className="display text-vermilion text-[clamp(5rem,15vw,8rem)] leading-none">
+              {day}
+            </span>
+            <div className="mt-2 flex flex-col">
+              <span className="almanac">For the day</span>
+              <h1 className="display mt-2 text-4xl md:text-5xl leading-none">
+                Today&rsquo;s
+                <br />
+                <span className="display-italic text-vermilion">practice</span>
+              </h1>
+            </div>
+          </div>
+          <div className="flex flex-col justify-end">
+            <p className="italic-accent text-lg text-ink/85 md:text-xl">
+              {almanac.season} — {almanac.marker.toLowerCase()}.
+            </p>
+            <p className="oracle-body mt-2 text-ink/80">
+              {almanac.land}
+            </p>
+          </div>
         </section>
 
-        {/* Almanac context */}
-        <section className="mt-8 fade-up" style={{ animationDelay: "100ms" }}>
-          <TodayPanel sky={sky} />
+        {/* ─── Sky table ─────────────────────────────────────────── */}
+        <section className="mt-8">
+          <EditionInfo
+            parts={[
+              {
+                label: "Moon",
+                value: (
+                  <span>
+                    <span className="text-vermilion mr-2 text-lg leading-none">
+                      {sky.moon.phaseSymbol}
+                    </span>
+                    {sky.moon.phaseName}
+                  </span>
+                ),
+              },
+              { label: "Sun", value: `${sky.sun.sign} ${Math.round(sky.sun.degree)}°` },
+              {
+                label: "Mercury",
+                value: (
+                  <span
+                    className={
+                      sky.planets.mercury.retrograde
+                        ? "text-vermilion"
+                        : sky.planets.mercury.shadowPeriod
+                          ? "text-sage"
+                          : "text-ink"
+                    }
+                  >
+                    {sky.planets.mercury.retrograde
+                      ? "Retrograde"
+                      : sky.planets.mercury.shadowPeriod
+                        ? "In shadow"
+                        : "Direct"}
+                  </span>
+                ),
+              },
+              {
+                label: "Dark moon in",
+                value: `${Math.round(sky.moon.daysToNewMoon)}d`,
+              },
+            ]}
+          />
         </section>
 
-        {/* Practice body */}
-        <section className="mt-12">
+        <Fleuron mark="❋" />
+
+        {/* ─── The practice itself ────────────────────────────────── */}
+        <section>
           {reading.status === "loading" && <PracticeSkeleton />}
           {reading.status === "error" && (
             <ErrorBlock
@@ -186,44 +245,45 @@ function ReadingPage({
           )}
         </section>
 
-        {/* Question form */}
-        <section className="mt-16 border-t border-bark/25 pt-10">
-          <h2 className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-            Ask the oracle
-          </h2>
-          <p className="oracle-body mt-2 text-ink/85">
+        <Fleuron mark="❋" />
+
+        {/* ─── Question ────────────────────────────────────────── */}
+        <section>
+          <SectionHeader label="Ask the oracle" index="?" />
+          <p className="oracle-body mt-3 text-ink/85">
             One question. The practice will be shaped to answer it.
           </p>
-          <div className="mt-4 flex gap-3">
+          <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
             <input
               type="text"
               value={questionValue}
               onChange={(e) => onQuestionChange(e.target.value)}
               placeholder="What am I avoiding?"
-              className="flex-1 border-b border-bark/30 bg-transparent px-1 py-2 font-serif text-lg text-ink outline-none placeholder:text-bark/50 focus:border-clay"
+              className="broadsheet-input"
             />
             <button
               onClick={onAskQuestion}
               disabled={!questionValue.trim()}
-              className="font-sans text-xs uppercase tracking-[0.25em] border border-clay bg-clay px-6 py-3 text-parchment transition-base hover:bg-clay/85 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-vermilion disabled:cursor-not-allowed disabled:opacity-50"
             >
               Ask
             </button>
           </div>
         </section>
 
-        <footer className="mt-16 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* ─── Foot links ────────────────────────────────────────── */}
+        <section className="mt-14 grid grid-cols-2 gap-px bg-rule md:grid-cols-4">
           <FooterLink href="/draw" label="Pull a card" />
           <FooterLink href="/spread" label="Three-card spread" />
           <FooterLink href="/journal" label="The journal" />
-          <FooterLink href="/library" label="The library" />
-        </footer>
+          <FooterLink href="/library" label="The Library" />
+        </section>
       </div>
     </main>
   );
 }
 
-// ─── Body sections ─────────────────────────────────────────────────────────
+// ─── Body sections ────────────────────────────────────────────────────────
 
 function PracticeBody({
   reading,
@@ -237,92 +297,100 @@ function PracticeBody({
   hasQuestion: boolean;
 }) {
   return (
-    <div>
-      {/* Intention line — the frame for today */}
-      <p className="oracle-body text-ink/95 fade-up">
+    <div className="fade-up">
+      {/* Intention line — set with a drop cap */}
+      <p className="oracle-body drop-cap text-ink/95 max-w-3xl">
         {reading.intentionLine}
       </p>
 
-      {/* Gather + Do, side by side on desktop */}
-      <div className="mt-12 grid gap-10 md:grid-cols-2">
+      {/* Gather and Do, side by side */}
+      <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2">
         <GatherList items={reading.gather} />
         <StepsList steps={reading.steps} />
       </div>
 
-      {/* Reflect */}
-      <div className="mt-12 rounded-sm border border-clay/40 bg-clay/5 p-6 fade-up">
-        <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
-          Then write
-        </p>
-        <p className="oracle-body mt-3 text-ink/95">
-          {reading.reflectionPrompt}
-        </p>
-        <div className="mt-5 flex flex-wrap items-baseline gap-4">
-          <Link
-            href="/journal"
-            className="inline-block font-sans text-xs uppercase tracking-[0.25em] border border-bark/30 bg-bone/60 px-5 py-2 text-ink transition-base hover:border-clay hover:text-clay"
-          >
-            Take it to the journal →
-          </Link>
-          <MarkDoneButton practiceType="daily" />
-        </div>
+      {/* Reflect — framed inset with vermilion stamp */}
+      <div className="mt-14">
+        <Frame shadow="vermilion" className="px-7 py-7">
+          <div className="flex items-baseline justify-between gap-4">
+            <Stamp tone="vermilion">Then write</Stamp>
+            <span className="almanac">After the practice</span>
+          </div>
+          <p className="display-italic mt-5 text-2xl text-ink md:text-3xl">
+            {reading.reflectionPrompt}
+          </p>
+          <div className="mt-6 flex flex-wrap items-baseline gap-5">
+            <Link href="/journal" className="btn-ink no-underline">
+              Take it to the journal <span>→</span>
+            </Link>
+            <MarkDoneButton practiceType="daily" />
+          </div>
+        </Frame>
       </div>
 
-      {/* Today's card with its action */}
+      {/* Today&rsquo;s card */}
       {reading.cardAction && (
-        <div className="mt-12 fade-up">
-          <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
-            Today&rsquo;s card
-          </p>
-          <div className="mt-4 grid grid-cols-[auto,1fr] items-start gap-6">
-            <div className="flex flex-col items-center">
-              <div className="flex h-44 w-28 flex-col items-center justify-between border border-bark/30 bg-bone/60 px-2 py-3">
-                <span className="font-sans text-[8px] uppercase tracking-[0.25em] text-moss">
-                  {card.suit}
+        <section className="mt-14">
+          <SectionHeader
+            label="Today&rsquo;s card"
+            index="✦"
+            meta={`Suit of ${card.suit}`}
+          />
+          <div className="mt-5 grid grid-cols-1 gap-8 md:grid-cols-[auto_1fr] md:gap-10">
+            <div className="border-[2px] border-ink bg-paper-3 ink-shadow w-[180px]">
+              <div className="rule-b px-4 pb-2 pt-2 almanac text-vermilion">
+                {card.suit}
+              </div>
+              <div className="px-4 py-10 text-center">
+                <span className="display-italic text-[clamp(1.8rem,4vw,2.3rem)] text-ink leading-[0.9]">
+                  {card.name}
                 </span>
-                <div className="text-moss">
-                  <CardArt card={card} />
-                </div>
-                <span className="accent text-sm text-ink">{card.name}</span>
+              </div>
+              <div className="rule-t px-4 py-2 almanac text-ash">
+                I / XXVIII
               </div>
             </div>
-            <p className="oracle-body text-ink/95">{reading.cardAction}</p>
+            <p className="oracle-body text-ink/95 max-w-2xl">
+              {reading.cardAction}
+            </p>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Optional sections */}
       {hasJournal && reading.journalAwareness && (
-        <div className="mt-12 border-l-2 border-moss/40 pl-5 fade-up">
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-moss">
-            What&rsquo;s been moving through you
-          </p>
-          <p className="oracle-body mt-2 text-ink/90">
+        <section className="mt-14">
+          <SectionHeader
+            label="What's been moving through you"
+            index="¶"
+            meta="Read from your journal"
+          />
+          <p className="oracle-body mt-3 max-w-3xl italic-accent text-ink/90">
             {reading.journalAwareness}
           </p>
-        </div>
+        </section>
       )}
 
       {hasQuestion && reading.questionGuidance && (
-        <div className="mt-10 border-l-2 border-clay/40 pl-5 fade-up">
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-clay">
-            On your question
-          </p>
-          <p className="oracle-body mt-2 text-ink/95">
+        <section className="mt-14">
+          <SectionHeader
+            label="On your question"
+            index="?"
+            meta="In voice"
+          />
+          <p className="oracle-body mt-3 max-w-3xl text-ink/95">
             {reading.questionGuidance}
           </p>
-        </div>
+        </section>
       )}
 
       {reading.tonightNote && (
-        <div className="mt-10 fade-up">
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-            Tonight
-          </p>
-          <p className="oracle-body mt-2 italic text-bark/85">
+        <section className="mt-14">
+          <SectionHeader label="Tonight" index="☽" />
+          <p className="display-italic mt-3 text-xl text-ink/85">
             {reading.tonightNote}
           </p>
-        </div>
+        </section>
       )}
     </div>
   );
@@ -330,23 +398,15 @@ function PracticeBody({
 
 function GatherList({ items }: { items: string[] }) {
   return (
-    <div className="fade-up">
-      <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
-        Gather
-      </p>
-      <ul className="mt-4 space-y-3">
+    <div>
+      <SectionHeader label="Gather" index="I" meta={`${items.length} items`} />
+      <ul className="mt-6 space-y-5">
         {items.map((item, i) => (
-          <li
-            key={i}
-            className="flex items-baseline gap-3 border-b border-bark/15 pb-3 last:border-b-0"
-          >
-            <span
-              aria-hidden
-              className="font-sans text-[10px] uppercase tracking-[0.25em] text-moss"
-            >
-              {String(i + 1).padStart(2, "0")}
+          <li key={i} className="grid grid-cols-[2.5rem_1fr] items-baseline gap-3">
+            <span className="marginalia">{String(i + 1).padStart(2, "0")}</span>
+            <span className="font-serif text-lg leading-snug text-ink">
+              {item}
             </span>
-            <span className="font-serif text-base text-ink/95">{item}</span>
           </li>
         ))}
       </ul>
@@ -355,25 +415,29 @@ function GatherList({ items }: { items: string[] }) {
 }
 
 function StepsList({ steps }: { steps: PracticeStep[] }) {
+  const total = steps
+    .map((s) => parseMinutes(s.duration))
+    .reduce((a, b) => a + b, 0);
   return (
-    <div className="fade-up">
-      <p className="font-sans text-[10px] uppercase tracking-[0.32em] text-clay">
-        Do
-      </p>
-      <ol className="mt-4 space-y-4">
+    <div>
+      <SectionHeader
+        label="Do"
+        index="II"
+        meta={total > 0 ? `${total} min total` : `${steps.length} steps`}
+      />
+      <ol className="rule-t mt-6 border-rule">
         {steps.map((s, i) => (
-          <li key={i} className="flex items-baseline gap-4">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-clay/50 bg-bone/60 font-sans text-[10px] tracking-wider text-clay">
-              {i + 1}
+          <li
+            key={i}
+            className="rule-b border-rule grid grid-cols-[3rem_5rem_1fr] items-baseline gap-3 py-4"
+          >
+            <span className="marginalia">{i + 1}</span>
+            <span className="font-mono text-xs uppercase tracking-[0.15em] text-vermilion">
+              {s.duration}
             </span>
-            <div className="flex-1">
-              <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-bark/60">
-                {s.duration}
-              </p>
-              <p className="mt-1 font-serif text-base leading-relaxed text-ink/95">
-                {s.action}
-              </p>
-            </div>
+            <span className="font-serif text-lg leading-snug text-ink">
+              {s.action}
+            </span>
           </li>
         ))}
       </ol>
@@ -383,24 +447,21 @@ function StepsList({ steps }: { steps: PracticeStep[] }) {
 
 function PracticeSkeleton() {
   return (
-    <div className="animate-pulse space-y-8 text-bark/40">
+    <div className="animate-pulse space-y-8 text-ink/40">
       <div className="space-y-2">
-        <div className="h-4 w-full bg-bark/15" />
-        <div className="h-4 w-11/12 bg-bark/15" />
+        <div className="h-5 w-full bg-ink/10" />
+        <div className="h-5 w-11/12 bg-ink/10" />
+        <div className="h-5 w-10/12 bg-ink/10" />
       </div>
-      <div className="grid gap-10 md:grid-cols-2">
-        <div className="space-y-3">
-          <div className="h-3 w-20 bg-clay/20" />
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-5 w-full bg-bark/10" />
-          ))}
-        </div>
-        <div className="space-y-3">
-          <div className="h-3 w-20 bg-clay/20" />
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-5 w-full bg-bark/10" />
-          ))}
-        </div>
+      <div className="grid gap-12 md:grid-cols-2">
+        {[0, 1].map((i) => (
+          <div key={i} className="space-y-3">
+            <div className="h-4 w-32 bg-vermilion/30" />
+            {Array.from({ length: 4 }).map((_, j) => (
+              <div key={j} className="h-5 w-full bg-ink/10" />
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -408,12 +469,10 @@ function PracticeSkeleton() {
 
 function ErrorBlock({ label, detail }: { label: string; detail: string }) {
   return (
-    <div className="rounded-sm border border-clay/40 bg-clay/5 px-6 py-5">
-      <p className="font-sans text-xs uppercase tracking-[0.25em] text-clay">
-        {label}
-      </p>
-      <p className="mt-2 font-serif text-base text-ink/85">{detail}</p>
-    </div>
+    <Frame shadow="vermilion" className="px-6 py-5">
+      <Stamp tone="vermilion">{label}</Stamp>
+      <p className="mt-3 font-serif text-base text-ink/85">{detail}</p>
+    </Frame>
   );
 }
 
@@ -421,24 +480,32 @@ function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="rounded-sm border border-bark/25 bg-linen/40 px-4 py-3 text-center font-sans text-[10px] uppercase tracking-[0.25em] text-ink transition-base hover:border-clay hover:bg-linen/70 hover:text-clay"
+      className="block bg-paper px-5 py-4 almanac text-center text-ink transition-base hover:bg-paper-3 hover:text-vermilion"
     >
       {label}
     </Link>
   );
 }
 
-function BootingState() {
+function Booting() {
   return (
     <main className="flex min-h-screen items-center justify-center">
-      <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-bark/70">
-        Casting…
-      </span>
+      <span className="almanac">Casting…</span>
     </main>
   );
 }
 
-// ─── Fetchers ─────────────────────────────────────────────────────────────
+// ─── helpers ──────────────────────────────────────────────────────────────
+
+function parseMinutes(s: string): number {
+  const m = s.match(/(\d+)\s*min/i);
+  if (m) return parseInt(m[1], 10);
+  const sec = s.match(/(\d+)\s*sec/i);
+  if (sec) return Math.round(parseInt(sec[1], 10) / 60);
+  return 0;
+}
+
+// ─── fetchers (unchanged) ─────────────────────────────────────────────────
 
 interface FetchReadingArgs {
   sky: SkyState;

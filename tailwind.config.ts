@@ -1,13 +1,9 @@
 import type { Config } from "tailwindcss";
 
 /*
-  Tailwind config maps directly to the CSS custom properties in
-  globals.css. All theme values are derived from the tokens — changing
-  a token reskins the entire app.
-
-  Witch Life palette: cream herbarium surfaces (bone, parchment, linen),
-  warm dark inks (ink, bark, ash), and earthy accents
-  (clay/ember/ochre/saffron, moss/sage, aubergine).
+  Tailwind config maps to the broadsheet CSS custom properties.
+  Existing colour utility names are kept as legacy aliases so old
+  references resolve correctly during the design migration.
 */
 const config: Config = {
   content: [
@@ -19,35 +15,40 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Surfaces
-        bone: "var(--color-bone)",
-        parchment: "var(--color-parchment)",
-        linen: "var(--color-linen)",
-        // Ink
-        ink: "var(--color-ink)",
-        bark: "var(--color-bark)",
-        ash: "var(--color-ash)",
-        // Accents
-        clay: "var(--color-clay)",
-        ember: "var(--color-ember)",
-        ochre: "var(--color-ochre)",
-        saffron: "var(--color-saffron)",
-        moss: "var(--color-moss)",
-        sage: "var(--color-sage)",
-        aubergine: "var(--color-aubergine)",
-        // Legacy aliases — resolve to current palette so older utility
-        // classes still work.
+        // Witch Life broadsheet tokens
+        paper: "var(--c-paper)",
+        "paper-2": "var(--c-paper-2)",
+        "paper-3": "var(--c-paper-3)",
+        ink: "var(--c-ink)",
+        rule: "var(--c-rule)",
+        vermilion: "var(--c-vermilion)",
+        rust: "var(--c-rust)",
+        bone: "var(--c-bone)",
+        sage: "var(--c-sage)",
+        ash: "var(--c-ash)",
+        marginalia: "var(--c-marginalia)",
+        // Legacy aliases → tokens
         earth: "var(--color-earth)",
         wax: "var(--color-wax)",
         gold: "var(--color-gold)",
         smoke: "var(--color-smoke)",
         forest: "var(--color-forest)",
+        parchment: "var(--color-parchment)",
+        linen: "var(--color-linen)",
+        clay: "var(--color-clay)",
+        ember: "var(--color-ember)",
+        ochre: "var(--color-ochre)",
+        saffron: "var(--color-saffron)",
+        moss: "var(--color-moss)",
+        bark: "var(--color-bark)",
+        aubergine: "var(--color-aubergine)",
       },
       fontFamily: {
         display: ["var(--font-display)"],
         serif: ["var(--font-serif)"],
+        mono: ["var(--font-mono)"],
         accent: ["var(--font-accent)"],
-        sans: ["var(--font-sans)"],
+        sans: ["var(--font-mono)"], // legacy: anything that asked for "sans" now gets the mono used as labels
       },
       fontSize: {
         xs: "var(--text-xs)",
@@ -59,6 +60,10 @@ const config: Config = {
         "3xl": "var(--text-3xl)",
         "4xl": "var(--text-4xl)",
         "5xl": "var(--text-5xl)",
+        "6xl": "4rem",
+        "7xl": "5rem",
+        "8xl": "6.5rem",
+        "9xl": "8rem",
       },
       spacing: {
         1: "var(--space-1)",
@@ -72,15 +77,16 @@ const config: Config = {
         24: "var(--space-24)",
       },
       borderRadius: {
+        none: "0",
         sm: "var(--radius-sm)",
         md: "var(--radius-md)",
         lg: "var(--radius-lg)",
       },
       transitionDuration: {
-        base: "400ms",
+        base: "350ms",
       },
       transitionTimingFunction: {
-        base: "ease",
+        base: "cubic-bezier(0.2, 0.7, 0.2, 1)",
       },
     },
   },
