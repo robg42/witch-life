@@ -36,6 +36,10 @@ import { LogInput } from "./log-input";
 import { TapeView } from "./tape-view";
 import { AnomalyBadge } from "./anomaly-badge";
 import { AnomalyPanel } from "./anomaly-panel";
+import { MailSlot } from "./mail-slot";
+import { LetterView } from "./letter-view";
+import { bell } from "@/lib/foreshore/sound";
+import type { LetterRecord } from "@/lib/foreshore/letters";
 
 /*
   Console shell — the entire Foreshore product UI is rendered inside
@@ -65,6 +69,7 @@ type PanelState =
   | { kind: "tape"; channel: number }
   | { kind: "filed"; channel: number; text: string }
   | { kind: "anomaly"; channel: number; alerts: SkyAlert[] }
+  | { kind: "letter"; channel: number; letter: LetterRecord }
   | { kind: "error"; channel: number; message: string };
 
 export function ConsoleShell() {
@@ -73,16 +78,48 @@ export function ConsoleShell() {
   const [operator, setOperator] = useState<OperatorPrefs>({});
   const [panel, setPanel] = useState<PanelState>({ kind: "standby" });
   const [glitching, setGlitching] = useState(false);
+  const [latestLetter, setLatestLetter] = useState<LetterRecord | null>(null);
+  const [bellPlayed, setBellPlayed] = useState(false);
 
   // Boot: load birth + operator from local storage. If birth is
   // missing, route to /calibrate (the new enrolment, built in Phase D).
-  // During Phase A — before /calibrate exists — fall through to a
-  // gentle empty state instead of breaking.
   useEffect(() => {
     const b = loadBirth();
     setBirth(b);
     setOperator({ phosphor: DEFAULT_PHOSPHOR, sound: false, ...loadOperator() });
   }, []);
+
+  // Fetch the latest letter, if any. We always show the slot but the
+  // LED only pulses when there's an unread letter.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/foreshore/letter", { method: "GET" });
+        if (!res.ok || cancelled) return;
+        const body = (await res.json()) as { letter: LetterRecord | null };
+        if (!cancelled) setLatestLetter(body.letter ?? null);
+      } catch {
+        // ignore; the slot just stays empty.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Ring the slot bell once when an unread letter appears (after sound
+  // has been enabled by the operator).
+  useEffect(() => {
+    if (!latestLetter || latestLetter.read || bellPlayed) return;
+    if (!operator.sound) return;
+    setBellPlayed(true);
+    try {
+      bell();
+    } catch {
+      // ignore
+    }
+  }, [latestLetter, operator.sound, bellPlayed]);
 
   // When the operator's phosphor preference changes, mirror it onto
   // the <html> data attribute so the CSS theme switches.
@@ -141,6 +178,18 @@ export function ConsoleShell() {
     if (operator.sound) click();
     setPanel({ kind: "channel", channel: next });
   }, [operator.sound]);
+
+  const openLetter = useCallback(() => {
+    if (!latestLetter) return;
+    setPanel({ kind: "letter", channel, letter: latestLetter });
+    if (!latestLetter.read) {
+      // Mark read — best-effort; ignore failures.
+      void fetch(`/api/foreshore/letter?id=${latestLetter.id}`, {
+        method: "PATCH",
+      });
+      setLatestLetter({ ...latestLetter, read: true });
+    }
+  }, [latestLetter, channel]);
 
   const onSettle = useCallback(() => {
     if (operator.sound) staticWash();
@@ -246,10 +295,15 @@ export function ConsoleShell() {
               }
             />
           )}
-          <CRTScreen glitch={glitching}>
+          <CRTScreen
+            glitch={glitching}
+            mode={panel.kind === "letter" ? "paper" : "phosphor"}
+            waveform={panel.kind !== "letter"}
+          >
             <CRTContents
               panel={panel}
               channel={currentChannel}
+              callsign={operator.callsign ?? deriveCallsign(birth)}
               onOpenLog={() => setPanel({ kind: "log", channel })}
               onClose={() => setPanel({ kind: "channel", channel })}
               onFiled={(text) => setPanel({ kind: "filed", channel, text })}
@@ -267,6 +321,13 @@ export function ConsoleShell() {
               soundOn={!!operator.sound}
             />
           </CRTScreen>
+
+          {/* Mail slot — the Foreshore's foothold in the station */}
+          <MailSlot
+            pulsing={!!latestLetter && !latestLetter.read}
+            onOpen={openLetter}
+            disabled={!latestLetter}
+          />
 
           {/* Control row below the CRT */}
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -367,6 +428,7 @@ export function ConsoleShell() {
 function CRTContents({
   panel,
   channel,
+  callsign,
   onOpenLog,
   onClose,
   onFiled,
@@ -375,6 +437,7 @@ function CRTContents({
 }: {
   panel: PanelState;
   channel: ReturnType<typeof channelAt>;
+  callsign: string;
   onOpenLog: () => void;
   onClose: () => void;
   onFiled: (text: string) => void;
@@ -491,6 +554,16 @@ function CRTContents({
     return <AnomalyPanel alerts={panel.alerts} onClose={onClose} />;
   }
 
+  if (panel.kind === "letter") {
+    return (
+      <LetterView
+        letter={panel.letter}
+        callsign={callsign}
+        onClose={onClose}
+      />
+    );
+  }
+
   if (panel.kind === "filed") {
     return (
       <div className="space-y-5">
@@ -547,6 +620,15 @@ function ConsoleSwitch({
       )}
     </button>
   );
+}
+
+/**
+ * Fallback callsign when the operator hasn't set one explicitly.
+ * Derives from any available identifier; ultimately "OPERATOR".
+ */
+function deriveCallsign(birth: BirthDetails | null): string {
+  if (!birth) return "OPERATOR";
+  return "OPERATOR";
 }
 
 /* ─── Boot state ──────────────────────────────────────────────────── */

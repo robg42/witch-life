@@ -538,6 +538,29 @@ textarea.broadsheet-input::placeholder {
   --fs-phosphor: var(--fs-phosphor-green);
 }
 
+/*
+  Broadsheet → Foreshore token overrides. When data-foreshore is set
+  on a wrapper, any legacy component using --c-ink / --c-paper / etc.
+  picks up the brass + ivory + housing palette automatically. This is
+  how /admin and /share/[token] get reskinned without rewriting their
+  component trees.
+*/
+[data-foreshore] {
+  --c-paper: var(--fs-housing);
+  --c-paper-2: var(--fs-housing-2);
+  --c-paper-3: var(--fs-housing-3);
+  --c-ink: var(--fs-ivory);
+  --c-rule: var(--fs-rule);
+  --c-vermilion: var(--fs-brass-glint);
+  --c-rust: var(--fs-brass);
+  --c-sunshine: var(--fs-brass-glint);
+  --c-flamingo: var(--fs-brass-dim);
+  --c-bone: var(--fs-housing-2);
+  --c-sage: var(--fs-brass-dim);
+  --c-ash: var(--fs-ivory-dim);
+  --c-marginalia: var(--fs-ivory-dim);
+}
+
 [data-foreshore] body,
 body[data-foreshore] {
   background: var(--fs-housing);

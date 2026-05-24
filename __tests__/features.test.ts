@@ -12,6 +12,7 @@ describe("Feature registry", () => {
     expect(Object.keys(FEATURES).sort()).toEqual(
       [
         "daily-email",
+        "foreshore",
         "journal-export",
         "shared-spreads",
         "sky-alerts",

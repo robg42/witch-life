@@ -99,6 +99,14 @@ export const FEATURES = {
     defaultEnabled: false,
     paywallBlurb: "Get today's practice delivered to your inbox each morning.",
   },
+  foreshore: {
+    key: "foreshore",
+    name: "Foreshore correspondence",
+    description:
+      "Weekly letter from the Foreshore to the operator, woven from recent captures and addressed by callsign.",
+    tier: "free",
+    defaultEnabled: true,
+  },
 } as const satisfies Record<string, FeatureDefinition>;
 
 export type FeatureKey = keyof typeof FEATURES;

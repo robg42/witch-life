@@ -60,10 +60,14 @@ export default async function SharedSpreadPage({
     LAYOUT_LABELS[row.layout] ?? (["First", "Second", "Third"] as const);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main
+      data-foreshore
+      data-crt="amber"
+      className="mx-auto min-h-screen max-w-3xl px-6 py-12 fs-housing"
+    >
       <header className="mb-10 border-b border-[var(--c-rule)] pb-6">
         <p className="font-[family-name:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.22em] text-[var(--c-ash)]">
-          Witch Life · Shared spread
+          STATION 28 · SHARED BROADCAST
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-[var(--c-ink)]">
           {row.question ?? "A three-card practice"}
@@ -129,7 +133,7 @@ export default async function SharedSpreadPage({
           href="/"
           className="font-[family-name:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.2em] text-[var(--c-vermilion)] hover:underline"
         >
-          Witch Life · Read your own
+          STATION 28 · ENROL YOUR OWN TERMINAL →
         </Link>
       </footer>
     </main>
