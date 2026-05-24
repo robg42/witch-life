@@ -79,6 +79,21 @@ export interface OracleCallOptions {
    * Defaults to "unknown" — pass the actual route name.
    */
   endpoint?: string;
+  /**
+   * Optional system-prompt override. When provided, the voice-derived
+   * prompt is replaced wholesale — used by surfaces that want a
+   * fundamentally different contract (e.g. the Foreshore transmissions,
+   * which speak in radio-operator fragments rather than practice
+   * scripts). The override still gets ascii-folded for header safety.
+   */
+  systemOverride?: string;
+  /**
+   * When `expectJson` is false, the function returns the raw text from
+   * the model rather than parsing JSON. The generic `T` becomes
+   * `string`. Used for very-short signal-poem outputs where a JSON
+   * wrapper would be wasted tokens.
+   */
+  expectJson?: boolean;
 }
 
 /**
@@ -125,10 +140,14 @@ export async function callOracle<T>({
   maxTokens = 1024,
   schema,
   endpoint = "unknown",
+  systemOverride,
+  expectJson = true,
 }: OracleCallOptions): Promise<T> {
-  const system = asciiFold(systemPromptFor(voice));
+  const system = asciiFold(systemOverride ?? systemPromptFor(voice));
   const userContent = asciiFold(
-    `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`,
+    expectJson
+      ? `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`
+      : userMessage,
   );
 
   const clerkUserId = await currentClerkUserId();
@@ -190,6 +209,9 @@ export async function callOracle<T>({
     throw new Error("Oracle returned no text content");
   }
   const raw = stripCodeFences(block.text.trim());
+  if (!expectJson) {
+    return raw as unknown as T;
+  }
   try {
     return JSON.parse(raw) as T;
   } catch {

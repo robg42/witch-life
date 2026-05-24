@@ -470,3 +470,342 @@ textarea.broadsheet-input::placeholder {
   color: var(--c-marginalia);
   font-style: italic;
 }
+
+/*
+  ─── FORESHORE / STATION 28 console theme ─────────────────────────────
+
+  The Foreshore is a complete reinterpretation, not a reskin. It lives
+  scoped under [data-foreshore] so the broadsheet pages (still at /leaf
+  during transition) keep their tokens.
+
+  The console is two registers:
+    - PHOSPHOR mode: CRT type on warm-black housing, brushed-brass chrome
+    - PAPER mode: cream letterpaper laid into the screen, used for letters
+
+  Two channel-colour variants (AMBER default, GREEN cold) chosen at
+  enrolment and stored on the operator. Switched by setting
+  --crt-phosphor on the root container.
+*/
+
+[data-foreshore] {
+  /* Console chassis */
+  --fs-housing: #0b0e0b;          /* warm near-black */
+  --fs-housing-2: #131611;        /* slightly lifted, for inset surfaces */
+  --fs-housing-3: #1a1d17;        /* panels, recessed wells */
+  --fs-brass: #bfa46b;            /* brushed brass */
+  --fs-brass-dim: #856e3f;        /* recessed brass / shadow side */
+  --fs-brass-glint: #e6d29a;      /* highlight on brass */
+  --fs-ivory: #f0e7d2;            /* stencilled labels */
+  --fs-ivory-dim: #b9b09d;        /* dim labels */
+
+  /* CRT */
+  --fs-crt-bg: #050706;            /* CRT off-state */
+  --fs-crt-base: #070b08;          /* CRT field, faint phosphor decay */
+  --fs-phosphor-amber: #ffc25f;    /* warm channel */
+  --fs-phosphor-green: #3fff92;    /* cold channel */
+  --fs-phosphor: var(--fs-phosphor-amber);  /* default, overridden by [data-crt] */
+  --fs-phosphor-dim: color-mix(in srgb, var(--fs-phosphor) 55%, transparent);
+  --fs-phosphor-ghost: color-mix(in srgb, var(--fs-phosphor) 18%, transparent);
+
+  /* Paper mode (for letters) */
+  --fs-paper: #f3e8cd;             /* warm cream letter paper */
+  --fs-paper-shadow: #d5c39b;
+  --fs-paper-ink: #2a1f12;         /* warm dark for body */
+
+  /* Alarms / anomaly */
+  --fs-alarm: #e75c4d;             /* desaturated red, used sparingly */
+  --fs-alarm-glow: color-mix(in srgb, var(--fs-alarm) 40%, transparent);
+
+  /* Schematic */
+  --fs-schematic: #6b8ec9;         /* ammonia-blueprint line colour */
+  --fs-schematic-bg: #14233f;
+
+  /* Type — declared as fonts already loaded for the broadsheet */
+  --fs-font-display: var(--font-display);
+  --fs-font-mono: var(--font-mono);
+  --fs-font-paper: var(--font-serif);   /* italic Garamond for letters */
+
+  /* Spacing */
+  --fs-pad: 1.25rem;
+  --fs-gutter: 1.75rem;
+
+  /* Borders */
+  --fs-rule: rgba(191, 164, 107, 0.32);
+  --fs-rule-strong: rgba(191, 164, 107, 0.65);
+}
+
+[data-foreshore][data-crt="green"] {
+  --fs-phosphor: var(--fs-phosphor-green);
+}
+
+[data-foreshore] body,
+body[data-foreshore] {
+  background: var(--fs-housing);
+  color: var(--fs-ivory);
+}
+
+/* When the document root carries data-foreshore, repaint the body
+   surrounds so we don't see broadsheet peach behind the console. */
+html[data-foreshore],
+html[data-foreshore] body {
+  background: var(--fs-housing) !important;
+  background-image: none !important;
+  color: var(--fs-ivory);
+}
+html[data-foreshore] body::before {
+  display: none;  /* kill the broadsheet noise overlay */
+}
+
+/* ─── Foreshore primitives ────────────────────────────────────────── */
+
+.fs-housing {
+  background: linear-gradient(180deg,
+    var(--fs-housing) 0%,
+    var(--fs-housing-2) 60%,
+    var(--fs-housing) 100%);
+  color: var(--fs-ivory);
+}
+
+.fs-mono {
+  font-family: var(--fs-font-mono);
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  letter-spacing: 0.02em;
+}
+
+.fs-stencil {
+  font-family: var(--fs-font-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.65rem;
+  color: var(--fs-ivory-dim);
+}
+
+.fs-stencil-strong {
+  font-family: var(--fs-font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  color: var(--fs-brass-glint);
+}
+
+/* Engraved label — used on brass control surrounds */
+.fs-engraved {
+  font-family: var(--fs-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: 0.6rem;
+  color: var(--fs-brass-dim);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Brushed brass plate background. Subtle directional gradient + grain. */
+.fs-brass-plate {
+  background:
+    linear-gradient(180deg,
+      var(--fs-brass-glint) 0%,
+      var(--fs-brass) 22%,
+      var(--fs-brass-dim) 65%,
+      var(--fs-brass) 100%);
+  color: #2a1f12;
+  position: relative;
+}
+.fs-brass-plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85 0.02' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+}
+
+/* The CRT itself. Used as the inner display surface. */
+.fs-crt {
+  position: relative;
+  background: radial-gradient(
+    ellipse at center,
+    var(--fs-crt-base) 0%,
+    var(--fs-crt-bg) 78%,
+    #02030200 100%
+  );
+  color: var(--fs-phosphor);
+  font-family: var(--fs-font-mono);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Scanline overlay — separate layer for accessibility-toggleable scope. */
+.fs-crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.16) 3px,
+    rgba(0, 0, 0, 0) 4px
+  );
+  z-index: 2;
+  opacity: 0.7;
+}
+
+/* Slow drifting refresh band */
+.fs-crt::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: -10%;
+  height: 12%;
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.18) 50%,
+    rgba(0, 0, 0, 0) 100%);
+  z-index: 3;
+  pointer-events: none;
+  animation: fs-scan-drift 9s linear infinite;
+}
+
+@keyframes fs-scan-drift {
+  0%   { transform: translateY(0%); }
+  100% { transform: translateY(1100%); }
+}
+
+/* Phosphor character glow */
+.fs-phosphor {
+  color: var(--fs-phosphor);
+  text-shadow:
+    0 0 1px var(--fs-phosphor),
+    0 0 6px var(--fs-phosphor-dim),
+    0 0 14px var(--fs-phosphor-ghost);
+}
+
+/* Slight idle flicker */
+@keyframes fs-flicker {
+  0%, 92%, 100% { opacity: 1; }
+  93%           { opacity: 0.92; }
+  95%           { opacity: 0.98; }
+  97%           { opacity: 0.86; }
+}
+.fs-flicker {
+  animation: fs-flicker 7s steps(60, end) infinite;
+}
+
+/* Idle sine waveform at foot of CRT */
+.fs-waveform {
+  stroke: var(--fs-phosphor-dim);
+  fill: none;
+  stroke-width: 1;
+  filter: drop-shadow(0 0 2px var(--fs-phosphor-ghost));
+}
+
+/* Typed cursor */
+.fs-cursor::after {
+  content: "▮";
+  display: inline-block;
+  margin-left: 1px;
+  color: var(--fs-phosphor);
+  animation: fs-blink 1.05s steps(2, end) infinite;
+}
+@keyframes fs-blink {
+  0%, 50%   { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Mail slot LED pulse */
+@keyframes fs-led-pulse {
+  0%, 100% { opacity: 0.25; box-shadow: 0 0 0 var(--fs-phosphor-ghost); }
+  50%      { opacity: 1;    box-shadow: 0 0 12px var(--fs-phosphor); }
+}
+.fs-led {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--fs-phosphor);
+  box-shadow: 0 0 8px var(--fs-phosphor);
+}
+.fs-led--pulse {
+  animation: fs-led-pulse 4s ease-in-out infinite;
+}
+
+/* Switch / button base */
+.fs-switch {
+  font-family: var(--fs-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.65rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--fs-brass-dim);
+  background: var(--fs-housing-2);
+  color: var(--fs-ivory);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.fs-switch:hover {
+  background: var(--fs-housing-3);
+  border-color: var(--fs-brass);
+  color: var(--fs-brass-glint);
+}
+.fs-switch:active {
+  background: var(--fs-housing);
+  transform: translateY(1px);
+}
+.fs-switch[aria-pressed="true"] {
+  background: var(--fs-brass);
+  color: var(--fs-housing);
+  border-color: var(--fs-brass-glint);
+}
+
+/* Letter paper mode — replaces phosphor inside CRT for letter view */
+.fs-paper {
+  background: linear-gradient(180deg,
+    var(--fs-paper) 0%,
+    color-mix(in srgb, var(--fs-paper) 92%, #00000010) 100%);
+  color: var(--fs-paper-ink);
+  font-family: var(--fs-font-paper);
+  font-style: italic;
+  position: relative;
+  box-shadow:
+    inset 0 0 28px rgba(0, 0, 0, 0.25),
+    inset 0 0 6px rgba(0, 0, 0, 0.15);
+}
+.fs-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.10 0 0 0 0 0.05 0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+
+/* CRT → paper transition wash, used as a div absolutely positioned
+   over the CRT briefly during mode change. */
+.fs-mode-wash {
+  position: absolute;
+  inset: 0;
+  background: var(--fs-paper);
+  animation: fs-wash-in 0.6s cubic-bezier(0.3, 0.7, 0.1, 1) forwards;
+  z-index: 10;
+}
+@keyframes fs-wash-in {
+  0%   { opacity: 0; transform: scale(0.95); filter: blur(8px); }
+  50%  { opacity: 1; filter: blur(2px); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+/* Subtle horizontal slip used on important events */
+@keyframes fs-glitch {
+  0%, 96%, 100% { transform: translateX(0); }
+  97%           { transform: translateX(-3px) skewX(-1deg); }
+  98%           { transform: translateX(2px); }
+  99%           { transform: translateX(-1px) skewX(0.5deg); }
+}
+.fs-glitch { animation: fs-glitch 1.2s linear; }
+

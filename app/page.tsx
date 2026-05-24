@@ -1,36 +1,30 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { LeafExperience } from "@/components/leaf/leaf-experience";
-import { SkyAlertsBanner } from "@/components/leaf/sky-alerts-banner";
-import { StreakChip } from "@/components/leaf/streak-chip";
+import { ConsoleShell } from "@/components/foreshore/console-shell";
 
 export const dynamic = "force-dynamic";
 
 /*
-  Witch Life root — the daily leaf. Single primary surface. The hub
-  has been retired: this page is the practice, the card, the question
-  channel, and the journal entry for today, all on one broadsheet.
+  Witch Life root — STATION 28, the operator console.
 
-  We wrap the client LeafExperience with two server-rendered slots:
-    - SkyAlertsBanner above the leaf (when 'sky-alerts' flag is on)
-    - StreakChip passed in as a slot prop, rendered inside the
-      masthead by the client (when 'streaks' flag is on)
+  The console is the entire product. One page, one room, four
+  primary controls (DIAL, TAPE, LOG, FILE) and the CRT in the
+  middle of it. Phase A wires DIAL + TRANSMIT to a live
+  Foreshore-voiced transmission. Subsequent phases plug in
+  TAPE, LOG, FILE, mail slot, anomalies.
 
-  Unauthenticated visitors are redirected to /sign-in (when Clerk is
-  configured); without Clerk the leaf renders for everyone so dev
-  builds without keys still work.
+  Unauthenticated visitors are redirected to /sign-in (when Clerk
+  is configured); without Clerk the console renders for everyone
+  so dev builds without keys still work.
+
+  The previous broadsheet remains available at /leaf during the
+  transition; existing operators with unchanged habits will find
+  it untouched.
 */
-export default async function Home() {
+export default async function StationPage() {
   if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
     const { userId } = await auth();
     if (!userId) redirect("/sign-in");
   }
-  return (
-    <>
-      <div className="mx-auto max-w-[1080px] px-5 pt-6 md:px-10 md:pt-10">
-        <SkyAlertsBanner />
-      </div>
-      <LeafExperience streakSlot={<StreakChip />} />
-    </>
-  );
+  return <ConsoleShell />;
 }
