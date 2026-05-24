@@ -21,6 +21,8 @@ import { CRTScreen } from "./crt-screen";
 import { TypeOn } from "./type-on";
 import { AtmosphericStrip } from "./atmospheric-strip";
 import { Dial } from "./dial";
+import { LogInput } from "./log-input";
+import { TapeView } from "./tape-view";
 
 /*
   Console shell — the entire Foreshore product UI is rendered inside
@@ -46,6 +48,9 @@ type PanelState =
   | { kind: "channel"; channel: number }
   | { kind: "transmitting"; channel: number; text: string }
   | { kind: "received"; channel: number; text: string }
+  | { kind: "log"; channel: number }
+  | { kind: "tape"; channel: number }
+  | { kind: "filed"; channel: number; text: string }
   | { kind: "error"; channel: number; message: string };
 
 export function ConsoleShell() {
@@ -185,22 +190,47 @@ export function ConsoleShell() {
             <CRTContents
               panel={panel}
               channel={currentChannel}
-              onLogPlaceholder={() => {
-                // Phase C will wire this up.
+              onOpenLog={() => setPanel({ kind: "log", channel })}
+              onClose={() => setPanel({ kind: "channel", channel })}
+              onFiled={(text) => setPanel({ kind: "filed", channel, text })}
+              onTransmissionTypedOut={(text) => {
+                // After the type-out finishes we transition the panel to
+                // `received` so the operator gets the LOG / ACK affordance.
+                if (
+                  panel.kind === "transmitting" &&
+                  panel.text === text &&
+                  panel.channel === channel
+                ) {
+                  setPanel({ kind: "received", channel, text });
+                }
               }}
-              onAcknowledge={() => setPanel({ kind: "channel", channel })}
             />
           </CRTScreen>
 
           {/* Control row below the CRT */}
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <ConsoleSwitch label="◯ DIAL" disabled aria-pressed>
+            <ConsoleSwitch
+              label="◯ DIAL"
+              aria-pressed={panel.kind === "channel" || panel.kind === "transmitting"}
+              onClick={() => setPanel({ kind: "channel", channel })}
+              title="Tune a channel"
+            >
               tuned
             </ConsoleSwitch>
-            <ConsoleSwitch label="▭ TAPE" disabled title="Available Phase C">
+            <ConsoleSwitch
+              label="▭ TAPE"
+              aria-pressed={panel.kind === "tape"}
+              onClick={() => setPanel({ kind: "tape", channel })}
+              title="Open the archive"
+            >
               archive
             </ConsoleSwitch>
-            <ConsoleSwitch label="▢ LOG" disabled title="Available Phase C">
+            <ConsoleSwitch
+              label="▢ LOG"
+              aria-pressed={panel.kind === "log"}
+              onClick={() => setPanel({ kind: "log", channel })}
+              title="File a capture"
+            >
               capture
             </ConsoleSwitch>
             <ConsoleSwitch label="⌧ FILE" disabled title="Available Phase G">
@@ -272,13 +302,17 @@ export function ConsoleShell() {
 function CRTContents({
   panel,
   channel,
-  onLogPlaceholder,
-  onAcknowledge,
+  onOpenLog,
+  onClose,
+  onFiled,
+  onTransmissionTypedOut,
 }: {
   panel: PanelState;
   channel: ReturnType<typeof channelAt>;
-  onLogPlaceholder: () => void;
-  onAcknowledge: () => void;
+  onOpenLog: () => void;
+  onClose: () => void;
+  onFiled: (text: string) => void;
+  onTransmissionTypedOut: (text: string) => void;
 }) {
   if (panel.kind === "standby") {
     return (
@@ -340,9 +374,7 @@ function CRTContents({
               text={panel.text}
               speedMs={36}
               keepCursor
-              onDone={() => {
-                /* Phase A: just leaves the cursor blinking. */
-              }}
+              onDone={() => onTransmissionTypedOut(panel.text)}
             />
           </p>
         ) : (
@@ -362,20 +394,43 @@ function CRTContents({
           {panel.text}
         </p>
         <div className="flex gap-3 pt-4">
-          <button
-            type="button"
-            onClick={onLogPlaceholder}
-            className="fs-switch"
-            disabled
-            title="Available Phase C"
-          >
+          <button type="button" onClick={onOpenLog} className="fs-switch">
             LOG THIS
           </button>
-          <button
-            type="button"
-            onClick={onAcknowledge}
-            className="fs-switch"
-          >
+          <button type="button" onClick={onClose} className="fs-switch">
+            ACKNOWLEDGE
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (panel.kind === "log") {
+    return (
+      <LogInput
+        onClose={onClose}
+        onFiled={({ text }) => onFiled(text)}
+        channelHint={`CH ${String(channel.number).padStart(2, "0")} · ${channel.name}`}
+      />
+    );
+  }
+
+  if (panel.kind === "tape") {
+    return <TapeView onClose={onClose} />;
+  }
+
+  if (panel.kind === "filed") {
+    return (
+      <div className="space-y-5">
+        <p className="fs-stencil">CAPTURE FILED · TAPE ADVANCED</p>
+        <p className="fs-mono text-base leading-[1.6] text-[var(--fs-phosphor)] fs-phosphor max-w-2xl">
+          “{panel.text}”
+        </p>
+        <div className="flex gap-3 pt-2">
+          <button type="button" onClick={onOpenLog} className="fs-switch">
+            FILE ANOTHER
+          </button>
+          <button type="button" onClick={onClose} className="fs-switch">
             ACKNOWLEDGE
           </button>
         </div>
@@ -392,7 +447,7 @@ function CRTContents({
       <p className="fs-mono text-base text-[var(--fs-alarm)] max-w-2xl">
         {panel.message}
       </p>
-      <button type="button" onClick={onAcknowledge} className="fs-switch">
+      <button type="button" onClick={onClose} className="fs-switch">
         ACKNOWLEDGE
       </button>
     </div>
