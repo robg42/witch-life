@@ -39,6 +39,8 @@ interface Bucket {
 const BUCKETS: Record<string, Bucket> = {
   "/api/reading": { windowMinutes: 60, max: 20 },
   "/api/transmission": { windowMinutes: 60, max: 30 },
+  "/api/foreshore/weekly": { windowMinutes: 60, max: 4 },
+  "/api/foreshore/letter": { windowMinutes: 60 * 24, max: 3 },
   "/api/card": { windowMinutes: 60, max: 30 },
   "/api/spread": { windowMinutes: 60, max: 10 },
   "/api/library/practice": { windowMinutes: 60, max: 20 },

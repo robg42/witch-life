@@ -14,15 +14,28 @@ import {
 import {
   DEFAULT_PHOSPHOR,
   loadOperator,
+  saveOperator,
   type OperatorPrefs,
 } from "@/lib/foreshore/operator";
 import { CHANNELS, channelAt } from "@/lib/foreshore/channels";
+import {
+  unlockAudio,
+  startHum,
+  stopHum,
+  clack,
+  staticWash,
+  acquire,
+  click,
+} from "@/lib/foreshore/sound";
+import { computeSkyAlerts, type SkyAlert } from "@/lib/sky-alerts";
 import { CRTScreen } from "./crt-screen";
 import { TypeOn } from "./type-on";
 import { AtmosphericStrip } from "./atmospheric-strip";
 import { Dial } from "./dial";
 import { LogInput } from "./log-input";
 import { TapeView } from "./tape-view";
+import { AnomalyBadge } from "./anomaly-badge";
+import { AnomalyPanel } from "./anomaly-panel";
 
 /*
   Console shell — the entire Foreshore product UI is rendered inside
@@ -51,6 +64,7 @@ type PanelState =
   | { kind: "log"; channel: number }
   | { kind: "tape"; channel: number }
   | { kind: "filed"; channel: number; text: string }
+  | { kind: "anomaly"; channel: number; alerts: SkyAlert[] }
   | { kind: "error"; channel: number; message: string };
 
 export function ConsoleShell() {
@@ -83,6 +97,29 @@ export function ConsoleShell() {
     };
   }, [operator.phosphor]);
 
+  // Sound: start / stop the ambient hum when sound preference flips.
+  useEffect(() => {
+    if (operator.sound) {
+      startHum();
+    } else {
+      stopHum();
+    }
+    return () => {
+      // Don't stop on unmount — the hum is owned by the page-long
+      // singleton context; stopHum is only called when the operator
+      // explicitly mutes.
+    };
+  }, [operator.sound]);
+
+  const setSound = useCallback(async (next: boolean) => {
+    if (next) await unlockAudio();
+    setOperator((prev) => {
+      const merged = { ...prev, sound: next };
+      saveOperator({ sound: next });
+      return merged;
+    });
+  }, []);
+
   // Derive astronomical state once per session — same as the broadsheet
   // does. Cheap (pure TS engine).
   const computed = useMemo(() => {
@@ -94,20 +131,30 @@ export function ConsoleShell() {
       lat: birth.lat,
       lng: birth.lng,
     });
-    return { sky, natal };
+    return { sky, natal, alerts: computeSkyAlerts(sky, now) };
   }, [birth]);
 
   const channel = panel.kind === "standby" ? 0 : panel.channel;
   const currentChannel = channelAt(channel);
 
   const onTune = useCallback((next: number) => {
+    if (operator.sound) click();
     setPanel({ kind: "channel", channel: next });
-  }, []);
+  }, [operator.sound]);
+
+  const onSettle = useCallback(() => {
+    if (operator.sound) staticWash();
+  }, [operator.sound]);
 
   const onTransmit = useCallback(async () => {
     if (!birth || !computed) return;
     if (panel.kind !== "channel") return;
     const ch = channelAt(panel.channel);
+
+    if (operator.sound) {
+      clack();
+      window.setTimeout(() => acquire(), 350);
+    }
 
     // Trigger a brief glitch as the signal "arrives".
     setGlitching(true);
@@ -185,7 +232,20 @@ export function ConsoleShell() {
 
       <main className="mx-auto grid max-w-6xl gap-6 px-5 py-6 md:grid-cols-[1fr_18rem] md:gap-8 md:px-8 md:py-8">
         {/* CRT — universal output */}
-        <section>
+        <section className="relative">
+          {computed.alerts.length > 0 && panel.kind !== "anomaly" && (
+            <AnomalyBadge
+              alerts={computed.alerts}
+              soundOn={!!operator.sound}
+              onOpen={() =>
+                setPanel({
+                  kind: "anomaly",
+                  channel,
+                  alerts: computed.alerts,
+                })
+              }
+            />
+          )}
           <CRTScreen glitch={glitching}>
             <CRTContents
               panel={panel}
@@ -204,6 +264,7 @@ export function ConsoleShell() {
                   setPanel({ kind: "received", channel, text });
                 }
               }}
+              soundOn={!!operator.sound}
             />
           </CRTScreen>
 
@@ -244,6 +305,7 @@ export function ConsoleShell() {
           <Dial
             value={channel}
             onChange={onTune}
+            onSettle={onSettle}
             labelFor={(n) => channelAt(n).name}
           />
 
@@ -278,13 +340,16 @@ export function ConsoleShell() {
                 {operator.phosphor ?? DEFAULT_PHOSPHOR}
               </span>
             </li>
-            <li className="flex justify-between">
-              <span>AUDIO</span>
-              <span className="text-[var(--fs-ivory)]">
-                {operator.sound ? "ON" : "OFF"}
-              </span>
-            </li>
           </ul>
+
+          <button
+            type="button"
+            onClick={() => void setSound(!operator.sound)}
+            aria-pressed={!!operator.sound}
+            className="fs-switch w-full"
+          >
+            ⏼ AUDIO · {operator.sound ? "ON" : "OFF"}
+          </button>
         </aside>
       </main>
 
@@ -306,6 +371,7 @@ function CRTContents({
   onClose,
   onFiled,
   onTransmissionTypedOut,
+  soundOn,
 }: {
   panel: PanelState;
   channel: ReturnType<typeof channelAt>;
@@ -313,6 +379,7 @@ function CRTContents({
   onClose: () => void;
   onFiled: (text: string) => void;
   onTransmissionTypedOut: (text: string) => void;
+  soundOn: boolean;
 }) {
   if (panel.kind === "standby") {
     return (
@@ -374,6 +441,7 @@ function CRTContents({
               text={panel.text}
               speedMs={36}
               keepCursor
+              tick={soundOn ? click : undefined}
               onDone={() => onTransmissionTypedOut(panel.text)}
             />
           </p>
@@ -417,6 +485,10 @@ function CRTContents({
 
   if (panel.kind === "tape") {
     return <TapeView onClose={onClose} />;
+  }
+
+  if (panel.kind === "anomaly") {
+    return <AnomalyPanel alerts={panel.alerts} onClose={onClose} />;
   }
 
   if (panel.kind === "filed") {

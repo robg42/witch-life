@@ -28,6 +28,15 @@ interface Props {
   skippable?: boolean;
   /** Called once, when the type animation finishes. */
   onDone?: () => void;
+  /**
+   * Optional sound hook — called every N characters with a small
+   * sound. Wired from the console only when audio is enabled. The
+   * primitive doesn't import the sound module itself so it stays
+   * isolated and testable in isolation.
+   */
+  tick?: () => void;
+  /** Tick every N characters; default 2. */
+  tickEvery?: number;
   className?: string;
 }
 
@@ -38,13 +47,17 @@ export function TypeOn({
   keepCursor = true,
   skippable = true,
   onDone,
+  tick,
+  tickEvery = 2,
   className = "",
 }: Props) {
   const [i, setI] = useState(0);
   const [started, setStarted] = useState(delayMs === 0);
   const doneRef = useRef(false);
   const onDoneRef = useRef(onDone);
+  const tickRef = useRef(tick);
   onDoneRef.current = onDone;
+  tickRef.current = tick;
 
   useEffect(() => {
     setI(0);
@@ -65,9 +78,18 @@ export function TypeOn({
       }
       return;
     }
-    const t = window.setTimeout(() => setI((n) => n + 1), speedMs);
+    const t = window.setTimeout(() => {
+      setI((n) => n + 1);
+      if (tickRef.current && i > 0 && i % tickEvery === 0) {
+        try {
+          tickRef.current();
+        } catch {
+          // ignore audio failures
+        }
+      }
+    }, speedMs);
     return () => window.clearTimeout(t);
-  }, [i, started, text, speedMs]);
+  }, [i, started, text, speedMs, tickEvery]);
 
   const done = i >= text.length;
   const visible = text.slice(0, i);
