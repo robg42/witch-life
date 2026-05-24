@@ -42,14 +42,17 @@ describe("Feature registry", () => {
 });
 
 describe("isHardcodedAdminEmail", () => {
-  it("matches mail@robgregg.com case-insensitively", () => {
+  it("matches each hardcoded admin email case-insensitively", () => {
     expect(isHardcodedAdminEmail("mail@robgregg.com")).toBe(true);
     expect(isHardcodedAdminEmail("MAIL@ROBGREGG.COM")).toBe(true);
     expect(isHardcodedAdminEmail("  mail@robgregg.com  ")).toBe(true);
+    expect(isHardcodedAdminEmail("anclove@gmail.com")).toBe(true);
+    expect(isHardcodedAdminEmail("Anclove@Gmail.com")).toBe(true);
   });
 
   it("rejects others", () => {
     expect(isHardcodedAdminEmail("other@robgregg.com")).toBe(false);
+    expect(isHardcodedAdminEmail("anclove2@gmail.com")).toBe(false);
     expect(isHardcodedAdminEmail(null)).toBe(false);
     expect(isHardcodedAdminEmail(undefined)).toBe(false);
     expect(isHardcodedAdminEmail("")).toBe(false);

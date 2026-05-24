@@ -16,7 +16,10 @@ if (typeof window !== "undefined") {
   throw new Error("lib/admin must not be imported in client code");
 }
 
-export const HARDCODED_ADMIN_EMAILS = ["mail@robgregg.com"] as const;
+export const HARDCODED_ADMIN_EMAILS = [
+  "mail@robgregg.com",
+  "anclove@gmail.com",
+] as const;
 
 export class AdminRequiredError extends Error {
   constructor() {
