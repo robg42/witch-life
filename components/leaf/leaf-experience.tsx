@@ -50,7 +50,11 @@ import {
        input, dynamic responses below, inline journal.
 */
 
-export function LeafExperience() {
+export function LeafExperience({
+  streakSlot,
+}: {
+  streakSlot?: React.ReactNode;
+} = {}) {
   const router = useRouter();
   const [birth, setBirth] = useState<BirthDetails | null>(null);
 
@@ -64,14 +68,15 @@ export function LeafExperience() {
   }, [router]);
 
   if (!birth) return <Booting />;
-  return <Leaf birth={birth} />;
+  return <Leaf birth={birth} streakSlot={streakSlot} />;
 }
 
 interface InnerProps {
   birth: BirthDetails;
+  streakSlot?: React.ReactNode;
 }
 
-function Leaf({ birth }: InnerProps) {
+function Leaf({ birth, streakSlot }: InnerProps) {
   const { sky, natal, card: seededCard, almanac, seasonalContext } = useMemo(() => {
     const now = new Date();
     const sky = getSkyState(now, { lat: birth.lat });
@@ -260,9 +265,12 @@ function Leaf({ birth }: InnerProps) {
             <span>
               Today&rsquo;s leaf · {dateLong.toUpperCase()}
             </span>
-            <span>
-              Voice ·{" "}
-              <span className="text-vermilion">{VOICE_LABEL[birth.voice]}</span>
+            <span className="flex items-center gap-3">
+              {streakSlot}
+              <span>
+                Voice ·{" "}
+                <span className="text-vermilion">{VOICE_LABEL[birth.voice]}</span>
+              </span>
             </span>
           </div>
           <div className="mt-3 grid grid-cols-1 items-end gap-2 md:grid-cols-[auto_1fr] md:gap-8">

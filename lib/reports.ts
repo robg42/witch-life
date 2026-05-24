@@ -24,6 +24,11 @@ import {
   type NatalChart,
   type SkyState,
 } from "@/lib/astro";
+import {
+  currentClerkUserId,
+  logApiCall,
+  usageFromAnthropic,
+} from "@/lib/telemetry";
 
 if (typeof window !== "undefined") {
   throw new Error("lib/reports must not be imported in client code");
@@ -212,27 +217,59 @@ async function callJson<T>({
   userMessage,
   schema,
   maxTokens,
+  endpoint = "report:unknown",
 }: {
   voice: VoiceKey;
   userMessage: string;
   schema: string;
   maxTokens: number;
+  endpoint?: string;
 }): Promise<T> {
   const system = asciiFold(systemPromptFor(voice));
   const content = asciiFold(
     `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`,
   );
-  const res = await client().messages.create({
-    model: MODEL_FOR_REPORTS,
-    max_tokens: maxTokens,
-    system: [
-      {
-        type: "text",
-        text: system,
-        cache_control: { type: "ephemeral" },
+  const clerkUserId = await currentClerkUserId();
+  const startedAt = Date.now();
+  let res;
+  try {
+    res = await client().messages.create({
+      model: MODEL_FOR_REPORTS,
+      max_tokens: maxTokens,
+      system: [
+        {
+          type: "text",
+          text: system,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+      messages: [{ role: "user", content }],
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await logApiCall({
+      endpoint,
+      model: MODEL_FOR_REPORTS,
+      usage: {
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheCreationTokens: 0,
+        cacheReadTokens: 0,
       },
-    ],
-    messages: [{ role: "user", content }],
+      durationMs: Date.now() - startedAt,
+      status: "error",
+      errorMessage: msg.slice(0, 500),
+      clerkUserId,
+    });
+    throw err;
+  }
+  await logApiCall({
+    endpoint,
+    model: MODEL_FOR_REPORTS,
+    usage: usageFromAnthropic(res.usage),
+    durationMs: Date.now() - startedAt,
+    status: "ok",
+    clerkUserId,
   });
   const block = res.content.find((b) => b.type === "text");
   if (!block || block.type !== "text") {
@@ -277,6 +314,7 @@ async function generateNatal({
     voice,
     maxTokens: 6000,
     schema: NATAL_SCHEMA,
+    endpoint: "/api/report:natal",
     userMessage: [
       "Translate this reader's natal chart into a practice plan. For each",
       "major placement (Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn,",
@@ -326,6 +364,7 @@ async function generateYearAhead({
     voice,
     maxTokens: 8000,
     schema: YEAR_SCHEMA,
+    endpoint: "/api/report:year_ahead",
     userMessage: [
       "Build a year-of-practice plan. Twelve months from the month given.",
       "Each month gets a theme (1 sentence, grounded in what's moving in",
@@ -366,6 +405,7 @@ async function generateSaturnReturn({
     voice,
     maxTokens: 3000,
     schema: SATURN_SCHEMA,
+    endpoint: "/api/report:saturn_return",
     userMessage: [
       "Build a Saturn-return practice for this reader. Saturn is in their",
       `natal sign of ${natal.saturn}, currently ${
@@ -414,6 +454,7 @@ async function generateEclipseSeason({
     voice,
     maxTokens: 3500,
     schema: ECLIPSE_SCHEMA,
+    endpoint: "/api/report:eclipse_season",
     userMessage: [
       "Build a practice plan for the current eclipse window. For each",
       "eclipse in the window, give a CONCRETE PRACTICE the reader can do",

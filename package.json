@@ -24,7 +24,8 @@
     "stripe": "^22.1.1",
     "svix": "^1.94.0",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20",

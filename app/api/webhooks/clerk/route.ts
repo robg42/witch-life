@@ -2,13 +2,18 @@ import { headers } from "next/headers";
 import { Webhook } from "svix";
 import type { WebhookEvent } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { isHardcodedAdminEmail } from "@/lib/admin";
 
 /*
   Clerk webhook → mirror user records into Supabase.
 
-  Configure in the Clerk dashboard: webhook endpoint pointing at
-  /api/webhooks/clerk, subscribed to `user.created`, `user.updated`,
-  `user.deleted`. Paste the signing secret into CLERK_WEBHOOK_SECRET.
+  Subscribed events: user.created, user.updated, user.deleted.
+  Paste the signing secret into CLERK_WEBHOOK_SECRET.
+
+  Side effect: any user whose primary email matches one of the
+  HARDCODED_ADMIN_EMAILS (currently just mail@robgregg.com) is
+  granted is_admin=true. Re-runs idempotently — granting admin on
+  every user.updated event is harmless.
 */
 
 export async function POST(req: Request) {
@@ -45,14 +50,21 @@ export async function POST(req: Request) {
     case "user.created":
     case "user.updated": {
       const email = event.data.email_addresses?.[0]?.email_address ?? null;
+      const isAdmin = isHardcodedAdminEmail(email);
       const { error } = await supabase
         .from("users")
         .upsert(
-          { clerk_id: event.data.id, email },
+          {
+            clerk_id: event.data.id,
+            email,
+            ...(isAdmin ? { is_admin: true } : {}),
+          },
           { onConflict: "clerk_id" },
         );
       if (error) {
-        return new Response(`Supabase error: ${error.message}`, { status: 500 });
+        return new Response(`Supabase error: ${error.message}`, {
+          status: 500,
+        });
       }
       break;
     }
@@ -63,7 +75,9 @@ export async function POST(req: Request) {
           .delete()
           .eq("clerk_id", event.data.id);
         if (error) {
-          return new Response(`Supabase error: ${error.message}`, { status: 500 });
+          return new Response(`Supabase error: ${error.message}`, {
+            status: 500,
+          });
         }
       }
       break;

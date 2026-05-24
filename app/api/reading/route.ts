@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { auth } from "@clerk/nextjs/server";
 import { callOracle } from "@/lib/anthropic";
+import { rateLimit } from "@/lib/rate-limit";
+import { getCachedReading, saveCachedReading } from "@/lib/reading-cache";
 import type { VoiceKey } from "@/lib/voices";
 import type { NatalChart, SkyState } from "@/lib/astro";
 
@@ -41,6 +45,27 @@ export interface ReadingResponse {
   tonightNote: string | null; // 1 sentence about tonight, only on lunar events
 }
 
+// Validation. We keep the schema permissive enough that mid-version
+// client changes don't 400 the user, but tight enough that obviously
+// wrong inputs are rejected before they reach the LLM.
+const voiceSchema = z.enum(["root", "blade", "tide"]);
+const requestSchema = z.object({
+  sky: z.record(z.string(), z.unknown()),
+  natal: z.record(z.string(), z.unknown()),
+  voice: voiceSchema,
+  question: z.string().max(2000).optional(),
+  recentJournal: z.string().max(8000).optional(),
+  intentions: z.array(z.string().max(64)).max(10).optional(),
+  seasonalContext: z.string().max(2000).optional(),
+  dailyCard: z
+    .object({
+      name: z.string(),
+      suit: z.string(),
+      description: z.string(),
+    })
+    .optional(),
+});
+
 const SCHEMA = `{
   "intentionLine": "1 to 2 sentences. The frame for today's practice in plant/season/moon language. No zodiac terms unless directly naming a specific natal placement that is doing real work today.",
   "gather": ["3 to 5 concrete items the reader can find at home or outside right now. Real physical things only — candle, water, paper, a leaf, a stone, an object from their home. No abstractions."],
@@ -55,17 +80,52 @@ const SCHEMA = `{
 }`;
 
 export async function POST(req: Request) {
-  let body: RequestBody;
+  let raw: unknown;
   try {
-    body = (await req.json()) as RequestBody;
+    raw = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (!body.sky || !body.natal || !body.voice) {
+  const parsed = requestSchema.safeParse(raw);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Missing sky, natal, or voice" },
+      { error: "Invalid body", details: parsed.error.issues },
       { status: 400 },
     );
+  }
+  const body = parsed.data as unknown as RequestBody;
+
+  // Rate limit early — protects against runaway costs from a wedged
+  // client that retries on every render.
+  const { userId } = await auth();
+  if (userId) {
+    const rl = await rateLimit(userId, "/api/reading");
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: rl.message },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rl.retryAfterSec) },
+        },
+      );
+    }
+  }
+
+  // Cache check. The Leaf reloads on every navigation; without the
+  // cache, every page load regenerates the same reading.
+  const cacheInput = {
+    voice: body.voice,
+    intentions: body.intentions,
+    question: body.question,
+    recentJournal: body.recentJournal,
+    dailyCardName: body.dailyCard?.name,
+    seasonalContext: body.seasonalContext,
+  };
+  const cached = await getCachedReading(cacheInput);
+  if (cached) {
+    return NextResponse.json(cached, {
+      headers: { "X-Cache": "HIT" },
+    });
   }
 
   const userMessage = buildPrompt(body);
@@ -76,8 +136,13 @@ export async function POST(req: Request) {
       userMessage,
       maxTokens: 1500,
       schema: SCHEMA,
+      endpoint: "/api/reading",
     });
-    return NextResponse.json(result);
+    // Best-effort save. If it fails, the next request just regenerates.
+    await saveCachedReading(cacheInput, result);
+    return NextResponse.json(result, {
+      headers: { "X-Cache": "MISS" },
+    });
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Oracle failed to respond";

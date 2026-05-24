@@ -1,7 +1,22 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { auth } from "@clerk/nextjs/server";
 import { callOracle } from "@/lib/anthropic";
+import { rateLimit } from "@/lib/rate-limit";
 import type { VoiceKey } from "@/lib/voices";
 import type { NatalChart, SkyState } from "@/lib/astro";
+
+const cardBodySchema = z.object({
+  card: z.object({
+    name: z.string().min(1).max(80),
+    suit: z.enum(["Root", "Tide", "Blade", "Ember"]),
+    description: z.string().min(1).max(500),
+  }),
+  sky: z.record(z.string(), z.unknown()),
+  natal: z.record(z.string(), z.unknown()),
+  voice: z.enum(["root", "blade", "tide"]),
+  seasonalContext: z.string().max(2000).optional(),
+});
 
 /*
   Card interpretation, reframed as ACTION. Returns a one-sentence
@@ -32,17 +47,33 @@ const SCHEMA = `{
 }`;
 
 export async function POST(req: Request) {
-  let body: RequestBody;
+  let raw: unknown;
   try {
-    body = (await req.json()) as RequestBody;
+    raw = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (!body.card || !body.sky || !body.natal || !body.voice) {
+  const parsed = cardBodySchema.safeParse(raw);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Missing card, sky, natal, or voice" },
+      { error: "Invalid body", details: parsed.error.issues },
       { status: 400 },
     );
+  }
+  const body = parsed.data as unknown as RequestBody;
+
+  const { userId } = await auth();
+  if (userId) {
+    const rl = await rateLimit(userId, "/api/card");
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: rl.message },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rl.retryAfterSec) },
+        },
+      );
+    }
   }
 
   const userMessage = [
@@ -67,6 +98,7 @@ export async function POST(req: Request) {
       userMessage,
       maxTokens: 600,
       schema: SCHEMA,
+      endpoint: "/api/card",
     });
     return NextResponse.json(result);
   } catch (err) {

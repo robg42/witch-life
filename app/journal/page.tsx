@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { supabaseForUser } from "@/lib/supabase/server";
 import { JournalForm } from "@/components/journal/journal-form";
 import { JournalList } from "@/components/journal/journal-list";
+import { JournalExportButton } from "@/components/journal/journal-export-button";
 import { BotanicalDivider } from "@/components/site/botanical-divider";
 import type { JournalEntry } from "@/lib/journal";
 
@@ -80,9 +81,12 @@ export default async function JournalPage() {
 
         <BotanicalDivider className="my-16" />
 
-        <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70 mb-6">
-          Previously
-        </h2>
+        <div className="mb-6 flex items-baseline justify-between">
+          <h2 className="font-sans text-xs uppercase tracking-[0.25em] text-bark/70">
+            Previously
+          </h2>
+          <JournalExportButton />
+        </div>
 
         {loadError ? (
           <p className="font-serif text-base italic text-clay">{loadError}</p>

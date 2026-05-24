@@ -1,9 +1,27 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { auth } from "@clerk/nextjs/server";
 import { isSubscribed } from "@/lib/subscription";
 import { callOracle } from "@/lib/anthropic";
+import { rateLimit } from "@/lib/rate-limit";
 import type { Card } from "@/lib/deck";
 import type { NatalChart, SkyState } from "@/lib/astro";
 import type { VoiceKey } from "@/lib/voices";
+
+const cardSchema = z.object({
+  name: z.string().min(1).max(80),
+  suit: z.enum(["Root", "Tide", "Blade", "Ember"]),
+  description: z.string().min(1).max(500),
+});
+const spreadBodySchema = z.object({
+  cards: z.tuple([cardSchema, cardSchema, cardSchema]),
+  layout: z.enum(["sao", "ppf"]),
+  sky: z.record(z.string(), z.unknown()),
+  natal: z.record(z.string(), z.unknown()),
+  voice: z.enum(["root", "blade", "tide"]),
+  question: z.string().max(2000).optional(),
+  seasonalContext: z.string().max(2000).optional(),
+});
 
 /*
   Three-card spread, output as practice. Each position now returns
@@ -61,18 +79,34 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: RequestBody;
+  const { userId } = await auth();
+  if (userId) {
+    const rl = await rateLimit(userId, "/api/spread");
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: rl.message },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rl.retryAfterSec) },
+        },
+      );
+    }
+  }
+
+  let raw: unknown;
   try {
-    body = (await req.json()) as RequestBody;
+    raw = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (!body.cards || body.cards.length !== 3) {
+  const parsed = spreadBodySchema.safeParse(raw);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Three cards are required" },
+      { error: "Invalid body", details: parsed.error.issues },
       { status: 400 },
     );
   }
+  const body = parsed.data as unknown as RequestBody;
 
   const positions = LAYOUT_LABELS[body.layout] ?? LAYOUT_LABELS.sao;
 
@@ -107,6 +141,7 @@ export async function POST(req: Request) {
       userMessage,
       maxTokens: 1800,
       schema: SCHEMA,
+      endpoint: "/api/spread",
     });
     return NextResponse.json(result);
   } catch (err) {

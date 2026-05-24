@@ -21,6 +21,7 @@ import { TarotCard } from "@/components/cards/tarot-card";
 import { UpgradeCard } from "@/components/paywall/upgrade-card";
 import { VOICE_LABEL } from "@/lib/voices";
 import { MarkDoneButton } from "@/components/practice/mark-done-button";
+import { SpreadShareButton } from "@/components/spread/spread-share-button";
 
 const LAYOUT_LABELS: Record<SpreadLayout, [string, string, string]> = {
   sao: ["Situation", "Action", "Outcome"],
@@ -298,8 +299,16 @@ export function SpreadExperience() {
                     </li>
                   ))}
                 </ol>
-                <div className="mt-5">
+                <div className="mt-5 flex flex-wrap items-center gap-3">
                   <MarkDoneButton practiceType="spread" />
+                  {state && (
+                    <SpreadShareButton
+                      cards={state.cards}
+                      layout={layout}
+                      question={appliedQuestion}
+                      payload={reading.data}
+                    />
+                  )}
                 </div>
               </div>
             </div>

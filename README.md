@@ -123,14 +123,47 @@ The Clerk webhook (`/api/webhooks/clerk`) keeps the `users` table in sync on `us
 | `/draw` | — | Free — Single card pull |
 | `/library` | — | Free preview / Paid full |
 | `/library/sabbats/[key]` | — | Free preview / Paid full |
-| `/journal` | Required | Free |
-| `/spread` | Required | Paid (£9/mo subscription) |
+| `/journal` | Required | Free (markdown export behind `journal-export` flag) |
+| `/spread` | Required | Paid (£9/mo subscription); share button behind `shared-spreads` flag |
+| `/share/[token]` | — | Public — view a shared spread by token |
 | `/reports` | Required | Free to view, paid per report |
 | `/reports/[slug]` | Required | Owns-row only |
 | `/practice` | Required | Free — your log + chart + intentions |
 | `/account` | Required | Free — billing only |
+| `/admin` | Admin | Dashboard: counts, costs, errors |
+| `/admin/users` · `/admin/users/[id]` | Admin | User list + per-user feature overrides |
+| `/admin/flags` | Admin | Global feature flag toggles |
+| `/admin/api-calls` | Admin | Anthropic call log (filterable) |
 | `/sign-in` · `/sign-up` | — | Clerk |
 | `/debug/sky` | — | **Dev only** (404 in production) |
+
+## Admin portal
+
+`/admin` is gated by `public.users.is_admin = true`. The hardcoded list in [`lib/admin.ts`](lib/admin.ts) (`HARDCODED_ADMIN_EMAILS`) auto-grants admin to listed emails on `user.created` / `user.updated` via the Clerk webhook. Non-admins hitting any `/admin/**` route get a 404 — the surface is not acknowledged.
+
+Every admin mutation:
+1. Calls `requireAdmin()` (throws `AdminRequiredError` otherwise).
+2. Validates input with zod.
+3. Writes a row to `public.admin_actions` for the audit log.
+4. Calls `revalidatePath()` so the table refreshes.
+
+## Feature flags
+
+The full registry lives in [`lib/features.ts`](lib/features.ts) — the source of truth for which flags exist and what tier they belong to. The DB rows in `public.feature_flags` hold the globally-enabled state; `public.user_feature_overrides` holds per-user grants.
+
+Resolution order (in `hasFeature()`): **user override** → **global flag** → **hardcoded default**. Tier gating then applies: `free` allows everyone, `paid` requires active subscription (or admin), `admin` requires admin.
+
+Currently registered: `streaks`, `journal-export`, `sky-alerts`, `shared-spreads`, `voice-listen`, `daily-email`.
+
+## Cost, rate-limit, cache (Anthropic efficiency)
+
+| Concern | Module | Behaviour |
+|---|---|---|
+| Telemetry | [`lib/telemetry.ts`](lib/telemetry.ts) | Every call logs endpoint, model, tokens, cost (USD), duration, status to `public.api_calls`. Best-effort: telemetry failures never break a user request. |
+| Reading cache | [`lib/reading-cache.ts`](lib/reading-cache.ts) | Today's reading cached per `(user, date, voice)`, keyed by sha256 of inputs. Without it the Leaf regenerates on every page load. Sets the `X-Cache: HIT` response header on hits. |
+| Rate limit | [`lib/rate-limit.ts`](lib/rate-limit.ts) | DB-backed counter on `api_calls`. Per-endpoint buckets: `/api/reading` 20/h, `/api/card` 30/h, `/api/spread` 10/h, `/api/library/practice` 20/h, `/api/report` 5/h. Returns `429` with `Retry-After`. |
+| Prompt cache | [`lib/anthropic.ts`](lib/anthropic.ts) | The voice system prompt is sent with `cache_control: ephemeral`; Anthropic reuses it for ~5 min. |
+| ASCII fold | [`lib/anthropic.ts`](lib/anthropic.ts) | Normalises em dashes, curly quotes, NBSP into ASCII before sending — prevents `ByteString` errors in intermediate proxies. |
 
 ---
 

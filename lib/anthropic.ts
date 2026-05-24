@@ -1,5 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { systemPromptFor, type VoiceKey } from "@/lib/voices";
+import {
+  currentClerkUserId,
+  logApiCall,
+  usageFromAnthropic,
+} from "@/lib/telemetry";
 
 /*
   Server-only Claude client. The Anthropic key NEVER leaves the server.
@@ -69,6 +74,11 @@ export interface OracleCallOptions {
    * reliably, and the prompt stays compact.
    */
   schema: string;
+  /**
+   * Logged into api_calls for cost tracking and rate limiting.
+   * Defaults to "unknown" — pass the actual route name.
+   */
+  endpoint?: string;
 }
 
 /**
@@ -114,11 +124,15 @@ export async function callOracle<T>({
   userMessage,
   maxTokens = 1024,
   schema,
+  endpoint = "unknown",
 }: OracleCallOptions): Promise<T> {
   const system = asciiFold(systemPromptFor(voice));
   const userContent = asciiFold(
     `${userMessage}\n\nRespond in valid JSON matching this schema:\n${schema}`,
   );
+
+  const clerkUserId = await currentClerkUserId();
+  const startedAt = Date.now();
 
   let response;
   try {
@@ -135,17 +149,41 @@ export async function callOracle<T>({
       messages: [{ role: "user", content: userContent }],
     });
   } catch (err) {
-    // Wrap the SDK's raw error in something more actionable.
     const msg = err instanceof Error ? err.message : String(err);
+    // Best-effort failure log.
+    await logApiCall({
+      endpoint,
+      model: ORACLE_MODEL,
+      usage: {
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheCreationTokens: 0,
+        cacheReadTokens: 0,
+      },
+      durationMs: Date.now() - startedAt,
+      status: "error",
+      errorMessage: msg.slice(0, 500),
+      clerkUserId,
+    });
     if (msg.includes("ByteString")) {
       throw new Error(
         "Anthropic request rejected non-ASCII content in a header. " +
-          "Prompts have been normalised; if this persists, check ANTHROPIC_MODEL " +
-          "env var for stray characters.",
+          "Prompts have been normalised; if this persists, check the " +
+          "ANTHROPIC_API_KEY env var for stray characters.",
       );
     }
     throw err;
   }
+
+  // Successful call — log usage + cost.
+  await logApiCall({
+    endpoint,
+    model: ORACLE_MODEL,
+    usage: usageFromAnthropic(response.usage),
+    durationMs: Date.now() - startedAt,
+    status: "ok",
+    clerkUserId,
+  });
 
   const block = response.content.find((b) => b.type === "text");
   if (!block || block.type !== "text") {

@@ -7,6 +7,7 @@ import {
   type NatalChart,
 } from "@/lib/astro";
 import { generateReport, REPORT_META, type ReportType } from "@/lib/reports";
+import { rateLimit } from "@/lib/rate-limit";
 import type { VoiceKey } from "@/lib/voices";
 
 /*
@@ -26,6 +27,17 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const rl = await rateLimit(userId, "/api/report");
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: rl.message },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rl.retryAfterSec) },
+      },
+    );
   }
 
   const id = new URL(req.url).searchParams.get("id");

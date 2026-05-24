@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { isSubscribed } from "@/lib/subscription";
 import { callOracle } from "@/lib/anthropic";
+import { rateLimit } from "@/lib/rate-limit";
 import { correspondenceById } from "@/lib/correspondences";
 import type { VoiceKey } from "@/lib/voices";
 
@@ -44,6 +46,20 @@ export async function POST(req: Request) {
     );
   }
 
+  const { userId } = await auth();
+  if (userId) {
+    const rl = await rateLimit(userId, "/api/library/practice");
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: rl.message },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rl.retryAfterSec) },
+        },
+      );
+    }
+  }
+
   let body: RequestBody;
   try {
     body = (await req.json()) as RequestBody;
@@ -81,6 +97,7 @@ export async function POST(req: Request) {
       userMessage,
       maxTokens: 700,
       schema: SCHEMA,
+      endpoint: "/api/library/practice",
     });
     return NextResponse.json(result);
   } catch (err) {
