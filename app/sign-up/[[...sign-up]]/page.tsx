@@ -1,192 +1,241 @@
 import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { getSkyState } from "@/lib/astro";
-import { almanacFor } from "@/lib/almanac";
-import { EditionInfo, Fleuron } from "@/components/broadsheet";
+import { CRTScreen } from "@/components/foreshore/crt-screen";
 
 export const dynamic = "force-dynamic";
 
+/*
+  New operator enrollment — Station 28 access request terminal.
+
+  The CRT walks through the three-step enrollment procedure;
+  the right panel is the Clerk registration form.
+*/
 export default function SignUpPage() {
   const now = new Date();
   const sky = getSkyState(now);
-  const almanac = almanacFor(now);
-  const day = now.getUTCDate();
-  const dateLong = now.toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const mercuryStatus = sky.planets.mercury.retrograde
-    ? "Retrograde"
-    : sky.planets.mercury.shadowPeriod
-      ? "In shadow"
-      : "Direct";
+  const mercury = sky.planets.mercury;
+  const mercuryStatus = mercury.retrograde
+    ? "RETROGRADE"
+    : mercury.shadowPeriod
+      ? "IN SHADOW"
+      : "DIRECT";
 
   return (
-    <main className="min-h-screen text-ink">
-      <div className="mx-auto max-w-[1280px] px-5 py-6 md:px-12 md:py-10">
-        <header className="rule-b pb-4">
-          <div className="almanac flex flex-wrap items-end justify-between gap-3">
-            <span>Volume I · For the practitioner</span>
-            <span>{dateLong.toUpperCase()}</span>
-          </div>
-          <div className="mt-2 grid grid-cols-1 items-end gap-2 md:grid-cols-[1fr_auto] md:gap-8">
-            <h1 className="broadsheet text-[clamp(3.2rem,12vw,9rem)] leading-[0.82] fade-up">
-              Witch&nbsp;Life
-            </h1>
-            <p
-              className="display-italic text-lg text-ink/85 md:text-right md:text-2xl fade-up"
-              style={{ animationDelay: "120ms" }}
-            >
-              An almanac of daily practice,
-              <br className="hidden md:block" /> drawn from the moon, the season,
-              <br className="hidden md:block" /> the land, and your chart.
-            </p>
-          </div>
-        </header>
+    <main className="flex min-h-screen flex-col fs-housing" data-foreshore="">
+      {/* Top brass rail */}
+      <header className="border-b border-[var(--fs-rule-strong)] px-5 py-2 text-center">
+        <h1 className="fs-stencil-strong">
+          STATION 28 · REMOTE RECEIVING OUTPOST
+        </h1>
+      </header>
 
-        <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr] md:gap-16">
-          <article className="fade-up" style={{ animationDelay: "180ms" }}>
-            <div className="flex items-start gap-5">
-              <span className="display text-vermilion text-[clamp(4rem,10vw,7rem)] leading-none">
-                {day}
-              </span>
-              <div className="mt-3">
-                <p className="almanac">For the day</p>
-                <p className="display-italic mt-1 text-2xl text-ink">
-                  {almanac.season} — {almanac.marker.toLowerCase()}.
+      {/* Body */}
+      <div className="mx-auto w-full max-w-[1280px] flex-1 px-5 py-8 md:px-10 md:py-10">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr] md:gap-14">
+
+          {/* Left: CRT enrollment procedure */}
+          <section>
+            <CRTScreen waveform>
+              <div className="space-y-7">
+                <p className="fs-stencil">NEW ENROLLMENT · ACCESS REQUEST</p>
+
+                <p className="fs-mono text-base leading-[1.65] text-[var(--fs-phosphor)] fs-phosphor max-w-2xl">
+                  TO PRIME A CHANNEL, THE STATION REQUIRES THREE PIECES OF
+                  INFORMATION. ENROLLMENT TAKES UNDER TWO MINUTES. YOUR CHART
+                  IS NEVER SHARED.
                 </p>
-              </div>
-            </div>
 
-            <p className="oracle-body mt-8 drop-cap text-ink/95">
-              The almanac is opening a new leaf for you. We&rsquo;ll cast your
-              chart against the moment you arrived, ask you to choose one to
-              three intentions for the season, and pick one of three voices
-              the oracle will speak to you in. Then every day you return, the
-              practice that lands here will be shaped by who you are and what
-              the sky is doing.
-            </p>
-
-            <Fleuron mark="❋" />
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <Column
-                num="I"
-                title="Your day in the year"
-                body="The date you arrived, plus optional time and place. Enough to know what was overhead when you began."
-              />
-              <Column
-                num="II"
-                title="Your intentions"
-                body="One to three from a menu of ten — clarity, courage, rest, grief, fertility — to shape the practice."
-              />
-              <Column
-                num="III"
-                title="Your voice"
-                body="The Root, the Blade, or the Tide. The oracle will speak in your chosen register."
-              />
-            </div>
-
-            <div className="mt-10">
-              <EditionInfo
-                parts={[
-                  {
-                    label: "Moon",
-                    value: (
-                      <span>
-                        <span className="text-vermilion mr-2 text-lg leading-none">
-                          {sky.moon.phaseSymbol}
+                <div className="border-t border-[var(--fs-rule)] pt-6">
+                  <p className="fs-stencil mb-4">ENROLLMENT PROCEDURE</p>
+                  <ol className="space-y-3">
+                    {[
+                      {
+                        num: "I",
+                        label: "DATE OF ARRIVAL",
+                        detail: "REQUIRED FOR CHART CAST · TIME + PLACE OPTIONAL",
+                      },
+                      {
+                        num: "II",
+                        label: "SEASON INTENTIONS",
+                        detail: "SELECT 1–3 FROM MENU · SHAPES EACH TRANSMISSION",
+                      },
+                      {
+                        num: "III",
+                        label: "VOICE REGISTER",
+                        detail: "FIELD · CIPHER · LONG-WAVE",
+                      },
+                    ].map(({ num, label, detail }) => (
+                      <li key={num} className="flex gap-4 fs-mono text-sm">
+                        <span className="text-[var(--fs-brass-glint)] fs-phosphor w-4 shrink-0 text-right">
+                          {num}
                         </span>
-                        {sky.moon.phaseName}
-                      </span>
-                    ),
-                  },
-                  { label: "Sun", value: sky.sun.sign },
-                  {
-                    label: "Mercury",
-                    value: (
-                      <span
-                        className={
-                          sky.planets.mercury.retrograde
-                            ? "text-vermilion"
-                            : sky.planets.mercury.shadowPeriod
-                              ? "text-sage"
-                              : "text-ink"
-                        }
+                        <div>
+                          <p className="text-[var(--fs-ivory)]">{label}</p>
+                          <p className="text-[var(--fs-ivory-dim)] text-xs mt-0.5 tracking-[0.08em]">
+                            {detail}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                <div className="border-t border-[var(--fs-rule)] pt-6">
+                  <p className="fs-stencil mb-4">CURRENT ATMOSPHERICS</p>
+                  <dl className="space-y-2">
+                    {(
+                      [
+                        {
+                          key: "MOON",
+                          val: `${sky.moon.phaseSymbol} ${sky.moon.phaseName.toUpperCase()}`,
+                          alarm: false,
+                        },
+                        {
+                          key: "SUN",
+                          val: `IN ${sky.sun.sign.toUpperCase()}`,
+                          alarm: false,
+                        },
+                        {
+                          key: "MERCURY",
+                          val: mercuryStatus,
+                          alarm: mercury.retrograde,
+                        },
+                        {
+                          key: "DARK MOON",
+                          val: `${Math.round(sky.moon.daysToNewMoon)}D`,
+                          alarm: false,
+                        },
+                      ] as const
+                    ).map(({ key, val, alarm }) => (
+                      <div
+                        key={key}
+                        className="flex justify-between border-b border-[var(--fs-rule)] pb-1 fs-mono text-sm"
                       >
-                        {mercuryStatus}
-                      </span>
-                    ),
-                  },
-                  {
-                    label: "Dark moon",
-                    value: `${Math.round(sky.moon.daysToNewMoon)}d`,
-                  },
-                ]}
-              />
-            </div>
-          </article>
-
-          <aside className="md:pl-10 md:border-l md:border-rule">
-            <div
-              className="sticky top-10 fade-up"
-              style={{ animationDelay: "240ms" }}
-            >
-              <p className="almanac">A notice</p>
-              <h2 className="display mt-2 text-4xl md:text-5xl">Begin</h2>
-              <p className="italic-accent mt-3 text-lg text-ink/80">
-                Save your chart. Begin the daily ritual.
-              </p>
-              <p className="oracle-body mt-3 text-ink/80">
-                An account holds your chart, your journal, your practice log.
-                <br />
-                <Link href="/sign-in" className="wl-link">
-                  Or return if the oracle already knows you
-                </Link>
-                .
-              </p>
-
-              <div className="mt-8">
-                <SignUp />
+                        <dt className="text-[var(--fs-ivory-dim)]">{key}</dt>
+                        <dd
+                          className={
+                            alarm
+                              ? "fs-phosphor text-[var(--fs-alarm)]"
+                              : "fs-phosphor text-[var(--fs-phosphor)]"
+                          }
+                        >
+                          {val}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
               </div>
+            </CRTScreen>
+          </section>
+
+          {/* Right: new operator enrollment panel */}
+          <aside>
+            <div className="border border-[var(--fs-rule)] bg-[var(--fs-housing-2)] px-7 py-8">
+              <p className="fs-engraved mb-5">NEW OPERATOR</p>
+
+              <p className="fs-mono text-3xl tracking-[0.08em] text-[var(--fs-ivory)] mb-2">
+                BEGIN
+              </p>
+              <p className="fs-mono text-xs leading-relaxed text-[var(--fs-ivory-dim)] mb-7 tracking-[0.1em]">
+                SAVE YOUR CHART. BEGIN THE DAILY RITUAL.
+                <br />
+                AN ACCOUNT HOLDS YOUR CHART, YOUR LOG, YOUR TAPE.
+              </p>
+
+              <SignUp
+                appearance={{
+                  variables: {
+                    colorPrimary: "#bfa46b",
+                    colorBackground: "#131611",
+                    colorInputBackground: "#1a1d17",
+                    colorInputText: "#f0e7d2",
+                    colorText: "#f0e7d2",
+                    colorTextSecondary: "#b9b09d",
+                    colorNeutral: "#b9b09d",
+                    fontFamily: "var(--font-mono)",
+                    borderRadius: "0px",
+                  },
+                  elements: {
+                    rootBox: { backgroundColor: "transparent" },
+                    card: {
+                      backgroundColor: "transparent",
+                      border: "none",
+                      boxShadow: "none",
+                      borderRadius: 0,
+                      padding: 0,
+                    },
+                    header: { display: "none" },
+                    formButtonPrimary: {
+                      backgroundColor: "#bfa46b",
+                      color: "#0b0e0b",
+                      fontFamily: "var(--font-mono)",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      border: "1px solid #e6d29a",
+                      borderRadius: 0,
+                    },
+                    dividerLine: {
+                      backgroundColor: "rgba(191, 164, 107, 0.32)",
+                    },
+                    dividerText: {
+                      color: "#856e3f",
+                      fontFamily: "var(--font-mono)",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      fontSize: "0.6rem",
+                    },
+                    footerActionText: { color: "#b9b09d" },
+                    footerActionLink: { color: "#e6d29a", fontWeight: 600 },
+                    socialButtonsBlockButton: {
+                      border: "1px solid rgba(191, 164, 107, 0.32)",
+                      backgroundColor: "#1a1d17",
+                      color: "#f0e7d2",
+                      borderRadius: 0,
+                    },
+                    identityPreview: {
+                      backgroundColor: "#1a1d17",
+                      border: "1px solid rgba(191, 164, 107, 0.32)",
+                    },
+                    formFieldInput: {
+                      backgroundColor: "#1a1d17",
+                      border: "1px solid rgba(191, 164, 107, 0.32)",
+                      color: "#f0e7d2",
+                    },
+                    formFieldLabel: {
+                      color: "#b9b09d",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                    },
+                  },
+                }}
+              />
+
+              <p className="mt-6 fs-mono text-[0.6rem] tracking-[0.18em] text-[var(--fs-ivory-dim)]">
+                EXISTING OPERATOR?{" "}
+                <Link
+                  href="/sign-in"
+                  className="text-[var(--fs-brass-glint)] underline underline-offset-2 hover:text-[var(--fs-brass)]"
+                >
+                  RE-ENTER HERE →
+                </Link>
+              </p>
             </div>
           </aside>
         </div>
-
-        <footer className="rule-t mt-16 pt-4 almanac">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <span>Witch Life</span>
-            <span className="italic-accent normal-case tracking-normal text-base text-ink/70">
-              Gather. Do. Reflect.
-            </span>
-            <span>No prediction · only attention</span>
-          </div>
-        </footer>
       </div>
+
+      {/* Foot rail */}
+      <footer className="border-t border-[var(--fs-rule-strong)] px-5 py-2 text-center">
+        <p className="fs-engraved">
+          WITCH LIFE · {now.getUTCFullYear()} · NO PREDICTION · ONLY ATTENTION
+        </p>
+      </footer>
     </main>
-  );
-}
-
-function Column({
-  num,
-  title,
-  body,
-}: {
-  num: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="rule-t pt-3">
-      <div className="flex items-baseline gap-2">
-        <span className="marginalia text-base">{num}</span>
-        <h3 className="display text-lg text-ink">{title}</h3>
-      </div>
-      <p className="italic-accent mt-2 text-base text-ink/80 leading-snug">
-        {body}
-      </p>
-    </div>
   );
 }

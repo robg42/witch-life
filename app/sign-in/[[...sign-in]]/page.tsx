@@ -1,218 +1,208 @@
 import { SignIn } from "@clerk/nextjs";
 import Link from "next/link";
 import { getSkyState } from "@/lib/astro";
-import { almanacFor } from "@/lib/almanac";
-import { EditionInfo, Fleuron } from "@/components/broadsheet";
+import { CRTScreen } from "@/components/foreshore/crt-screen";
 
 export const dynamic = "force-dynamic";
 
 /*
-  Sign-in arrival — the front page of an almanac, with the sign-in
-  form set into the right column like a notice in a newspaper.
+  Sign-in arrival — operator access terminal for Station 28.
+
+  The page presents the station in standby: CRT shows atmospheric
+  readings and a brief field description; the right panel is the
+  operator access form. The broadsheet is archived at /leaf.
 */
 export default function SignInPage() {
   const now = new Date();
   const sky = getSkyState(now);
-  const almanac = almanacFor(now);
-  const day = now.getUTCDate();
-  const dateLong = now.toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const mercuryStatus = sky.planets.mercury.retrograde
-    ? "Retrograde"
-    : sky.planets.mercury.shadowPeriod
-      ? "In shadow"
-      : "Direct";
+  const mercury = sky.planets.mercury;
+  const mercuryStatus = mercury.retrograde
+    ? "RETROGRADE"
+    : mercury.shadowPeriod
+      ? "IN SHADOW"
+      : "DIRECT";
 
   return (
-    <main className="min-h-screen text-ink">
-      <div className="mx-auto max-w-[1280px] px-5 py-6 md:px-12 md:py-10">
-        {/* Masthead */}
-        <header className="rule-b pb-4">
-          <div className="almanac flex flex-wrap items-end justify-between gap-3">
-            <span>
-              Volume I · A.D. {toRoman(now.getUTCFullYear())}
-            </span>
-            <span>For the practitioner</span>
-            <span>{dateLong.toUpperCase()}</span>
-          </div>
-          <div className="mt-2 grid grid-cols-1 items-end gap-2 md:grid-cols-[1fr_auto] md:gap-8">
-            <h1 className="broadsheet text-[clamp(3.2rem,12vw,9rem)] leading-[0.82] fade-up">
-              Witch&nbsp;Life
-            </h1>
-            <p
-              className="display-italic text-lg text-ink/85 md:text-right md:text-2xl fade-up"
-              style={{ animationDelay: "120ms" }}
-            >
-              An almanac of daily practice,
-              <br className="hidden md:block" /> drawn from the moon, the season,
-              <br className="hidden md:block" /> the land, and your chart.
-            </p>
-          </div>
-        </header>
+    <main className="flex min-h-screen flex-col fs-housing" data-foreshore="">
+      {/* Top brass rail */}
+      <header className="border-b border-[var(--fs-rule-strong)] px-5 py-2 text-center">
+        <h1 className="fs-stencil-strong">
+          STATION 28 · REMOTE RECEIVING OUTPOST
+        </h1>
+      </header>
 
-        {/* Body — two columns */}
-        <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr] md:gap-16">
-          {/* Left: editorial */}
-          <article className="fade-up" style={{ animationDelay: "180ms" }}>
-            <div className="flex items-start gap-5">
-              <span className="display text-vermilion text-[clamp(4rem,10vw,7rem)] leading-none">
-                {day}
-              </span>
-              <div className="mt-3">
-                <p className="almanac">For the day</p>
-                <p className="display-italic mt-1 text-2xl text-ink">
-                  {almanac.season} — {almanac.marker.toLowerCase()}.
+      {/* Body */}
+      <div className="mx-auto w-full max-w-[1280px] flex-1 px-5 py-8 md:px-10 md:py-10">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr] md:gap-14">
+
+          {/* Left: CRT standby screen */}
+          <section>
+            <CRTScreen waveform>
+              <div className="space-y-7">
+                <p className="fs-stencil">STANDBY · PRIMARY CARRIER NOMINAL</p>
+
+                <p className="fs-mono text-base leading-[1.65] text-[var(--fs-phosphor)] fs-phosphor max-w-2xl">
+                  A STATION FOR RECEIVING SIGNALS FROM A PLACE THAT MAY OR MAY
+                  NOT BE THERE. TUNE THE DIAL. PRESS TRANSMIT. EACH DAY A NEW
+                  TRANSMISSION ARRIVES — SHAPED BY YOUR CHART, THE MOON, AND
+                  THE LAND.
                 </p>
-              </div>
-            </div>
 
-            <p className="oracle-body mt-8 drop-cap text-ink/95">
-              {almanac.land} The almanac is open to today&rsquo;s leaf. Each
-              morning it carries the moon&rsquo;s phase, the season&rsquo;s
-              edge, and a single concrete practice — gather these things, do
-              these steps, then write this in your journal. Five to fifteen
-              minutes. The work is small. The body remembers.
-            </p>
-
-            <Fleuron mark="❋" />
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <Column
-                title="Today's practice"
-                body="A scaffolded ritual built around what's moving in the sky and what's growing on the land."
-              />
-              <Column
-                title="The Library"
-                body="Forty-seven correspondences and eight sabbats. Search by intention; pull a tailored practice from any entry."
-              />
-              <Column
-                title="The journal"
-                body="What you did. What's moving. The oracle reads the themes before it speaks again."
-              />
-            </div>
-
-            <div className="mt-10">
-              <EditionInfo
-                parts={[
-                  {
-                    label: "Moon",
-                    value: (
-                      <span>
-                        <span className="text-vermilion mr-2 text-lg leading-none">
-                          {sky.moon.phaseSymbol}
-                        </span>
-                        {sky.moon.phaseName}
-                      </span>
-                    ),
-                  },
-                  { label: "Sun", value: sky.sun.sign },
-                  {
-                    label: "Mercury",
-                    value: (
-                      <span
-                        className={
-                          sky.planets.mercury.retrograde
-                            ? "text-vermilion"
-                            : sky.planets.mercury.shadowPeriod
-                              ? "text-sage"
-                              : "text-ink"
-                        }
+                <div className="border-t border-[var(--fs-rule)] pt-6">
+                  <p className="fs-stencil mb-4">CURRENT ATMOSPHERICS</p>
+                  <dl className="space-y-2">
+                    {(
+                      [
+                        {
+                          key: "MOON",
+                          val: `${sky.moon.phaseSymbol} ${sky.moon.phaseName.toUpperCase()}`,
+                          alarm: false,
+                        },
+                        {
+                          key: "SUN",
+                          val: `IN ${sky.sun.sign.toUpperCase()}`,
+                          alarm: false,
+                        },
+                        {
+                          key: "MERCURY",
+                          val: mercuryStatus,
+                          alarm: mercury.retrograde,
+                        },
+                        {
+                          key: "DARK MOON",
+                          val: `${Math.round(sky.moon.daysToNewMoon)}D`,
+                          alarm: false,
+                        },
+                      ] as const
+                    ).map(({ key, val, alarm }) => (
+                      <div
+                        key={key}
+                        className="flex justify-between border-b border-[var(--fs-rule)] pb-1 fs-mono text-sm"
                       >
-                        {mercuryStatus}
-                      </span>
-                    ),
-                  },
-                  {
-                    label: "Dark moon",
-                    value: `${Math.round(sky.moon.daysToNewMoon)}d`,
-                  },
-                ]}
-              />
-            </div>
-          </article>
-
-          {/* Right: sign-in */}
-          <aside className="md:pl-10 md:border-l md:border-rule">
-            <div
-              className="sticky top-10 fade-up"
-              style={{ animationDelay: "240ms" }}
-            >
-              <p className="almanac">A notice</p>
-              <h2 className="display mt-2 text-4xl md:text-5xl">
-                Enter
-              </h2>
-              <p className="italic-accent mt-3 text-lg text-ink/80">
-                The chart remembers you.
-              </p>
-              <p className="oracle-body mt-3 text-ink/80">
-                Sign in to find the day&rsquo;s practice already waiting.
-                <br />
-                <Link href="/sign-up" className="wl-link">
-                  Or set down your chart for the first time
-                </Link>
-                .
-              </p>
-
-              <div className="mt-8">
-                <SignIn />
+                        <dt className="text-[var(--fs-ivory-dim)]">{key}</dt>
+                        <dd
+                          className={
+                            alarm
+                              ? "fs-phosphor text-[var(--fs-alarm)]"
+                              : "fs-phosphor text-[var(--fs-phosphor)]"
+                          }
+                        >
+                          {val}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
               </div>
+            </CRTScreen>
+          </section>
+
+          {/* Right: operator access panel */}
+          <aside>
+            <div className="border border-[var(--fs-rule)] bg-[var(--fs-housing-2)] px-7 py-8">
+              <p className="fs-engraved mb-5">OPERATOR ACCESS</p>
+
+              <p className="fs-mono text-3xl tracking-[0.08em] text-[var(--fs-ivory)] mb-2">
+                ENTER
+              </p>
+              <p className="fs-mono text-xs leading-relaxed text-[var(--fs-ivory-dim)] mb-7 tracking-[0.1em]">
+                THE CHART REMEMBERS YOU.
+                <br />
+                SIGN IN TO FIND THE DAY&apos;S TRANSMISSION ALREADY WAITING.
+              </p>
+
+              <SignIn
+                appearance={{
+                  variables: {
+                    colorPrimary: "#bfa46b",
+                    colorBackground: "#131611",
+                    colorInputBackground: "#1a1d17",
+                    colorInputText: "#f0e7d2",
+                    colorText: "#f0e7d2",
+                    colorTextSecondary: "#b9b09d",
+                    colorNeutral: "#b9b09d",
+                    fontFamily: "var(--font-mono)",
+                    borderRadius: "0px",
+                  },
+                  elements: {
+                    rootBox: { backgroundColor: "transparent" },
+                    card: {
+                      backgroundColor: "transparent",
+                      border: "none",
+                      boxShadow: "none",
+                      borderRadius: 0,
+                      padding: 0,
+                    },
+                    header: { display: "none" },
+                    formButtonPrimary: {
+                      backgroundColor: "#bfa46b",
+                      color: "#0b0e0b",
+                      fontFamily: "var(--font-mono)",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      border: "1px solid #e6d29a",
+                      borderRadius: 0,
+                    },
+                    dividerLine: {
+                      backgroundColor: "rgba(191, 164, 107, 0.32)",
+                    },
+                    dividerText: {
+                      color: "#856e3f",
+                      fontFamily: "var(--font-mono)",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      fontSize: "0.6rem",
+                    },
+                    footerActionText: { color: "#b9b09d" },
+                    footerActionLink: { color: "#e6d29a", fontWeight: 600 },
+                    socialButtonsBlockButton: {
+                      border: "1px solid rgba(191, 164, 107, 0.32)",
+                      backgroundColor: "#1a1d17",
+                      color: "#f0e7d2",
+                      borderRadius: 0,
+                    },
+                    identityPreview: {
+                      backgroundColor: "#1a1d17",
+                      border: "1px solid rgba(191, 164, 107, 0.32)",
+                    },
+                    formFieldInput: {
+                      backgroundColor: "#1a1d17",
+                      border: "1px solid rgba(191, 164, 107, 0.32)",
+                      color: "#f0e7d2",
+                    },
+                    formFieldLabel: {
+                      color: "#b9b09d",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                    },
+                  },
+                }}
+              />
+
+              <p className="mt-6 fs-mono text-[0.6rem] tracking-[0.18em] text-[var(--fs-ivory-dim)]">
+                NO ACCOUNT?{" "}
+                <Link
+                  href="/sign-up"
+                  className="text-[var(--fs-brass-glint)] underline underline-offset-2 hover:text-[var(--fs-brass)]"
+                >
+                  BEGIN ENROLLMENT →
+                </Link>
+              </p>
             </div>
           </aside>
         </div>
-
-        {/* Foot */}
-        <footer className="rule-t mt-16 pt-4 almanac">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <span>Witch Life · {toRoman(now.getUTCFullYear())}</span>
-            <span className="italic-accent normal-case tracking-normal text-base text-ink/70">
-              Gather. Do. Reflect.
-            </span>
-            <span>No prediction · only attention</span>
-          </div>
-        </footer>
       </div>
+
+      {/* Foot rail */}
+      <footer className="border-t border-[var(--fs-rule-strong)] px-5 py-2 text-center">
+        <p className="fs-engraved">
+          WITCH LIFE · {now.getUTCFullYear()} · NO PREDICTION · ONLY ATTENTION
+        </p>
+      </footer>
     </main>
   );
-}
-
-function Column({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rule-t pt-3">
-      <h3 className="display text-lg text-ink">{title}</h3>
-      <p className="italic-accent mt-2 text-base text-ink/80 leading-snug">
-        {body}
-      </p>
-    </div>
-  );
-}
-
-function toRoman(n: number): string {
-  const map: [number, string][] = [
-    [1000, "M"],
-    [900, "CM"],
-    [500, "D"],
-    [400, "CD"],
-    [100, "C"],
-    [90, "XC"],
-    [50, "L"],
-    [40, "XL"],
-    [10, "X"],
-    [9, "IX"],
-    [5, "V"],
-    [4, "IV"],
-    [1, "I"],
-  ];
-  let out = "";
-  let rem = n;
-  for (const [v, s] of map) {
-    while (rem >= v) {
-      out += s;
-      rem -= v;
-    }
-  }
-  return out;
 }
